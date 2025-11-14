@@ -206,11 +206,12 @@ def predict_viewership(p):
 
     X = pd.DataFrame([[features[c] for c in model.params.index]], columns=model.params.index)
 
-    # Prediction
     ln_pred = float(model.predict(X)[0])
     smearing = getattr(model, "smearing_factor", 1.0)
 
-    pred = (np.exp(ln_pred) - 1) * smearing
+    # Model output is in THOUSANDS → convert to REAL VIEWERS
+    pred_raw = (np.exp(ln_pred) - 1) * smearing
+    pred = pred_raw * 1000
 
     return {
         "raw": float(pred),
