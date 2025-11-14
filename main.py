@@ -11,15 +11,12 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # During development, allow everything
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# -------------------------------
-# Input schema
-# -------------------------------
 class GameInput(BaseModel):
     team1: str
     team2: str
@@ -30,10 +27,6 @@ class GameInput(BaseModel):
     time_slot: str
     comp_tier1: int = 0
 
-
-# -------------------------------
-# Root endpoint
-# -------------------------------
 @app.get("/")
 def root():
     return {"status": "running", "message": "Henderson Viewership Model API"}
@@ -47,10 +40,6 @@ def get_teams():
         ]
     }
 
-
-# -------------------------------
-# Prediction endpoint
-# -------------------------------
 @app.post("/predict")
 def predict_game(game: GameInput):
     result = predict_viewership(game.dict())

@@ -1,9 +1,11 @@
 fastapi
 uvicorn
-pydantic
-pandas
 numpy
-joblib
+pandas
+scipy
 statsmodels
 scikit-learn
+joblib
 python-dateutil
+pydantic
+gunicorn
