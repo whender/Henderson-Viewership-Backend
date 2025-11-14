@@ -47,3 +47,44 @@ def predict_game(game: GameInput):
         "prediction_raw": result["raw"],
         "prediction_formatted": result["formatted"]
     }
+
+
+# =====================================================
+# 🚀 NEW ENDPOINTS
+# =====================================================
+
+@app.get("/brand_rankings")
+def brand_rankings():
+    # Replace this with real rankings later
+    return {
+        "rankings": [
+            {"team": "Ohio St.", "brand_score": 97},
+            {"team": "Michigan", "brand_score": 95},
+            {"team": "Alabama", "brand_score": 94},
+        ]
+    }
+
+@app.get("/weekly_predictions")
+def weekly_predictions():
+    # Replace with real CSV-driven predictions
+    return {
+        "predictions": [
+            {"matchup": "Michigan vs USC", "predicted_viewers": "5.2M"},
+            {"matchup": "Georgia vs Texas", "predicted_viewers": "4.8M"},
+        ]
+    }
+
+@app.get("/model_explanation")
+def model_explanation():
+    # Replace with your actual regression explanation
+    return {
+        "model": "Log-transformed OLS regression with smearing adjustment.",
+        "features": [
+            "Top 10 Rankings",
+            "Network Dummies",
+            "Time Slot",
+            "Conference Strength",
+            "Rivalry Flags",
+            "Spread",
+        ]
+    }
