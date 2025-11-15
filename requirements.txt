@@ -9,3 +9,5 @@ joblib
 python-dateutil
 pydantic
 gunicorn
+google-cloud-firestore
+google-auth
