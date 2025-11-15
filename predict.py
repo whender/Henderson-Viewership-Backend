@@ -114,7 +114,7 @@ rivalries = {
 }
 
 FEUD_START = datetime(2025, 10, 30)
-FEUD_END = None
+FEUD_END = datetime(2025, 11, 13)
 
 def rank_to_coefs(r):
     if 1 <= r <= 10: return (1, 0)
