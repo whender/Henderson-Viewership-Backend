@@ -200,180 +200,251 @@ def weekly_predictions():
     df = pd.read_csv("weekly_predictions.csv")
     df = df.loc[:, ~df.columns.str.contains("^Unnamed")]
 
+    # Ensure prediction column exists
     if "Predicted Viewers" not in df.columns:
         df["Predicted Viewers"] = ""
 
     df["Predicted Viewers"] = df["Predicted Viewers"].replace(["nan", "NaN"], "")
 
-    # --- helpers ---
+    # --- helper to parse existing M/K values ---
     def parse_viewership(val):
         try:
             if val is None or pd.isna(val): return None
             val = str(val).strip().upper()
-            if "\n" in val: val = val.split("\n")[0]
-            if "(" in val: val = val.split("(")[0]
-            if val.endswith("M"): return float(val[:-1])
-            if val.endswith("K"): return float(val[:-1]) / 1000
+
+            if "\n" in val:  # remove CI if present
+                val = val.split("\n")[0]
+            if "(" in val:
+                val = val.split("(")[0]
+
+            if val.endswith("M"):
+                return float(val[:-1])
+            if val.endswith("K"):
+                return float(val[:-1]) / 1000
             return float(val)
         except:
             return None
 
-    # ----------------------------------------------------
-    # GENERATE MISSING PREDICTIONS (Streamlit logic)
-    # ----------------------------------------------------
+    # Rank buckets (same as Streamlit)
+    def rank_to_coefs(r):
+        if 1 <= r <= 10:
+            return (1, 0)
+        elif 11 <= r <= 25:
+            return (0, 1)
+        else:
+            return (0, 0)
+
     preds = []
     for _, row in df.iterrows():
 
-        existing = str(row["Predicted Viewers"]).strip()
-        if existing not in ["", "nan", "NaN"]:
-            preds.append(existing)
+        # Skip rows already predicted
+        existing = str(row["Predicted Viewers"]).strip().lower()
+        if existing not in ["", "nan"]:
+            preds.append(row["Predicted Viewers"])
             continue
 
         try:
+            # ---------------------------
+            # NORMALIZE TEAM NAMES
+            # ---------------------------
             team1 = normalize_team(row["Team 1"])
             team2 = normalize_team(row["Team 2"])
+
             rank1 = int(row["Rank 1"])
             rank2 = int(row["Rank 2"])
-
             spread = float(row["Spread"])
             network = row["Network"]
             time_slot = str(row["Time Slot"])
             comp_tier1 = int(row.get("Competing Tier 1", 0))
 
+            # ---------------------------
+            # CONF / POSTSEASON FLAGS
+            # ---------------------------
             conf1 = team_conferences.get(team1, "Group of 6")
             conf2 = team_conferences.get(team2, "Group of 6")
 
             both_ranked = rank1 > 0 and rank2 > 0
-            same_conf = conf1 == conf2 and conf1 in ["SEC","Big 10","ACC","Big 12"]
+            same_conf = conf1 == conf2 and conf1 in ["SEC", "Big 10", "ACC", "Big 12"]
 
+            # Ranking buckets
             t1_top10, t1_25 = rank_to_coefs(rank1)
             t2_top10, t2_25 = rank_to_coefs(rank2)
-
             top10 = t1_top10 + t2_top10
             rank_25_11 = t1_25 + t2_25
 
-            is_friday = "fri" in str(row["Day"]).lower()
+            # ---------------------------
+            # FRIDAY LOGIC (exact match)
+            # ---------------------------
+            raw_day = str(row["Day"]).strip().lower()
+            is_friday = raw_day == "fri" or "fri" in raw_day
 
+            # ---------------------------
+            # RIVALRY (exact match)
+            # ---------------------------
             auto_rivalry = next(
-                (r for r,(a,b) in rivalries.items() if {team1,team2} == {a,b}),
+                (r for r, (a, b) in rivalries.items() if {team1, team2} == {a, b}),
                 None
             )
 
-            # -------------------
-            # BUILD FEATURE VECTOR
-            # -------------------
+            # ---------------------------
+            # TIME SLOT LOGIC (exact match)
+            # ---------------------------
             features = {
                 "Spread": spread,
                 "Competing Tier 1": comp_tier1,
 
-                "ABC": int(network=="ABC"),
-                "CBS": int(network=="CBS"),
-                "NBC": int(network=="NBC"),
-                "FOX": int(network=="FOX"),
-                "ESPN": int(network=="ESPN"),
-                "ESPN2": int(network=="ESPN2"),
-                "ESPNU": int(network=="ESPNU"),
-                "FS1": int(network=="FS1"),
-                "FS2": int(network=="FS2"),
-                "BTN": int(network=="BTN"),
-                "CW": int(network=="CW"),
-                "NFLN": int(network=="NFLN"),
-                "ESPNNEWS": int(network=="ESPNNEWS"),
+                # Networks
+                "ABC": int(network == "ABC"),
+                "CBS": int(network == "CBS"),
+                "NBC": int(network == "NBC"),
+                "FOX": int(network == "FOX"),
+                "ESPN": int(network == "ESPN"),
+                "ESPN2": int(network == "ESPN2"),
+                "ESPNU": int(network == "ESPNU"),
+                "FS1": int(network == "FS1"),
+                "FS2": int(network == "FS2"),
+                "BTN": int(network == "BTN"),
+                "CW": int(network == "CW"),
+                "NFLN": int(network == "NFLN"),
+                "ESPNNEWS": int(network == "ESPNNEWS"),
 
+                # Time
                 "Sun": int("Sunday" in time_slot),
                 "Monday": int("Monday" in time_slot),
                 "Weekday": int("Weekday" in time_slot),
-                "Friday": int("Friday" in time_slot or is_friday),
-                "Sat Early": int("Early" in time_slot),
-                "Sat Mid": int("Mid" in time_slot),
-                "Sat Late": int("Late" in time_slot),
+                "Friday": int(is_friday or "Friday" in time_slot),
 
+                # EXACT STREAMLIT SLOT RULES
+                "Sat Early": int(
+                    not is_friday and (
+                        "Early" in time_slot or
+                        any(t in time_slot for t in [
+                            "11:00a","11:30a","12:00p","12:30p","1:00p","1:30p","2:00p"
+                        ])
+                    )
+                ),
+                "Sat Mid": int(
+                    not is_friday and (
+                        "Mid" in time_slot or
+                        any(t in time_slot for t in [
+                            "2:30p","3:00p","3:30p","4:00p","4:30p",
+                            "5:00p","5:30p","6:00p","6:30p"
+                        ])
+                    )
+                ),
+                "Sat Late": int(
+                    not is_friday and (
+                        "Late" in time_slot or
+                        any(t in time_slot for t in [
+                            "9:30p","10:00p","11:00p","11:30p"
+                        ])
+                    )
+                ),
+
+                # Ranking buckets
                 "Top 10 Rankings": top10,
                 "25-11 Rankings": rank_25_11,
 
-                "SEC": (conf1=="SEC") + (conf2=="SEC"),
-                "Big 10": (conf1=="Big 10") + (conf2=="Big 10"),
-                "ACC": (conf1=="ACC") + (conf2=="ACC"),
-                "Big 12": (conf1=="Big 12") + (conf2=="Big 12"),
+                # Conf dummies
+                "SEC": (conf1 == "SEC") + (conf2 == "SEC"),
+                "Big 10": (conf1 == "Big 10") + (conf2 == "Big 10"),
+                "ACC": (conf1 == "ACC") + (conf2 == "ACC"),
+                "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
             }
 
-            for conf_tag,flag_name in {
-                "SEC":"SEC_PostseasonImplications",
-                "Big 10":"Big10_PostseasonImplications",
-                "Big 12":"Big12_PostseasonImplications",
-                "ACC":"ACC_PostseasonImplications",
+            # Postseason flags
+            for conf_tag, flag_name in {
+                "SEC": "SEC_PostseasonImplications",
+                "Big 10": "Big10_PostseasonImplications",
+                "Big 12": "Big12_PostseasonImplications",
+                "ACC": "ACC_PostseasonImplications",
             }.items():
-                features[flag_name] = int(both_ranked and same_conf and conf1==conf_tag)
+                features[flag_name] = int(both_ranked and same_conf and conf1 == conf_tag)
 
+            # Rivalries
             for r in rivalries:
                 features[r] = int(r == auto_rivalry)
 
-            features["YTTV_ABC"] = 0
-            features["YTTV_ESPN"] = 0
+            # YTTV feud flags
             now = datetime.now()
-            if FEUD_START <= now <= FEUD_END:
-                if network in ["ABC","ESPN"]:
-                    features[f"YTTV_{network}"] = 1
+            feud_active = FEUD_START <= now <= FEUD_END
+            features["YTTV_ABC"] = int(feud_active and network == "ABC")
+            features["YTTV_ESPN"] = int(feud_active and network == "ESPN")
 
+            # Team dummy columns (CRITICAL)
             for col in model.params.index:
                 if col in MODEL_TEAM_NAMES:
                     features[col] = int(col in [team1, team2])
 
+            # Add constant + any missing features
             features["const"] = 1.0
             for c in model.params.index:
                 if c not in features:
                     features[c] = 0.0
 
+            # BTN × Ohio State interaction
             if "OhioSt_BTN" in model.params.index:
-                features["OhioSt_BTN"] = int("Ohio St." in [team1,team2] and network=="BTN")
+                features["OhioSt_BTN"] = int(
+                    ("Ohio St." in [team1, team2]) and network == "BTN"
+                )
 
-            X = pd.DataFrame([[features[c] for c in model.params.index]], columns=model.params.index)
+            # ---------------------------
+            # PREDICT
+            # ---------------------------
+            X = pd.DataFrame([[features[c] for c in model.params.index]],
+                             columns=model.params.index)
 
             try:
                 pred_res = model.get_prediction(X)
                 ci = pred_res.summary_frame(alpha=0.32)
 
-                smearing = getattr(model,"smearing_factor",1.0)
+                smearing = getattr(model, "smearing_factor", 1.0)
 
                 pred_ln = ci["mean"].iloc[0]
                 low_ln = ci["obs_ci_lower"].iloc[0]
                 high_ln = ci["obs_ci_upper"].iloc[0]
 
-                pred = (np.exp(pred_ln) - 1)*smearing
-                low = max(0,(np.exp(low_ln)-1)*smearing)
-                high = max(low,(np.exp(high_ln)-1)*smearing)
+                pred = (np.exp(pred_ln) - 1) * smearing
+                low = max(0, (np.exp(low_ln) - 1) * smearing)
+                high = max(low, (np.exp(high_ln) - 1) * smearing)
 
             except:
+                # Fallback (rare)
                 pred = float(model.predict(X)[0])
                 low = pred - 500
                 high = pred + 500
 
-            pred_fmt = f"{pred/1_000:.2f}M ({low/1_000:.2f}–{high/1_000:.2f}M)"
+            # ---------------------------
+            # FORMAT EXACTLY LIKE STREAMLIT
+            # ---------------------------
+            pred_fmt = (
+                f"{pred/1_000:.2f}M "
+                f"({low/1_000:.2f}–{high/1_000:.2f}M)"
+            )
+
             preds.append(pred_fmt)
 
         except Exception as e:
             preds.append(f"Error: {e}")
 
-    # Write predictions back
-    for i,val in enumerate(preds):
-        if str(df.loc[i,"Predicted Viewers"]).strip() in ["","nan","NaN"]:
-            df.loc[i,"Predicted Viewers"] = val
+    # Write predictions back only to empty rows
+    for i, val in enumerate(preds):
+        if str(df.loc[i, "Predicted Viewers"]).strip().lower() in ["", "nan"]:
+            df.loc[i, "Predicted Viewers"] = val
 
     df.to_csv("weekly_predictions.csv", index=False)
 
-    # ----------------------------------------------------
-    # CALC ERROR + ACCURACY
-    # ----------------------------------------------------
-    def calc_error(p,a):
-        p = parse_viewership(p)
-        a = parse_viewership(a)
-        if p is None or a is None or a <= 0: return None
-        return abs((p-a)/a)*100
-
+    # ---------------------------
+    # ERROR CALCULATIONS
+    # ---------------------------
     df["% Error"] = [
-        calc_error(p,a) for p,a in zip(df["Predicted Viewers"], df["Actual Viewers"])
+        abs((parse_viewership(p) - parse_viewership(a)) / parse_viewership(a)) * 100
+        if parse_viewership(p) and parse_viewership(a) and parse_viewership(a) > 0
+        else None
+        for p, a in zip(df["Predicted Viewers"], df["Actual Viewers"])
     ]
 
+    # Accuracy emojis
     def indicator(e):
         if e is None: return ""
         if e < 5: return "🟢🎯"
@@ -383,15 +454,15 @@ def weekly_predictions():
 
     df["Accuracy"] = [indicator(e) for e in df["% Error"]]
 
-    # Format matchup
-    def format_matchup(t1,r1,t2,r2):
-        t1s = f"#{int(r1)} {t1}" if r1>0 else t1
-        t2s = f"#{int(r2)} {t2}" if r2>0 else t2
+    # Matchup formatting
+    def format_matchup(t1, r1, t2, r2):
+        t1s = f"#{int(r1)} {t1}" if r1 > 0 else t1
+        t2s = f"#{int(r2)} {t2}" if r2 > 0 else t2
         return f"{t1s} @ {t2s}"
 
     df["Matchup"] = [
-        format_matchup(t1,r1,t2,r2)
-        for t1,r1,t2,r2 in zip(df["Team 1"], df["Rank 1"], df["Team 2"], df["Rank 2"])
+        format_matchup(t1, r1, t2, r2)
+        for t1, r1, t2, r2 in zip(df["Team 1"], df["Rank 1"], df["Team 2"], df["Rank 2"])
     ]
 
     # Safe date formatting
@@ -403,10 +474,10 @@ def weekly_predictions():
             return str(day)
 
     df["DateFmt"] = [
-        fmt_date(d, day) for d,day in zip(df["Date"], df["Day"])
+        fmt_date(d, day) for d, day in zip(df["Date"], df["Day"])
     ]
 
-    # Group by week
+    # Group weeks
     df["Year"] = pd.to_datetime(df["Date"], errors="coerce").dt.year
 
     weeks = []
@@ -439,8 +510,8 @@ def weekly_predictions():
     metrics = {
         "median_error": float(errors.median()) if len(errors) else None,
         "mean_error": float(errors.mean()) if len(errors) else None,
-        "pct_within_10": int((errors < 10).mean()*100) if len(errors) else None,
-        "pct_within_25": int((errors < 25).mean()*100) if len(errors) else None,
+        "pct_within_10": int((errors < 10).mean() * 100) if len(errors) else None,
+        "pct_within_25": int((errors < 25).mean() * 100) if len(errors) else None,
     }
 
     return clean_nan({
