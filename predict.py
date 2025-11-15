@@ -204,6 +204,8 @@ def predict_viewership(p):
     if "OhioSt_BTN" in model.params.index:
         features["OhioSt_BTN"] = int(("Ohio St." in [team1, team2]) and network == "BTN")
 
+    print("\n\nMODEL COLUMNS:", model.params.index.tolist(), "\n\n")
+
     X = pd.DataFrame([[features[c] for c in model.params.index]], columns=model.params.index)
 
     ln_pred = float(model.predict(X)[0])
