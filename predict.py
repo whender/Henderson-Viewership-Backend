@@ -44,6 +44,24 @@ teams_list = {
     "Wisconsin": "Wisconsin", "Wyoming": "Wyoming"
 }
 
+def normalize_team(name):
+    """
+    Convert frontend team names (e.g., 'Ohio State') into the exact
+    strings used in the model (e.g., 'Ohio St.').
+    """
+    if not name:
+        return name
+
+    # If already a model name, keep it
+    if name in teams_list.values():
+        return name
+
+    # If in the frontend dictionary, convert it
+    if name in teams_list:
+        return teams_list[name]
+
+    return name
+
 team_conferences = {
     # SEC
     "Alabama": "SEC", "Auburn": "SEC", "Georgia": "SEC", "Florida": "SEC", "LSU": "SEC",
@@ -111,8 +129,10 @@ def format_viewers(val):
     return f"{val:.0f}"
 
 def predict_viewership(p):
-    team1 = p["team1"]
-    team2 = p["team2"]
+    # Normalize the incoming names
+    team1 = normalize_team(p["team1"])
+    team2 = normalize_team(p["team2"])
+
     rank1 = p["rank1"]
     rank2 = p["rank2"]
     spread = p["spread"]
