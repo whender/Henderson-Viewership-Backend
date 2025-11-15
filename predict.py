@@ -128,6 +128,8 @@ def format_viewers(val):
         return f"{val/1_000:.0f}K"
     return f"{val:.0f}"
 
+MODEL_TEAM_NAMES = set(teams_list.values())
+
 def predict_viewership(p):
     # Normalize the incoming names
     team1 = normalize_team(p["team1"])
@@ -211,8 +213,9 @@ def predict_viewership(p):
 
     # team dummy columns
     for col in model.params.index:
-        if col in teams_list:
+        if col in MODEL_TEAM_NAMES:
             features[col] = int(col in [team1, team2])
+
 
     # ensure full alignment
     features["const"] = 1.0
