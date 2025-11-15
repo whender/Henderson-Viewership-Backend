@@ -336,7 +336,7 @@ def weekly_predictions():
                     not is_friday and (
                         "Late" in time_slot or
                         any(t in time_slot for t in [
-                            "9:30p","10:00p","11:00p","11:30p"
+                            "9:30p", "10:00p", "10:30p", "11:00p", "11:30p"
                         ])
                     )
                 ),
