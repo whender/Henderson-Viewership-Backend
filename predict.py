@@ -53,9 +53,9 @@ team_conferences = {
 
     # Big 10
     "Michigan": "Big 10", "Ohio St.": "Big 10", "Penn St.": "Big 10", "Wisconsin": "Big 10",
-    "Iowa": "Iowa", "Michigan St.": "Big 10", "Nebraska": "Big 10", "Minnesota": "Big 10",
-    "Illinois": "Big 10", "Indiana": "Big 10", "Purdue": "Big 10", "Northwestern": "Northwestern",
-    "Maryland": "Big 10", "Rutgers": "Big 10", "UCLA": "Big 10", "USC": "USC",
+    "Iowa": "Big 10", "Michigan St.": "Big 10", "Nebraska": "Big 10", "Minnesota": "Big 10",
+    "Illinois": "Big 10", "Indiana": "Big 10", "Purdue": "Big 10", "Northwestern": "Big 10",
+    "Maryland": "Big 10", "Rutgers": "Big 10", "UCLA": "Big 10", "USC": "Big 10",
     "Oregon": "Big 10", "Washington": "Big 10",
 
     # ACC
