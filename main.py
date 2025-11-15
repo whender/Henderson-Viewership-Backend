@@ -199,9 +199,7 @@ from predict import (
 @app.get("/weekly-predictions")
 def weekly_predictions():
 
-    # Load all week docs from Firestore
     docs = db.collection("weekly-predictions").stream()
-
     weeks_output = []
 
     for doc in docs:
@@ -233,7 +231,6 @@ def weekly_predictions():
             else:
                 g["accuracy"] = "🔴"
 
-        # Save back to Firestore only if updated
         if updated:
             db.collection("weekly-predictions").document(doc.id).set(data)
 
@@ -243,17 +240,24 @@ def weekly_predictions():
             "games": games
         })
 
-    # Compute summary stats
+    # Summary stats — remove None and NaN values
     all_errors = []
     for w in weeks_output:
         for g in w["games"]:
-            if g.get("percent_error") is not None:
-                all_errors.append(g["percent_error"])
+            e = g.get("percent_error")
+            if isinstance(e, (int, float)) and not math.isnan(e):
+                all_errors.append(e)
 
-    median_error = float(np.median(all_errors)) if all_errors else None
-    mean_error = float(np.mean(all_errors)) if all_errors else None
-    pct10 = int((np.mean([e < 10 for e in all_errors]) * 100)) if all_errors else None
-    pct25 = int((np.mean([e < 25 for e in all_errors]) * 100)) if all_errors else None
+    if len(all_errors) > 0:
+        median_error = float(np.median(all_errors))
+        mean_error = float(np.mean(all_errors))
+        pct10 = int(np.mean([e < 10 for e in all_errors]) * 100)
+        pct25 = int(np.mean([e < 25 for e in all_errors]) * 100)
+    else:
+        median_error = None
+        mean_error = None
+        pct10 = None
+        pct25 = None
 
     metrics = {
         "median_error": median_error,
@@ -262,10 +266,9 @@ def weekly_predictions():
         "pct_within_25": pct25
     }
 
-    # Sort weeks DESC (like your frontend)
     weeks_output = sorted(weeks_output, key=lambda w: w["week"], reverse=True)
 
-    return {
+    return clean_nan({
         "weeks": weeks_output,
         "metrics": metrics
-    }
+    })
