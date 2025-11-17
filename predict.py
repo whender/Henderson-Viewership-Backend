@@ -90,26 +90,18 @@ team_conferences = {
     "Colorado": "Big 12"
 }
 
-# ✔️ Correct rivalry dictionary (matches Streamlit)
 rivalries = {
-    "Michigan_OhioSt": ("Michigan", "Ohio St."),
-    "Texas_Oklahoma": ("Texas", "Oklahoma"),
-    "Alabama_Auburn": ("Alabama", "Auburn"),
-    "Georgia_Florida": ("Georgia", "Florida"),
-    "NotreDame_USC": ("Notre Dame", "USC"),
-    "Florida_Tennessee": ("Florida", "Tennessee"),
-    "Oregon_Washington": ("Oregon", "Washington"),
-    "BYU_Utah": ("BYU", "Utah"),
-    "Iowa_IowaSt": ("Iowa", "Iowa St."),
-    "OleMiss_MississippiSt": ("Mississippi", "Mississippi St."),
-    "Clemson_SouthCarolina": ("Clemson", "South Carolina"),
-    "Arizona_ArizonaSt": ("Arizona", "Arizona St."),
-    "Miami_FloridaSt": ("Miami", "Florida St."),
-    "Texas_TexasA&M": ("Texas", "Texas A&M"),
-    "Oregon_OregonSt": ("Oregon", "Oregon St."),
-    "USC_UCLA": ("USC", "UCLA"),
-    "Louisville_Kentucky": ("Louisville", "Kentucky"),
-    "OhioSt_PennSt": ("Ohio St.", "Penn St."),
+    "Michigan_OhioSt": ("Michigan", "Ohio St."), "Texas_Oklahoma": ("Texas", "Oklahoma"),
+    "Alabama_Auburn": ("Alabama", "Auburn"), "Georgia_Florida": ("Georgia", "Florida"),
+    "NotreDame_USC": ("Notre Dame", "USC"), "Florida_Tennessee": ("Florida", "Tennessee"),
+    "Oregon_Washington": ("Oregon", "Washington"), "BYU_Utah": ("BYU", "Utah"),
+    "Iowa_IowaSt": ("Iowa", "Iowa St."), "OleMiss_MississippiSt": ("Mississippi", "Mississippi St."),
+    "Clemson_SouthCarolina": ("Clemson", "South Carolina"), "Arizona_ArizonaSt": ("Arizona", "Arizona St."),
+    "Miami_FloridaSt": ("Miami", "Florida St."), "Texas_TexasA&M": ("Texas", "Texas A&M"),
+    "Oregon_OregonSt": ("Oregon", "Oregon St."), "USC_UCLA": ("USC", "UCLA"),
+    "Louisville_Kentucky": ("Louisville", "Kentucky"), "Washington_WashingtonSt": ("Washington", "Washington St."),
+    "Kansas_KansasSt": ("Kansas", "Kansas St."), "Minnesota_Wisconsin": ("Minnesota", "Wisconsin"),
+    "Army_Navy": ("Army", "Navy"), "OhioSt_PennSt": ("Ohio St.", "Penn St."),
     "Alabama_LSU": ("Alabama", "LSU")
 }
 
