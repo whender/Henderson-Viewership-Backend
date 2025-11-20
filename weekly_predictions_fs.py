@@ -158,6 +158,23 @@ def generate_prediction(row):
             "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
         }
 
+        # ======================================================
+        # 🆕 FRIDAY × NETWORK INTERACTIONS — MUST MATCH REGRESSION
+        # ======================================================
+
+        network_cols = [
+            "FOX","CBS","NBC","ABC",
+            "ESPN2","ESPNU","FS1","FS2",
+            "BTN","CW","NFLN","ESPNNEWS"
+        ]
+
+        # Create all non-baseline Friday interactions
+        for net in network_cols:
+            features[f"{net}_Fri"] = int(features["Friday"] == 1 and network == net)
+
+        # ESPN IS BASELINE — we must manually create ESPN_Fri
+        features["ESPN_Fri"] = int(features["Friday"] == 1 and network == "ESPN")
+
         # postseason flags
         for conf_tag, flag_name in {
             "SEC": "SEC_PostseasonImplications",

@@ -182,6 +182,26 @@ def predict_viewership(p):
         "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
     }
 
+    # ======================================================
+    # 🆕 Friday × Network Interactions (MUST MATCH REGRESSION)
+    # ======================================================
+
+    network_dummies = [
+        "FOX","CBS","NBC","ABC",
+        "ESPN2","ESPNU","FS1","FS2",
+        "BTN","CW","NFLN","ESPNNEWS"
+    ]
+
+    # Create _Fri dummies for every non-baseline network
+    for net in network_dummies:
+        features[f"{net}_Fri"] = int(network == net and features["Friday"] == 1)
+
+    # ESPN is baseline — no ESPN column — but we DO need ESPN_Fri
+    features["ESPN_Fri"] = int(
+        features["Friday"] == 1 and
+        network == "ESPN"
+    )
+
     # postseason implication flags
     for conf_tag, flag_name in {
         "SEC": "SEC_PostseasonImplications",
