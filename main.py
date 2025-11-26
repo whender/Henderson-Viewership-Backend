@@ -9,13 +9,7 @@ from sklearn.linear_model import RidgeCV
 import os
 import math
 from datetime import datetime
-
-# Import weekly prediction helpers
-from weekly_predictions_fs import (
-    generate_prediction,
-    calc_error,
-    compute_competition_score
-)
+from weekly_predictions_fs import generate_prediction, calc_error
 from firestore_client import db
 
 # ======================================================
@@ -24,7 +18,7 @@ from firestore_client import db
 
 app = FastAPI(
     title="Henderson Viewership Model API",
-    version="1.2"
+    version="1.1"
 )
 
 app.add_middleware(
@@ -36,7 +30,7 @@ app.add_middleware(
 )
 
 # ======================================================
-# 🧹 JSON SANITIZER
+# 🧹 JSON SANITIZER (fixes your NaN crash)
 # ======================================================
 
 def clean_nan(obj):
@@ -51,7 +45,6 @@ def clean_nan(obj):
         return [clean_nan(x) for x in obj]
     return obj
 
-
 # ======================================================
 # 📦 IMPORT PREDICTOR LOGIC
 # ======================================================
@@ -65,13 +58,11 @@ class GameInput(BaseModel):
     spread: float
     network: str
     time_slot: str
-    comp_tier1: int = 0   # ignored for main game predictor
-
+    comp_tier1: int = 0
 
 @app.get("/")
 def root():
     return {"status": "running", "message": "Henderson Viewership Model API"}
-
 
 @app.get("/teams")
 def get_teams():
@@ -81,7 +72,6 @@ def get_teams():
             for frontend_name, backend_name in teams_list.items()
         ]
     }
-
 
 @app.post("/predict")
 def predict_game(game: GameInput):
@@ -120,6 +110,7 @@ rivalry_features = [
     "Alabama_LSU"
 ]
 
+# Power 4 + Notre Dame
 team_conferences = {
     "Alabama":"SEC","Auburn":"SEC","Georgia":"SEC","Florida":"SEC","LSU":"SEC",
     "Tennessee":"SEC","Texas A&M":"SEC","Kentucky":"SEC","South Carolina":"SEC",
@@ -145,35 +136,45 @@ team_conferences = {
 
 power4_set = set(team_conferences.keys()) | {"Notre Dame"}
 
+# Load cleaned dataset with Score Diff already included
 df_all = pd.read_csv("viewership_cleaned.csv", low_memory=False)
 
+
+# ------------------------------------------------------
+# ⭐ CORE BRAND RANKING FUNCTION — USING POST-GAME MODEL
+# ------------------------------------------------------
 def compute_brand_rankings(df):
+    # Only include teams that appear in this dataset
     d1 = pd.get_dummies(df["Team 1"])
     d2 = pd.get_dummies(df["Team 2"])
     team_dummies = d1.add(d2, fill_value=0)
 
+    # Require minimum games to reduce noise
     counts = team_dummies.sum()
     valid_teams = counts[counts >= 3].index
     team_dummies = team_dummies[valid_teams]
-
     if team_dummies.empty:
         return []
 
+    # Build feature matrix (post-game model structure)
     cols = [c for c in df.columns if c in numeric_features_post + rivalry_features]
-
     X = pd.concat([df[cols], team_dummies], axis=1).fillna(0)
     X = sm.add_constant(X)
 
+    # Log-viewers target
     y = np.log(df["Persons 2+"].astype(float) + 1)
 
+    # Fit RidgeCV (fixed alpha = 1 to avoid instability for year subsets)
     ridge = RidgeCV(alphas=[1.0])
     ridge.fit(X, y)
 
     params = pd.Series(ridge.coef_, index=X.columns)
 
+    # Extract team coefficients
     team_coefs = params[team_dummies.columns]
     team_coefs = team_coefs[team_coefs.index.isin(power4_set)]
 
+    # Shrink low-sample teams
     counts = counts.reindex(team_coefs.index).fillna(0)
     adjusted = team_coefs.copy()
     for t in team_coefs.index:
@@ -181,8 +182,10 @@ def compute_brand_rankings(df):
         if n <= 4:
             adjusted[t] = team_coefs[t] * (n / (n + 5))
 
+    # Convert log-lift to percent lift
     lift_pct = (np.exp(adjusted) - 1) * 100
 
+    # Sort final rankings
     rows = []
     for i, (team, lift) in enumerate(lift_pct.sort_values(ascending=False).items(), start=1):
         rows.append({
@@ -194,28 +197,40 @@ def compute_brand_rankings(df):
     return rows
 
 
-brand_rankings_cache = {
-    "all": compute_brand_rankings(df_all)
-}
+# ------------------------------------------------------
+# ⭐ PRECOMPUTE BRAND RANKINGS FOR ALL YEARS + EACH YEAR
+# ------------------------------------------------------
+brand_rankings_cache = {}
 
+# "All" years
+brand_rankings_cache["all"] = compute_brand_rankings(df_all)
+
+# Individual years
 available_years = sorted(df_all["Year"].dropna().unique().tolist())
 for y in available_years:
     df_y = df_all[df_all["Year"] == y]
     brand_rankings_cache[str(y)] = compute_brand_rankings(df_y)
 
 
+# ------------------------------------------------------
+# ⭐ API ROUTES
+# ------------------------------------------------------
 @app.get("/brand-years")
 def brand_years():
     return {"years": available_years}
-
 
 @app.get("/brand-rankings")
 def brand_rankings(year: str = "all"):
     return {"rows": brand_rankings_cache.get(year, [])}
 
 # ======================================================
-# 📅 WEEKLY PREDICTIONS — NOW WITH COMPETITION VARIABLE
+# 📅 WEEKLY PREDICTIONS
 # ======================================================
+
+from predict import (
+    model, normalize_team, rank_to_coefs, team_conferences,
+    rivalries, FEUD_START, FEUD_END, MODEL_TEAM_NAMES, format_viewers
+)
 
 @app.get("/weekly-predictions")
 def weekly_predictions():
@@ -231,17 +246,13 @@ def weekly_predictions():
 
         updated = False
 
+        # Generate missing predictions
         for g in games:
-
-            # 1️⃣ AUTOMATIC COMPETITION SCORE (new)
-            g["comp_tier1"] = compute_competition_score(games, g)
-
-            # 2️⃣ Prediction (only if missing)
             if not g.get("predicted") or g["predicted"] in ["", None, "nan", "NaN"]:
                 g["predicted"] = generate_prediction(g)
                 updated = True
 
-            # 3️⃣ Error + accuracy
+            # Compute % error + accuracy
             g["percent_error"] = calc_error(g["predicted"], g.get("actual"))
             e = g["percent_error"]
 
@@ -265,7 +276,7 @@ def weekly_predictions():
             "games": games
         })
 
-    # Summary stats
+    # Summary stats — remove None and NaN values
     all_errors = []
     for w in weeks_output:
         for g in w["games"]:

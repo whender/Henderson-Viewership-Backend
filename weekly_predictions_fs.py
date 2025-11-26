@@ -7,9 +7,10 @@ from predict import (
     rivalries, FEUD_START, FEUD_END, MODEL_TEAM_NAMES, format_viewers
 )
 
-# ---------------------------------------------------------
+# ---------------------------------------------------------------------
 # ✔ VIEWERSHIP PARSER / ERROR FUNCTION
-# ---------------------------------------------------------
+# ---------------------------------------------------------------------
+
 def parse_viewership(val):
     try:
         if val is None:
@@ -41,63 +42,9 @@ def calc_error(pred, actual):
     return abs((p - a) / a) * 100
 
 
-# ---------------------------------------------------------
-# ⭐ REAL COMPETITION SCORE CALCULATOR
-# ---------------------------------------------------------
-def compute_competition_score(all_games, this_game):
-    """
-    TRUE CompetingGamesScore = SUM of predicted baseline viewers
-                              for all overlapping games (±1 hour).
-    """
-
-    date = this_game["date"]
-    time_slot = this_game["time_slot"]
-
-    # Convert "3:30p" style into float hours
-    def parse_time(ts):
-        ts = ts.strip().lower()
-        hour, minute = ts.replace("a", "").replace("p", "").split(":")
-        hour, minute = int(hour), int(minute)
-        if "p" in ts and hour != 12:
-            hour += 12
-        if "a" in ts and hour == 12:
-            hour = 0
-        return hour + minute / 60
-
-    this_time = parse_time(time_slot)
-
-    # 1-hour competition window
-    def is_competitor(g):
-        if g["team1"] == this_game["team1"] and g["team2"] == this_game["team2"]:
-            return False
-        if g["date"] != date:
-            return False
-        try:
-            t = parse_time(g["time_slot"])
-            return abs(t - this_time) <= 1.0
-        except:
-            return False
-
-    competitors = [g for g in all_games if is_competitor(g)]
-
-    # 🔥 Predict baseline viewers for each competitor (NO competition variable included)
-    # This matches Stage-1 training.
-    baseline_scores = []
-    for g in competitors:
-        # Predict competitor WITHOUT competition score
-        tmp = g.copy()
-        tmp["comp_tier1"] = 0
-        pred = generate_prediction(tmp)
-        val = parse_viewership(pred)   # convert "2.73M" → 2.73
-        if val:
-            baseline_scores.append(val)
-
-    return sum(baseline_scores)   # total millions
-
-
-# ---------------------------------------------------------
+# ---------------------------------------------------------------------
 # ⭐ MAIN PREDICTION FUNCTION — IDENTICAL TO STREAMLIT
-# ---------------------------------------------------------
+# ---------------------------------------------------------------------
 def generate_prediction(row):
 
     try:
@@ -112,9 +59,7 @@ def generate_prediction(row):
         spread = float(row["spread"])
         network = row["network"]
         time_slot = str(row["time_slot"])
-
-        # TRUE CompetingGamesScore (already computed by main script)
-        comp_score = float(row.get("comp_tier1", 0))
+        comp_tier1 = int(row.get("comp_tier1", 0))
 
         day = row["day"]
 
@@ -139,7 +84,7 @@ def generate_prediction(row):
         )
 
         # ------------------------
-        # RIVALRY
+        # RIVALRY DETECTION
         # ------------------------
         auto_rivalry = next(
             (r for r, (a, b) in rivalries.items() if {team1, team2} == {a, b}),
@@ -147,22 +92,36 @@ def generate_prediction(row):
         )
 
         # ------------------------
-        # TIME BUCKETS
+        # TIME BUCKETS (MATCHING STREAMLIT EXACTLY!)
         # ------------------------
-        early_keywords = ["11:00a","11:30a","12:00p","12:30p","1:00p","1:30p","2:00p"]
-        mid_keywords   = ["2:30p","3:00p","3:30p","4:00p","4:30p","5:00p","5:30p","6:00p","6:30p"]
-        late_keywords  = ["9:30p","10:00p","10:30","11:00p","11:30p"]
 
-        sat_early = (not is_friday and ("Early" in time_slot or any(t in time_slot for t in early_keywords)))
-        sat_mid   = (not is_friday and ("Mid"   in time_slot or any(t in time_slot for t in mid_keywords)))
-        sat_late  = (not is_friday and ("Late"  in time_slot or any(t in time_slot for t in late_keywords)))
+        # FULL timestamp-based bucketing
+        early_keywords = ["11:00a", "11:30a", "12:00p", "12:30p", "1:00p", "1:30p", "2:00p"]
+        mid_keywords = ["2:30p", "3:00p", "3:30p", "4:00p", "4:30p", "5:00p", "5:30p", "6:00p", "6:30p"]
+        late_keywords = ["9:30p", "10:00p", "10:30", "11:00p", "11:30p"]
+
+        sat_early = (
+            not is_friday and (
+                "Early" in time_slot or any(t in time_slot for t in early_keywords)
+            )
+        )
+        sat_mid = (
+            not is_friday and (
+                "Mid" in time_slot or any(t in time_slot for t in mid_keywords)
+            )
+        )
+        sat_late = (
+            not is_friday and (
+                "Late" in time_slot or any(t in time_slot for t in late_keywords)
+            )
+        )
 
         # ------------------------
         # FEATURE VECTOR
         # ------------------------
         features = {
             "Spread": spread,
-            "CompetingGamesScore": comp_score,   # REAL SCORE 🔥
+            "Competing Tier 1": comp_tier1,
 
             "ABC": int(network == "ABC"),
             "CBS": int(network == "CBS"),
@@ -179,9 +138,11 @@ def generate_prediction(row):
             "ESPNNEWS": int(network == "ESPNNEWS"),
 
             "Conf Champ": 0,
+
             "Sun": int("Sunday" in time_slot),
             "Monday": int("Monday" in time_slot),
             "Weekday": int("Weekday" in time_slot),
+
             "Friday": int(is_friday or "Friday" in time_slot),
 
             "Sat Early": int(sat_early),
@@ -197,15 +158,24 @@ def generate_prediction(row):
             "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
         }
 
-        # ------------------------
-        # FRIDAY × NETWORK
-        # ------------------------
-        network_cols = ["FOX","CBS","NBC","ABC","ESPN2","ESPNU","FS1","FS2","BTN","CW","NFLN","ESPNNEWS"]
+        # ======================================================
+        # 🆕 FRIDAY × NETWORK INTERACTIONS — MUST MATCH REGRESSION
+        # ======================================================
+
+        network_cols = [
+            "FOX","CBS","NBC","ABC",
+            "ESPN2","ESPNU","FS1","FS2",
+            "BTN","CW","NFLN","ESPNNEWS"
+        ]
+
+        # Create all non-baseline Friday interactions
         for net in network_cols:
             features[f"{net}_Fri"] = int(features["Friday"] == 1 and network == net)
+
+        # ESPN IS BASELINE — we must manually create ESPN_Fri
         features["ESPN_Fri"] = int(features["Friday"] == 1 and network == "ESPN")
 
-        # Postseason flags
+        # postseason flags
         for conf_tag, flag_name in {
             "SEC": "SEC_PostseasonImplications",
             "Big 10": "Big10_PostseasonImplications",
@@ -214,11 +184,11 @@ def generate_prediction(row):
         }.items():
             features[flag_name] = int(both_ranked and same_conf and conf1 == conf_tag)
 
-        # Rivalries
+        # rivalry flags
         for r in rivalries:
             features[r] = int(r == auto_rivalry)
 
-        # YTTV
+        # YTTV flags
         features["YTTV_ABC"] = 0
         features["YTTV_ESPN"] = 0
         now = datetime.now()
@@ -226,39 +196,52 @@ def generate_prediction(row):
             if network in ["ABC", "ESPN"]:
                 features[f"YTTV_{network}"] = 1
 
-        # Team dummy flags
+        # team dummy flags
         for col in model.params.index:
             if col in MODEL_TEAM_NAMES:
                 features[col] = int(col in [team1, team2])
 
+        # const
         features["const"] = 1.0
 
+        # fill missing model params
         for c in model.params.index:
             if c not in features:
-                features[c] = 0
+                features[c] = 0.0
 
+        # OhioSt × BTN
         if "OhioSt_BTN" in model.params.index:
-            features["OhioSt_BTN"] = int("Ohio St." in [team1, team2] and network == "BTN")
+            features["OhioSt_BTN"] = int(
+                ("Ohio St." in [team1, team2]) and network == "BTN"
+            )
 
         # ------------------------
-        # FINAL PREDICTION
+        # PREDICTION + CONFIDENCE INTERVAL (MATCHES STREAMLIT)
         # ------------------------
+
         X = pd.DataFrame([[features[c] for c in model.params.index]], columns=model.params.index)
 
-        pred_res = model.get_prediction(X)
-        ci = pred_res.summary_frame(alpha=0.32)
+        try:
+            pred_res = model.get_prediction(X)
+            ci = pred_res.summary_frame(alpha=0.32)
 
-        smearing = getattr(model, "smearing_factor", 1.0)
+            smearing = getattr(model, "smearing_factor", 1.0)
 
-        pred_ln = ci["mean"].iloc[0]
-        low_ln  = ci["obs_ci_lower"].iloc[0]
-        high_ln = ci["obs_ci_upper"].iloc[0]
+            pred_ln = ci["mean"].iloc[0]
+            low_ln = ci["obs_ci_lower"].iloc[0]
+            high_ln = ci["obs_ci_upper"].iloc[0]
 
-        pred = (np.exp(pred_ln) - 1) * smearing
-        low  = max(0, (np.exp(low_ln) - 1) * smearing)
-        high = max(low, (np.exp(high_ln) - 1) * smearing)
+            pred = (np.exp(pred_ln) - 1) * smearing
+            low = max(0, (np.exp(low_ln) - 1) * smearing)
+            high = max(low, (np.exp(high_ln) - 1) * smearing)
 
-        return f"{pred/1_000:.2f}M\n({low/1_000:.2f}–{high/1_000:.2f}M)"
+        except:
+            pred = float(model.predict(X)[0])
+            low = max(pred - 500, 0)
+            high = pred + 500
+
+        pred_fmt = f"{pred/1_000:.2f}M\n({low/1_000:.2f}–{high/1_000:.2f}M)"
+        return pred_fmt
 
     except Exception as e:
         return f"Error: {e}"
