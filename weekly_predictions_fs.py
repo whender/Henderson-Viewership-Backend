@@ -7,10 +7,9 @@ from predict import (
     rivalries, FEUD_START, FEUD_END, MODEL_TEAM_NAMES, format_viewers
 )
 
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------
 # ✔ VIEWERSHIP PARSER / ERROR FUNCTION
-# ---------------------------------------------------------------------
-
+# ---------------------------------------------------------
 def parse_viewership(val):
     try:
         if val is None:
@@ -42,62 +41,63 @@ def calc_error(pred, actual):
     return abs((p - a) / a) * 100
 
 
-# ---------------------------------------------------------------------
-# ⭐ COMPETITION SCORE CALCULATOR
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------
+# ⭐ REAL COMPETITION SCORE CALCULATOR
+# ---------------------------------------------------------
 def compute_competition_score(all_games, this_game):
     """
-    Input: games = list of dicts from Firestore week doc
-    Output: numeric CompetingGamesScore for THIS game
+    TRUE CompetingGamesScore = SUM of predicted baseline viewers
+                              for all overlapping games (±1 hour).
     """
 
-    # We define "competing games" as:
-    # Same day AND same time_slot AND NOT this game.
-    day = this_game.get("day")
-    time_slot = this_game.get("time_slot")
+    date = this_game["date"]
+    time_slot = this_game["time_slot"]
 
-    # Filter competing games
-    competitors = [
-        g for g in all_games
-        if g.get("day") == day
-        and g.get("time_slot") == time_slot
-        and not (
-            g["team1"] == this_game["team1"]
-            and g["team2"] == this_game["team2"]
-        )
-    ]
+    # Convert "3:30p" style into float hours
+    def parse_time(ts):
+        ts = ts.strip().lower()
+        hour, minute = ts.replace("a", "").replace("p", "").split(":")
+        hour, minute = int(hour), int(minute)
+        if "p" in ts and hour != 12:
+            hour += 12
+        if "a" in ts and hour == 12:
+            hour = 0
+        return hour + minute / 60
 
-    # Score rule (simple version):
-    # Tier1 competitor = ranked Top 15 or major brand (P4 bluebloods)
-    # Tier1 → add 1
-    score = 0
+    this_time = parse_time(time_slot)
 
-    tier1_brands = {
-        "Alabama","Georgia","Ohio St.","Michigan","Texas","Oklahoma",
-        "Notre Dame","LSU","USC","Florida St.","Oregon","Penn St."
-    }
+    # 1-hour competition window
+    def is_competitor(g):
+        if g["team1"] == this_game["team1"] and g["team2"] == this_game["team2"]:
+            return False
+        if g["date"] != date:
+            return False
+        try:
+            t = parse_time(g["time_slot"])
+            return abs(t - this_time) <= 1.0
+        except:
+            return False
 
+    competitors = [g for g in all_games if is_competitor(g)]
+
+    # 🔥 Predict baseline viewers for each competitor (NO competition variable included)
+    # This matches Stage-1 training.
+    baseline_scores = []
     for g in competitors:
-        # Ranked check
-        r1 = int(g.get("rank1", 0))
-        r2 = int(g.get("rank2", 0))
+        # Predict competitor WITHOUT competition score
+        tmp = g.copy()
+        tmp["comp_tier1"] = 0
+        pred = generate_prediction(tmp)
+        val = parse_viewership(pred)   # convert "2.73M" → 2.73
+        if val:
+            baseline_scores.append(val)
 
-        is_ranked15 = (0 < r1 <= 15) or (0 < r2 <= 15)
-
-        # Brand check
-        t1 = normalize_team(g["team1"])
-        t2 = normalize_team(g["team2"])
-        brand_hit = (t1 in tier1_brands) or (t2 in tier1_brands)
-
-        if is_ranked15 or brand_hit:
-            score += 1
-
-    return score
+    return sum(baseline_scores)   # total millions
 
 
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------
 # ⭐ MAIN PREDICTION FUNCTION — IDENTICAL TO STREAMLIT
-# ---------------------------------------------------------------------
+# ---------------------------------------------------------
 def generate_prediction(row):
 
     try:
@@ -113,8 +113,8 @@ def generate_prediction(row):
         network = row["network"]
         time_slot = str(row["time_slot"])
 
-        # COMPETITION SCORE
-        comp_tier1 = int(row.get("comp_tier1", 0))
+        # TRUE CompetingGamesScore (already computed by main script)
+        comp_score = float(row.get("comp_tier1", 0))
 
         day = row["day"]
 
@@ -139,7 +139,7 @@ def generate_prediction(row):
         )
 
         # ------------------------
-        # RIVALRY DETECTION
+        # RIVALRY
         # ------------------------
         auto_rivalry = next(
             (r for r, (a, b) in rivalries.items() if {team1, team2} == {a, b}),
@@ -149,20 +149,20 @@ def generate_prediction(row):
         # ------------------------
         # TIME BUCKETS
         # ------------------------
-        early_keywords = ["11:00a", "11:30a", "12:00p", "12:30p", "1:00p", "1:30p", "2:00p"]
-        mid_keywords = ["2:30p", "3:00p", "3:30p", "4:00p", "4:30p", "5:00p", "5:30p", "6:00p", "6:30p"]
-        late_keywords = ["9:30p", "10:00p", "10:30", "11:00p", "11:30p"]
+        early_keywords = ["11:00a","11:30a","12:00p","12:30p","1:00p","1:30p","2:00p"]
+        mid_keywords   = ["2:30p","3:00p","3:30p","4:00p","4:30p","5:00p","5:30p","6:00p","6:30p"]
+        late_keywords  = ["9:30p","10:00p","10:30","11:00p","11:30p"]
 
         sat_early = (not is_friday and ("Early" in time_slot or any(t in time_slot for t in early_keywords)))
-        sat_mid = (not is_friday and ("Mid" in time_slot or any(t in time_slot for t in mid_keywords)))
-        sat_late = (not is_friday and ("Late" in time_slot or any(t in time_slot for t in late_keywords)))
+        sat_mid   = (not is_friday and ("Mid"   in time_slot or any(t in time_slot for t in mid_keywords)))
+        sat_late  = (not is_friday and ("Late"  in time_slot or any(t in time_slot for t in late_keywords)))
 
         # ------------------------
         # FEATURE VECTOR
         # ------------------------
         features = {
             "Spread": spread,
-            "CompetingGamesScore": comp_tier1,   # <<<<<< CORRECT NAME FOR REGRESSION
+            "CompetingGamesScore": comp_score,   # REAL SCORE 🔥
 
             "ABC": int(network == "ABC"),
             "CBS": int(network == "CBS"),
@@ -197,7 +197,9 @@ def generate_prediction(row):
             "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
         }
 
-        # FRIDAY × NETWORK INTERACTIONS
+        # ------------------------
+        # FRIDAY × NETWORK
+        # ------------------------
         network_cols = ["FOX","CBS","NBC","ABC","ESPN2","ESPNU","FS1","FS2","BTN","CW","NFLN","ESPNNEWS"]
         for net in network_cols:
             features[f"{net}_Fri"] = int(features["Friday"] == 1 and network == net)
@@ -224,7 +226,7 @@ def generate_prediction(row):
             if network in ["ABC", "ESPN"]:
                 features[f"YTTV_{network}"] = 1
 
-        # Team dummies
+        # Team dummy flags
         for col in model.params.index:
             if col in MODEL_TEAM_NAMES:
                 features[col] = int(col in [team1, team2])
@@ -233,37 +235,30 @@ def generate_prediction(row):
 
         for c in model.params.index:
             if c not in features:
-                features[c] = 0.0
+                features[c] = 0
 
         if "OhioSt_BTN" in model.params.index:
             features["OhioSt_BTN"] = int("Ohio St." in [team1, team2] and network == "BTN")
 
         # ------------------------
-        # PREDICTION
+        # FINAL PREDICTION
         # ------------------------
         X = pd.DataFrame([[features[c] for c in model.params.index]], columns=model.params.index)
 
-        try:
-            pred_res = model.get_prediction(X)
-            ci = pred_res.summary_frame(alpha=0.32)
+        pred_res = model.get_prediction(X)
+        ci = pred_res.summary_frame(alpha=0.32)
 
-            smearing = getattr(model, "smearing_factor", 1.0)
+        smearing = getattr(model, "smearing_factor", 1.0)
 
-            pred_ln = ci["mean"].iloc[0]
-            low_ln = ci["obs_ci_lower"].iloc[0]
-            high_ln = ci["obs_ci_upper"].iloc[0]
+        pred_ln = ci["mean"].iloc[0]
+        low_ln  = ci["obs_ci_lower"].iloc[0]
+        high_ln = ci["obs_ci_upper"].iloc[0]
 
-            pred = (np.exp(pred_ln) - 1) * smearing
-            low = max(0, (np.exp(low_ln) - 1) * smearing)
-            high = max(low, (np.exp(high_ln) - 1) * smearing)
+        pred = (np.exp(pred_ln) - 1) * smearing
+        low  = max(0, (np.exp(low_ln) - 1) * smearing)
+        high = max(low, (np.exp(high_ln) - 1) * smearing)
 
-        except:
-            pred = float(model.predict(X)[0])
-            low = max(pred - 500, 0)
-            high = pred + 500
-
-        pred_fmt = f"{pred/1_000:.2f}M\n({low/1_000:.2f}–{high/1_000:.2f}M)"
-        return pred_fmt
+        return f"{pred/1_000:.2f}M\n({low/1_000:.2f}–{high/1_000:.2f}M)"
 
     except Exception as e:
         return f"Error: {e}"
