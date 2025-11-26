@@ -43,7 +43,7 @@ def calc_error(pred, actual):
 
 
 # ---------------------------------------------------------------------
-# ⭐ MAIN PREDICTION FUNCTION — IDENTICAL TO STREAMLIT
+# ⭐ MAIN PREDICTION FUNCTION — IDENTICAL TO STREAMLIT + DEION ERA ADDED
 # ---------------------------------------------------------------------
 def generate_prediction(row):
 
@@ -62,6 +62,22 @@ def generate_prediction(row):
         comp_tier1 = int(row.get("comp_tier1", 0))
 
         day = row["day"]
+
+        # ------------------------
+        # EXTRACT YEAR FROM DATE (MM/DD/YY)
+        # ------------------------
+        date_str = row.get("date", "")
+        try:
+            parsed = datetime.strptime(date_str, "%m/%d/%y")
+            year = parsed.year
+        except:
+            year = datetime.now().year  # fallback
+
+        # ------------------------
+        # APPLY DEION ERA FLAG
+        # ------------------------
+        is_colorado_game = ("Colorado" in [team1, team2])
+        deion_era = int(is_colorado_game and year in [2023, 2024, 2025])
 
         conf1 = team_conferences.get(team1, "Group of 6")
         conf2 = team_conferences.get(team2, "Group of 6")
@@ -92,29 +108,15 @@ def generate_prediction(row):
         )
 
         # ------------------------
-        # TIME BUCKETS (MATCHING STREAMLIT EXACTLY!)
+        # TIME BUCKETS
         # ------------------------
-
-        # FULL timestamp-based bucketing
         early_keywords = ["11:00a", "11:30a", "12:00p", "12:30p", "1:00p", "1:30p", "2:00p"]
         mid_keywords = ["2:30p", "3:00p", "3:30p", "4:00p", "4:30p", "5:00p", "5:30p", "6:00p", "6:30p"]
         late_keywords = ["9:30p", "10:00p", "10:30", "11:00p", "11:30p"]
 
-        sat_early = (
-            not is_friday and (
-                "Early" in time_slot or any(t in time_slot for t in early_keywords)
-            )
-        )
-        sat_mid = (
-            not is_friday and (
-                "Mid" in time_slot or any(t in time_slot for t in mid_keywords)
-            )
-        )
-        sat_late = (
-            not is_friday and (
-                "Late" in time_slot or any(t in time_slot for t in late_keywords)
-            )
-        )
+        sat_early = (not is_friday and ("Early" in time_slot or any(t in time_slot for t in early_keywords)))
+        sat_mid   = (not is_friday and ("Mid" in time_slot or any(t in time_slot for t in mid_keywords)))
+        sat_late  = (not is_friday and ("Late" in time_slot or any(t in time_slot for t in late_keywords)))
 
         # ------------------------
         # FEATURE VECTOR
@@ -122,6 +124,7 @@ def generate_prediction(row):
         features = {
             "Spread": spread,
             "Competing Tier 1": comp_tier1,
+            "DeionEra": deion_era,   # ⭐ ADDED HERE ⭐
 
             "ABC": int(network == "ABC"),
             "CBS": int(network == "CBS"),
@@ -142,7 +145,6 @@ def generate_prediction(row):
             "Sun": int("Sunday" in time_slot),
             "Monday": int("Monday" in time_slot),
             "Weekday": int("Weekday" in time_slot),
-
             "Friday": int(is_friday or "Friday" in time_slot),
 
             "Sat Early": int(sat_early),
@@ -158,21 +160,18 @@ def generate_prediction(row):
             "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
         }
 
-        # ======================================================
-        # 🆕 FRIDAY × NETWORK INTERACTIONS — MUST MATCH REGRESSION
-        # ======================================================
-
+        # ------------------------
+        # FRIDAY × NETWORK INTERACTIONS
+        # ------------------------
         network_cols = [
             "FOX","CBS","NBC","ABC",
             "ESPN2","ESPNU","FS1","FS2",
             "BTN","CW","NFLN","ESPNNEWS"
         ]
 
-        # Create all non-baseline Friday interactions
         for net in network_cols:
             features[f"{net}_Fri"] = int(features["Friday"] == 1 and network == net)
 
-        # ESPN IS BASELINE — we must manually create ESPN_Fri
         features["ESPN_Fri"] = int(features["Friday"] == 1 and network == "ESPN")
 
         # postseason flags
@@ -188,7 +187,7 @@ def generate_prediction(row):
         for r in rivalries:
             features[r] = int(r == auto_rivalry)
 
-        # YTTV flags
+        # YTTV
         features["YTTV_ABC"] = 0
         features["YTTV_ESPN"] = 0
         now = datetime.now()
@@ -204,7 +203,7 @@ def generate_prediction(row):
         # const
         features["const"] = 1.0
 
-        # fill missing model params
+        # fill missing features
         for c in model.params.index:
             if c not in features:
                 features[c] = 0.0
@@ -216,7 +215,7 @@ def generate_prediction(row):
             )
 
         # ------------------------
-        # PREDICTION + CONFIDENCE INTERVAL (MATCHES STREAMLIT)
+        # PREDICTION
         # ------------------------
 
         X = pd.DataFrame([[features[c] for c in model.params.index]], columns=model.params.index)
@@ -224,7 +223,6 @@ def generate_prediction(row):
         try:
             pred_res = model.get_prediction(X)
             ci = pred_res.summary_frame(alpha=0.32)
-
             smearing = getattr(model, "smearing_factor", 1.0)
 
             pred_ln = ci["mean"].iloc[0]
