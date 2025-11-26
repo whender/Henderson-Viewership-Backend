@@ -77,7 +77,8 @@ def generate_prediction(row):
         # APPLY DEION ERA FLAG
         # ------------------------
         is_colorado_game = ("Colorado" in [team1, team2])
-        deion_era = int(is_colorado_game and year in [2023, 2024, 2025])
+        deion_era = int(is_colorado_game and year in [2023, 2024])
+        deion_era25 = int(is_colorado_game and year in [2025])
 
         conf1 = team_conferences.get(team1, "Group of 6")
         conf2 = team_conferences.get(team2, "Group of 6")
@@ -124,7 +125,8 @@ def generate_prediction(row):
         features = {
             "Spread": spread,
             "Competing Tier 1": comp_tier1,
-            "DeionEra": deion_era,   # ⭐ ADDED HERE ⭐
+            "DeionEra": deion_era,
+            "DeionEra25": deion_era25,
 
             "ABC": int(network == "ABC"),
             "CBS": int(network == "CBS"),
