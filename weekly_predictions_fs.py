@@ -43,6 +43,59 @@ def calc_error(pred, actual):
 
 
 # ---------------------------------------------------------------------
+# ⭐ COMPETITION SCORE CALCULATOR
+# ---------------------------------------------------------------------
+def compute_competition_score(all_games, this_game):
+    """
+    Input: games = list of dicts from Firestore week doc
+    Output: numeric CompetingGamesScore for THIS game
+    """
+
+    # We define "competing games" as:
+    # Same day AND same time_slot AND NOT this game.
+    day = this_game.get("day")
+    time_slot = this_game.get("time_slot")
+
+    # Filter competing games
+    competitors = [
+        g for g in all_games
+        if g.get("day") == day
+        and g.get("time_slot") == time_slot
+        and not (
+            g["team1"] == this_game["team1"]
+            and g["team2"] == this_game["team2"]
+        )
+    ]
+
+    # Score rule (simple version):
+    # Tier1 competitor = ranked Top 15 or major brand (P4 bluebloods)
+    # Tier1 → add 1
+    score = 0
+
+    tier1_brands = {
+        "Alabama","Georgia","Ohio St.","Michigan","Texas","Oklahoma",
+        "Notre Dame","LSU","USC","Florida St.","Oregon","Penn St."
+    }
+
+    for g in competitors:
+        # Ranked check
+        r1 = int(g.get("rank1", 0))
+        r2 = int(g.get("rank2", 0))
+
+        is_ranked15 = (0 < r1 <= 15) or (0 < r2 <= 15)
+
+        # Brand check
+        t1 = normalize_team(g["team1"])
+        t2 = normalize_team(g["team2"])
+        brand_hit = (t1 in tier1_brands) or (t2 in tier1_brands)
+
+        if is_ranked15 or brand_hit:
+            score += 1
+
+    return score
+
+
+# ---------------------------------------------------------------------
 # ⭐ MAIN PREDICTION FUNCTION — IDENTICAL TO STREAMLIT
 # ---------------------------------------------------------------------
 def generate_prediction(row):
@@ -59,6 +112,8 @@ def generate_prediction(row):
         spread = float(row["spread"])
         network = row["network"]
         time_slot = str(row["time_slot"])
+
+        # COMPETITION SCORE
         comp_tier1 = int(row.get("comp_tier1", 0))
 
         day = row["day"]
@@ -92,36 +147,22 @@ def generate_prediction(row):
         )
 
         # ------------------------
-        # TIME BUCKETS (MATCHING STREAMLIT EXACTLY!)
+        # TIME BUCKETS
         # ------------------------
-
-        # FULL timestamp-based bucketing
         early_keywords = ["11:00a", "11:30a", "12:00p", "12:30p", "1:00p", "1:30p", "2:00p"]
         mid_keywords = ["2:30p", "3:00p", "3:30p", "4:00p", "4:30p", "5:00p", "5:30p", "6:00p", "6:30p"]
         late_keywords = ["9:30p", "10:00p", "10:30", "11:00p", "11:30p"]
 
-        sat_early = (
-            not is_friday and (
-                "Early" in time_slot or any(t in time_slot for t in early_keywords)
-            )
-        )
-        sat_mid = (
-            not is_friday and (
-                "Mid" in time_slot or any(t in time_slot for t in mid_keywords)
-            )
-        )
-        sat_late = (
-            not is_friday and (
-                "Late" in time_slot or any(t in time_slot for t in late_keywords)
-            )
-        )
+        sat_early = (not is_friday and ("Early" in time_slot or any(t in time_slot for t in early_keywords)))
+        sat_mid = (not is_friday and ("Mid" in time_slot or any(t in time_slot for t in mid_keywords)))
+        sat_late = (not is_friday and ("Late" in time_slot or any(t in time_slot for t in late_keywords)))
 
         # ------------------------
         # FEATURE VECTOR
         # ------------------------
         features = {
             "Spread": spread,
-            "Competing Tier 1": comp_tier1,
+            "CompetingGamesScore": comp_tier1,   # <<<<<< CORRECT NAME FOR REGRESSION
 
             "ABC": int(network == "ABC"),
             "CBS": int(network == "CBS"),
@@ -138,11 +179,9 @@ def generate_prediction(row):
             "ESPNNEWS": int(network == "ESPNNEWS"),
 
             "Conf Champ": 0,
-
             "Sun": int("Sunday" in time_slot),
             "Monday": int("Monday" in time_slot),
             "Weekday": int("Weekday" in time_slot),
-
             "Friday": int(is_friday or "Friday" in time_slot),
 
             "Sat Early": int(sat_early),
@@ -158,24 +197,13 @@ def generate_prediction(row):
             "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
         }
 
-        # ======================================================
-        # 🆕 FRIDAY × NETWORK INTERACTIONS — MUST MATCH REGRESSION
-        # ======================================================
-
-        network_cols = [
-            "FOX","CBS","NBC","ABC",
-            "ESPN2","ESPNU","FS1","FS2",
-            "BTN","CW","NFLN","ESPNNEWS"
-        ]
-
-        # Create all non-baseline Friday interactions
+        # FRIDAY × NETWORK INTERACTIONS
+        network_cols = ["FOX","CBS","NBC","ABC","ESPN2","ESPNU","FS1","FS2","BTN","CW","NFLN","ESPNNEWS"]
         for net in network_cols:
             features[f"{net}_Fri"] = int(features["Friday"] == 1 and network == net)
-
-        # ESPN IS BASELINE — we must manually create ESPN_Fri
         features["ESPN_Fri"] = int(features["Friday"] == 1 and network == "ESPN")
 
-        # postseason flags
+        # Postseason flags
         for conf_tag, flag_name in {
             "SEC": "SEC_PostseasonImplications",
             "Big 10": "Big10_PostseasonImplications",
@@ -184,11 +212,11 @@ def generate_prediction(row):
         }.items():
             features[flag_name] = int(both_ranked and same_conf and conf1 == conf_tag)
 
-        # rivalry flags
+        # Rivalries
         for r in rivalries:
             features[r] = int(r == auto_rivalry)
 
-        # YTTV flags
+        # YTTV
         features["YTTV_ABC"] = 0
         features["YTTV_ESPN"] = 0
         now = datetime.now()
@@ -196,29 +224,23 @@ def generate_prediction(row):
             if network in ["ABC", "ESPN"]:
                 features[f"YTTV_{network}"] = 1
 
-        # team dummy flags
+        # Team dummies
         for col in model.params.index:
             if col in MODEL_TEAM_NAMES:
                 features[col] = int(col in [team1, team2])
 
-        # const
         features["const"] = 1.0
 
-        # fill missing model params
         for c in model.params.index:
             if c not in features:
                 features[c] = 0.0
 
-        # OhioSt × BTN
         if "OhioSt_BTN" in model.params.index:
-            features["OhioSt_BTN"] = int(
-                ("Ohio St." in [team1, team2]) and network == "BTN"
-            )
+            features["OhioSt_BTN"] = int("Ohio St." in [team1, team2] and network == "BTN")
 
         # ------------------------
-        # PREDICTION + CONFIDENCE INTERVAL (MATCHES STREAMLIT)
+        # PREDICTION
         # ------------------------
-
         X = pd.DataFrame([[features[c] for c in model.params.index]], columns=model.params.index)
 
         try:
