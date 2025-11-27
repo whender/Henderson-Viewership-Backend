@@ -21,8 +21,7 @@ import os
 # 🔥 LOAD POSTGAME MODEL
 # ======================================================
 
-BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "hendersonviewershipbackend"))
-POSTGAME_PATH = os.path.join(BACKEND_DIR, "viewership_postgame_model.joblib")
+POSTGAME_PATH = os.path.join(os.path.dirname(__file__), "viewership_postgame_model.joblib")
 
 post_data = joblib.load(POSTGAME_PATH)
 post_model = post_data["model"]
