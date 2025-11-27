@@ -31,3 +31,20 @@ def load_brand_model():
         return model
 
     return data
+
+def load_postgame_model():
+    path = "viewership_postgame_model.joblib"
+    if not os.path.exists(path):
+        raise FileNotFoundError("Missing viewership_postgame_model.joblib")
+
+    data = joblib.load(path)
+
+    if isinstance(data, dict):
+        model = data["model"]
+        model.team_counts = data.get("team_counts", {})
+        model.smearing_factor = data.get("smearing_factor", 1.0)
+        return model
+
+    # fallback if saved as plain model
+    data.smearing_factor = 1.0
+    return data

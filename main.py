@@ -9,7 +9,15 @@ from sklearn.linear_model import RidgeCV
 import os
 import math
 from datetime import datetime
-from weekly_predictions_fs import generate_prediction, calc_error
+
+from weekly_predictions_fs import (
+    generate_prediction,
+    generate_postgame_prediction,
+    calc_error,
+    build_features,
+    parse_viewership
+)
+
 from firestore_client import db
 
 # ======================================================
@@ -30,11 +38,10 @@ app.add_middleware(
 )
 
 # ======================================================
-# 🧹 JSON SANITIZER (fixes your NaN crash)
+# 🧹 JSON SANITIZER
 # ======================================================
 
 def clean_nan(obj):
-    """Recursively convert NaN/inf to None so FastAPI can JSON encode."""
     if isinstance(obj, float):
         if math.isnan(obj) or math.isinf(obj):
             return None
@@ -46,7 +53,7 @@ def clean_nan(obj):
     return obj
 
 # ======================================================
-# 📦 IMPORT PREDICTOR LOGIC
+# 📦 IMPORT PREGAME PREDICTOR LOGIC
 # ======================================================
 from predict import predict_viewership, teams_list
 
@@ -82,7 +89,7 @@ def predict_game(game: GameInput):
     }
 
 # ======================================================
-# 🏆 BRAND RANKINGS (POST-GAME MODEL VERSION)
+# 🏆 BRAND RANKINGS (POSTGAME MODEL)
 # ======================================================
 
 numeric_features_post = [
@@ -91,101 +98,86 @@ numeric_features_post = [
     "Sat Early","Sat Mid","Sat Late","Top 10 Rankings","25-11 Rankings",
     "SEC_PostseasonImplications","Big10_PostseasonImplications",
     "Big12_PostseasonImplications","ACC_PostseasonImplications",
-    "YTTV_ABC","YTTV_ESPN",
-    "Score Diff"
+    "YTTV_ABC","YTTV_ESPN","Score Diff"
 ]
 
 rivalry_features = [
-    "Michigan_OhioSt", "Texas_Oklahoma",
-    "Alabama_Auburn", "Georgia_Florida",
-    "NotreDame_USC", "Florida_Tennessee",
-    "Oregon_Washington", "BYU_Utah",
-    "Iowa_IowaSt", "OleMiss_MississippiSt",
-    "Clemson_SouthCarolina", "Arizona_ArizonaSt",
-    "Miami_FloridaSt", "Texas_TexasA&M",
-    "Oregon_OregonSt", "USC_UCLA",
-    "Louisville_Kentucky", "Washington_WashingtonSt",
-    "Kansas_KansasSt", "Minnesota_Wisconsin",
-    "Army_Navy", "OhioSt_PennSt",
-    "Alabama_LSU"
+    "Michigan_OhioSt","Texas_Oklahoma","Alabama_Auburn","Georgia_Florida",
+    "NotreDame_USC","Florida_Tennessee","Oregon_Washington","BYU_Utah",
+    "Iowa_IowaSt","OleMiss_MississippiSt","Clemson_SouthCarolina","Arizona_ArizonaSt",
+    "Miami_FloridaSt","Texas_TexasA&M","Oregon_OregonSt","USC_UCLA",
+    "Louisville_Kentucky","Washington_WashingtonSt","Kansas_KansasSt",
+    "Minnesota_Wisconsin","Army_Navy","OhioSt_PennSt","Alabama_LSU"
 ]
 
-# Power 4 + Notre Dame
 team_conferences = {
+    # SEC
     "Alabama":"SEC","Auburn":"SEC","Georgia":"SEC","Florida":"SEC","LSU":"SEC",
     "Tennessee":"SEC","Texas A&M":"SEC","Kentucky":"SEC","South Carolina":"SEC",
     "Mississippi":"SEC","Mississippi St.":"SEC","Arkansas":"SEC","Missouri":"SEC",
     "Vanderbilt":"SEC","Texas":"SEC","Oklahoma":"SEC",
 
+    # Big 10
     "Michigan":"Big 10","Ohio St.":"Big 10","Penn St.":"Big 10","Wisconsin":"Big 10",
     "Iowa":"Big 10","Michigan St.":"Big 10","Nebraska":"Big 10","Minnesota":"Big 10",
     "Illinois":"Big 10","Indiana":"Big 10","Purdue":"Big 10","Northwestern":"Big 10",
-    "Maryland":"Big 10","Rutgers":"Big 10","UCLA":"Big 10","USC":"Big 10","Oregon":"Big 10",
-    "Washington":"Big 10",
+    "Maryland":"Big 10","Rutgers":"Big 10","UCLA":"Big 10","USC":"Big 10",
+    "Oregon":"Big 10","Washington":"Big 10",
 
-    "Clemson":"ACC","Florida St.":"ACC","Miami":"ACC","North Carolina":"ACC","Duke":"ACC",
-    "North Carolina St.":"ACC","Virginia":"ACC","Virginia Tech":"ACC","Louisville":"ACC",
-    "Syracuse":"ACC","Boston College":"ACC","Wake Forest":"ACC","Pittsburgh":"ACC",
-    "Georgia Tech":"ACC","California":"ACC","Stanford":"ACC","SMU":"ACC",
+    # ACC
+    "Clemson":"ACC","Florida St.":"ACC","Miami":"ACC","North Carolina":"ACC",
+    "Duke":"ACC","North Carolina St.":"ACC","Virginia":"ACC","Virginia Tech":"ACC",
+    "Louisville":"ACC","Syracuse":"ACC","Boston College":"ACC","Wake Forest":"ACC",
+    "Pittsburgh":"ACC","Georgia Tech":"ACC","California":"ACC",
+    "Stanford":"ACC","SMU":"ACC",
 
-    "BYU":"Big 12","UCF":"Big 12","Houston":"Big 12","Cincinnati":"Big 12","Baylor":"Big 12",
-    "Texas Tech":"Big 12","TCU":"Big 12","Kansas":"Big 12","Kansas St.":"Big 12",
-    "Iowa St.":"Big 12","Oklahoma St.":"Big 12","West Virginia":"Big 12","Utah":"Big 12",
-    "Arizona":"Big 12","Arizona St.":"Big 12","Colorado":"Big 12"
+    # Big 12
+    "BYU":"Big 12","UCF":"Big 12","Houston":"Big 12","Cincinnati":"Big 12",
+    "Baylor":"Big 12","Texas Tech":"Big 12","TCU":"Big 12","Kansas":"Big 12",
+    "Kansas St.":"Big 12","Iowa St.":"Big 12","Oklahoma St.":"Big 12",
+    "West Virginia":"Big 12","Utah":"Big 12","Arizona":"Big 12",
+    "Arizona St.":"Big 12","Colorado":"Big 12"
 }
 
 power4_set = set(team_conferences.keys()) | {"Notre Dame"}
 
-# Load cleaned dataset with Score Diff already included
 df_all = pd.read_csv("viewership_cleaned.csv", low_memory=False)
 
-
-# ------------------------------------------------------
-# ⭐ CORE BRAND RANKING FUNCTION — USING POST-GAME MODEL
-# ------------------------------------------------------
 def compute_brand_rankings(df):
-    # Only include teams that appear in this dataset
     d1 = pd.get_dummies(df["Team 1"])
     d2 = pd.get_dummies(df["Team 2"])
     team_dummies = d1.add(d2, fill_value=0)
 
-    # Require minimum games to reduce noise
     counts = team_dummies.sum()
-    valid_teams = counts[counts >= 3].index
-    team_dummies = team_dummies[valid_teams]
+    valid = counts[counts >= 3].index
+    team_dummies = team_dummies[valid]
+
     if team_dummies.empty:
         return []
 
-    # Build feature matrix (post-game model structure)
     cols = [c for c in df.columns if c in numeric_features_post + rivalry_features]
     X = pd.concat([df[cols], team_dummies], axis=1).fillna(0)
     X = sm.add_constant(X)
 
-    # Log-viewers target
     y = np.log(df["Persons 2+"].astype(float) + 1)
 
-    # Fit RidgeCV (fixed alpha = 1 to avoid instability for year subsets)
     ridge = RidgeCV(alphas=[1.0])
     ridge.fit(X, y)
 
     params = pd.Series(ridge.coef_, index=X.columns)
-
-    # Extract team coefficients
     team_coefs = params[team_dummies.columns]
     team_coefs = team_coefs[team_coefs.index.isin(power4_set)]
 
-    # Shrink low-sample teams
     counts = counts.reindex(team_coefs.index).fillna(0)
     adjusted = team_coefs.copy()
+
     for t in team_coefs.index:
         n = counts[t]
         if n <= 4:
             adjusted[t] = team_coefs[t] * (n / (n + 5))
 
-    # Convert log-lift to percent lift
     lift_pct = (np.exp(adjusted) - 1) * 100
 
-    # Sort final rankings
     rows = []
     for i, (team, lift) in enumerate(lift_pct.sort_values(ascending=False).items(), start=1):
         rows.append({
@@ -196,25 +188,14 @@ def compute_brand_rankings(df):
         })
     return rows
 
-
-# ------------------------------------------------------
-# ⭐ PRECOMPUTE BRAND RANKINGS FOR ALL YEARS + EACH YEAR
-# ------------------------------------------------------
 brand_rankings_cache = {}
-
-# "All" years
 brand_rankings_cache["all"] = compute_brand_rankings(df_all)
 
-# Individual years
 available_years = sorted(df_all["Year"].dropna().unique().tolist())
 for y in available_years:
     df_y = df_all[df_all["Year"] == y]
     brand_rankings_cache[str(y)] = compute_brand_rankings(df_y)
 
-
-# ------------------------------------------------------
-# ⭐ API ROUTES
-# ------------------------------------------------------
 @app.get("/brand-years")
 def brand_years():
     return {"years": available_years}
@@ -224,12 +205,13 @@ def brand_rankings(year: str = "all"):
     return {"rows": brand_rankings_cache.get(year, [])}
 
 # ======================================================
-# 📅 WEEKLY PREDICTIONS
+# 📅 WEEKLY PREDICTIONS (PREGAME + POSTGAME)
 # ======================================================
 
 from predict import (
-    model, normalize_team, rank_to_coefs, team_conferences,
-    rivalries, FEUD_START, FEUD_END, MODEL_TEAM_NAMES, format_viewers
+    model, normalize_team, rank_to_coefs,
+    team_conferences, rivalries, FEUD_START,
+    FEUD_END, MODEL_TEAM_NAMES, format_viewers
 )
 
 @app.get("/weekly-predictions")
@@ -237,6 +219,9 @@ def weekly_predictions():
 
     docs = db.collection("weekly-predictions").stream()
     weeks_output = []
+
+    pre_errors = []
+    post_errors = []
 
     for doc in docs:
         data = doc.to_dict()
@@ -246,26 +231,66 @@ def weekly_predictions():
 
         updated = False
 
-        # Generate missing predictions
         for g in games:
+
+            # ----------------------------
+            # 🔵 PRE-GAME PREDICTION
+            # ----------------------------
             if not g.get("predicted") or g["predicted"] in ["", None, "nan", "NaN"]:
                 g["predicted"] = generate_prediction(g)
                 updated = True
 
-            # Compute % error + accuracy
             g["percent_error"] = calc_error(g["predicted"], g.get("actual"))
-            e = g["percent_error"]
+            e_pre = g["percent_error"]
 
-            if e is None:
+            if e_pre is None:
                 g["accuracy"] = ""
-            elif e < 5:
+            elif e_pre < 5:
                 g["accuracy"] = "🟢🎯"
-            elif e < 25:
+            elif e_pre < 25:
                 g["accuracy"] = "🟢"
-            elif e < 35:
+            elif e_pre < 35:
                 g["accuracy"] = "🟡"
             else:
                 g["accuracy"] = "🔴"
+
+            if isinstance(e_pre, (int, float)) and not math.isnan(e_pre):
+                pre_errors.append(e_pre)
+
+            # ----------------------------
+            # 🔴 POST-GAME PREDICTION
+            # ----------------------------
+            feature_vec = build_features(g)
+
+            try:
+                post_pred_str = generate_postgame_prediction(g)  # "X.XXM"
+                g["post_predicted"] = post_pred_str
+                post_pred_millions = parse_viewership(post_pred_str)
+            except:
+                g["post_predicted"] = ""
+                post_pred_millions = None
+
+            actual_millions = parse_viewership(g.get("actual"))
+            e_post = None
+
+            if actual_millions and post_pred_millions:
+                e_post = abs((post_pred_millions - actual_millions) / actual_millions) * 100
+
+            g["post_percent_error"] = e_post
+
+            if e_post is None:
+                g["post_accuracy"] = ""
+            elif e_post < 5:
+                g["post_accuracy"] = "🟢🎯"
+            elif e_post < 25:
+                g["post_accuracy"] = "🟢"
+            elif e_post < 35:
+                g["post_accuracy"] = "🟡"
+            else:
+                g["post_accuracy"] = "🔴"
+
+            if isinstance(e_post, (int, float)) and not math.isnan(e_post):
+                post_errors.append(e_post)
 
         if updated:
             db.collection("weekly-predictions").document(doc.id).set(data)
@@ -276,30 +301,32 @@ def weekly_predictions():
             "games": games
         })
 
-    # Summary stats — remove None and NaN values
-    all_errors = []
-    for w in weeks_output:
-        for g in w["games"]:
-            e = g.get("percent_error")
-            if isinstance(e, (int, float)) and not math.isnan(e):
-                all_errors.append(e)
+    def compute_stats(arr):
+        if len(arr) == 0:
+            return (None, None, None, None)
+        return (
+            float(np.median(arr)),
+            float(np.mean(arr)),
+            int(np.mean([e < 10 for e in arr]) * 100),
+            int(np.mean([e < 25 for e in arr]) * 100)
+        )
 
-    if len(all_errors) > 0:
-        median_error = float(np.median(all_errors))
-        mean_error = float(np.mean(all_errors))
-        pct10 = int(np.mean([e < 10 for e in all_errors]) * 100)
-        pct25 = int(np.mean([e < 25 for e in all_errors]) * 100)
-    else:
-        median_error = None
-        mean_error = None
-        pct10 = None
-        pct25 = None
+    pre_median, pre_mean, pre_pct10, pre_pct25 = compute_stats(pre_errors)
+    post_median, post_mean, post_pct10, post_pct25 = compute_stats(post_errors)
 
     metrics = {
-        "median_error": median_error,
-        "mean_error": mean_error,
-        "pct_within_10": pct10,
-        "pct_within_25": pct25
+        "pregame": {
+            "median_error": pre_median,
+            "mean_error": pre_mean,
+            "pct_within_10": pre_pct10,
+            "pct_within_25": pre_pct25,
+        },
+        "postgame": {
+            "median_error": post_median,
+            "mean_error": post_mean,
+            "pct_within_10": post_pct10,
+            "pct_within_25": post_pct25,
+        }
     }
 
     weeks_output = sorted(weeks_output, key=lambda w: w["week"], reverse=True)
