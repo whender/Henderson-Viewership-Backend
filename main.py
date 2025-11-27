@@ -11,7 +11,7 @@ import math
 from datetime import datetime
 
 from weekly_predictions_fs import (
-    generate_prediction,
+    generate_pregame_prediction,
     generate_postgame_prediction,
     calc_error,
     build_features,
@@ -237,7 +237,7 @@ def weekly_predictions():
             # 🔵 PRE-GAME PREDICTION
             # ----------------------------
             if not g.get("predicted") or g["predicted"] in ["", None, "nan", "NaN"]:
-                g["predicted"] = generate_prediction(g)
+                g["predicted"] = generate_pregame_prediction(g)
                 updated = True
 
             g["percent_error"] = calc_error(g["predicted"], g.get("actual"))
