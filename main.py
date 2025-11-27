@@ -260,15 +260,16 @@ def weekly_predictions():
             # ----------------------------
             # 🔴 POST-GAME PREDICTION
             # ----------------------------
-            feature_vec = build_features(g)
-
             try:
-                post_pred_str = generate_postgame_prediction(g)  # "X.XXM"
-                g["post_predicted"] = post_pred_str
-                post_pred_millions = parse_viewership(post_pred_str)
+                post_pred_str = generate_postgame_prediction(g)
+                g["post_predicted"] = post_pred_str if post_pred_str else ""
             except:
                 g["post_predicted"] = ""
-                post_pred_millions = None
+                post_pred_str = None
+
+            post_pred_millions = None
+            if post_pred_str:
+                post_pred_millions = parse_viewership(post_pred_str)
 
             actual_millions = parse_viewership(g.get("actual"))
             e_post = None
@@ -292,6 +293,7 @@ def weekly_predictions():
             if isinstance(e_post, (int, float)) and not math.isnan(e_post):
                 post_errors.append(e_post)
 
+        # 🔥 Save updates if anything changed (pregame or postgame)
         if updated:
             db.collection("weekly-predictions").document(doc.id).set(data)
 

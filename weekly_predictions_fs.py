@@ -60,13 +60,13 @@ def calc_error(pred, actual):
 
 
 # ======================================================
-# 🧠 SHARED FEATURE BUILDER
+# 🧠 SHARED FEATURE BUILDER (NO SCORE DIFF)
 # ======================================================
 
 def build_features(row):
     """
     Returns dict of all features EXCEPT Score Diff.
-    Used by BOTH pregame and postgame predictions.
+    Score Diff added later when doing postgame predictions.
     """
     team1 = normalize_team(row["team1"])
     team2 = normalize_team(row["team2"])
@@ -118,9 +118,9 @@ def build_features(row):
     )
 
     # ---------- TIME BUCKETS ----------
-    early_keywords = ["11:00a", "11:30a", "12:00p", "12:30p", "1:00p", "1:30p", "2:00p"]
-    mid_keywords = ["2:30p", "3:00p", "3:30p", "4:00p", "4:30p", "5:00p", "5:30p", "6:00p", "6:30p"]
-    late_keywords = ["9:30p", "10:00p", "10:30", "11:00p", "11:30p"]
+    early_keywords = ["11:00a","11:30a","12:00p","12:30p","1:00p","1:30p","2:00p"]
+    mid_keywords = ["2:30p","3:00p","3:30p","4:00p","4:30p","5:00p","5:30p","6:00p","6:30p"]
+    late_keywords = ["9:30p","10:00p","10:30","11:00p","11:30p"]
 
     sat_early = (not is_friday and any(t in time_slot for t in early_keywords))
     sat_mid   = (not is_friday and any(t in time_slot for t in mid_keywords))
@@ -203,7 +203,7 @@ def build_features(row):
 
 
 # ======================================================
-# 🔵 PRE-GAME PREDICTION (as formatted string)
+# 🔵 PRE-GAME PREDICTION
 # ======================================================
 
 def generate_pregame_prediction(row):
@@ -217,7 +217,6 @@ def generate_pregame_prediction(row):
         X = pd.DataFrame([[feats[c] for c in pregame_model.params.index]],
                           columns=pregame_model.params.index)
 
-        # Try with CI (for ranges)
         try:
             pred_res = pregame_model.get_prediction(X)
             ci = pred_res.summary_frame(alpha=0.32)
@@ -244,18 +243,29 @@ def generate_pregame_prediction(row):
 
 
 # ======================================================
-# 🔴 POST-GAME PREDICTION (returns formatted string)
+# 🔴 POST-GAME PREDICTION (Real Score Diff)
 # ======================================================
 
 def generate_postgame_prediction(row):
     """
-    Returns "X.XXM" for postgame model prediction (Score Diff = 0)
+    Uses Firestore score fields to compute REAL Score Diff.
+    Returns None if no scores available.
     """
     try:
+        s1 = row.get("score1")
+        s2 = row.get("score2")
+
+        # If either score missing → no postgame prediction
+        if s1 is None or s2 is None:
+            return None
+
+        # REAL SCORE DIFF
+        score_diff = abs(int(s1) - int(s2))
+
         feats = build_features(row)
+        feats["Score Diff"] = score_diff
 
-        feats["Score Diff"] = 0
-
+        # Fill missing features
         for c in post_model.params.index:
             if c not in feats:
                 feats[c] = 0.0
@@ -268,5 +278,5 @@ def generate_postgame_prediction(row):
 
         return f"{pred/1_000:.2f}M"
 
-    except Exception as e:
-        return f"Error: {e}"
+    except Exception:
+        return None
