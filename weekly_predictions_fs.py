@@ -147,7 +147,7 @@ def build_features(row):
         "NFLN": int(network == "NFLN"),
         "ESPNNEWS": int(network == "ESPNNEWS"),
 
-        "Conf Champ": 0,
+        "Conf Champ": int(bool(row.get("conf_champ", False))),
         "Sun": int("Sunday" in time_slot),
         "Monday": int("Monday" in time_slot),
         "Weekday": int("Weekday" in time_slot),
