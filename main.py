@@ -94,7 +94,9 @@ def predict_game(game: GameInput):
 
 numeric_features_post = [
     "Spread","Competing Tier 1","FOX","ESPN","ESPN2","ESPNU","FS1","FS2","NBC","CBS",
-    "ABC","BTN","CW","NFLN","ESPNNEWS","Conf Champ","Sun","Monday","Weekday","Friday",
+    "ABC","BTN","CW","NFLN","ESPNNEWS",
+    "SEC_ConfChamp","Big10_ConfChamp","Big12_ConfChamp","ACC_ConfChamp","Other_ConfChamp",
+    "Sun","Monday","Weekday","Friday",
     "Sat Early","Sat Mid","Sat Late","Top 10 Rankings","25-11 Rankings",
     "SEC_PostseasonImplications","Big10_PostseasonImplications",
     "Big12_PostseasonImplications","ACC_PostseasonImplications",
