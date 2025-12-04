@@ -102,7 +102,7 @@ rivalries = {
     "Louisville_Kentucky": ("Louisville", "Kentucky"), "Washington_WashingtonSt": ("Washington", "Washington St."),
     "Kansas_KansasSt": ("Kansas", "Kansas St."), "Minnesota_Wisconsin": ("Minnesota", "Wisconsin"),
     "Army_Navy": ("Army", "Navy"), "OhioSt_PennSt": ("Ohio St.", "Penn St."),
-    "Alabama_LSU": ("Alabama", "LSU")
+    "Alabama_LSU": ("Alabama", "LSU"), "Vanderbilt_Tennessee": ("Vanderbilt", "Tennessee")
 }
 
 FEUD_START = datetime(2025, 10, 30)
