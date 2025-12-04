@@ -229,27 +229,31 @@ def weekly_predictions():
         year = data["year"]
         games = data["games"]
 
-        updated = False  # <-- will flip True if pre OR post predictions change
+        updated = False  # flips true only if something actually changes
 
         for g in games:
 
             # =====================================================
-            # 🔵 SAVE OLD VALUES (to detect changes)
+            # 🔵 SAVE OLD VALUES FOR CHANGE DETECTION
             # =====================================================
             pre_old = g.get("predicted", "")
             post_old = g.get("post_predicted", "")
 
             # =====================================================
-            # 🔵 PRE-GAME PREDICTION
+            # 🔵 PRE-GAME PREDICTION (NEVER OVERWRITE)
             # =====================================================
-            if not g.get("predicted") or g["predicted"] in ["", None, "nan", "NaN"]:
+            missing_pre = (
+                not g.get("predicted")
+                or g["predicted"] in ["", None, "nan", "NaN"]
+            )
+
+            if missing_pre:
                 g["predicted"] = generate_pregame_prediction(g)
 
-            # mark change
             if g.get("predicted") != pre_old:
                 updated = True
 
-            # pregame percent error
+            # ---------- pregame percent error ----------
             g["percent_error"] = calc_error(g["predicted"], g.get("actual"))
             e_pre = g["percent_error"]
 
@@ -269,26 +273,40 @@ def weekly_predictions():
                 pre_errors.append(e_pre)
 
             # =====================================================
-            # 🔴 POST-GAME PREDICTION
+            # 🔴 POST-GAME PREDICTION — NEVER OVERWRITE
             # =====================================================
-            try:
-                post_pred_str = generate_postgame_prediction(g)
-                g["post_predicted"] = post_pred_str if post_pred_str else ""
-            except:
-                g["post_predicted"] = ""
-                post_pred_str = None
+            scores_exist = (
+                g.get("score1") is not None
+                and g.get("score2") is not None
+            )
+            already_has_post = bool(g.get("post_predicted"))
 
-            # mark change
-            if g.get("post_predicted") != post_old:
-                updated = True
+            if scores_exist and not already_has_post:
+                # Generate ONLY if missing
+                try:
+                    post_pred_str = generate_postgame_prediction(g)
+                    if post_pred_str:
+                        g["post_predicted"] = post_pred_str
 
-            # postgame percent error
+                    if g.get("post_predicted") != post_old:
+                        updated = True
+
+                except:
+                    post_pred_str = None
+
+            else:
+                # Use stored postgame prediction for percent error
+                post_pred_str = g.get("post_predicted") or ""
+
+            # ---------- postgame percent error ----------
             post_pred_millions = parse_viewership(post_pred_str)
             actual_millions = parse_viewership(g.get("actual"))
 
             e_post = None
             if actual_millions and post_pred_millions:
-                e_post = abs((post_pred_millions - actual_millions) / actual_millions) * 100
+                e_post = abs(
+                    (post_pred_millions - actual_millions) / actual_millions
+                ) * 100
 
             g["post_percent_error"] = e_post
 
@@ -308,7 +326,7 @@ def weekly_predictions():
                 post_errors.append(e_post)
 
         # =====================================================
-        # 🔥 SAVE ANY CHANGES (pregame OR postgame)
+        # 🔥 SAVE CHANGES BACK TO FIRESTORE ONLY IF NEEDED
         # =====================================================
         if updated:
             db.collection("weekly-predictions").document(doc.id).set(data)
@@ -329,7 +347,7 @@ def weekly_predictions():
             float(np.median(arr)),
             float(np.mean(arr)),
             int(np.mean([e < 10 for e in arr]) * 100),
-            int(np.mean([e < 25 for e in arr]) * 100)
+            int(np.mean([e < 25 for e in arr]) * 100),
         )
 
     pre_median, pre_mean, pre_pct10, pre_pct25 = compute_stats(pre_errors)
