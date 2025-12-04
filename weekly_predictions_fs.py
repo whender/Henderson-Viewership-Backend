@@ -166,6 +166,25 @@ def build_features(row):
         "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
     }
 
+    # ---------- SPLIT CONF CHAMP BY CONFERENCE ----------
+    is_cc = bool(row.get("conf_champ", False))
+
+    # Both teams must be from same conference for the game to count
+    features["SEC_ConfChamp"] = int(is_cc and conf1 == "SEC" and conf2 == "SEC")
+    features["Big10_ConfChamp"] = int(is_cc and conf1 == "Big 10" and conf2 == "Big 10")
+    features["Big12_ConfChamp"] = int(is_cc and conf1 == "Big 12" and conf2 == "Big 12")
+    features["ACC_ConfChamp"] = int(is_cc and conf1 == "ACC" and conf2 == "ACC")
+
+    # If it's a conf champ but NOT SEC/Big10/Big12/ACC
+    features["Other_ConfChamp"] = int(
+        is_cc and not (
+            (conf1 == "SEC" and conf2 == "SEC") or
+            (conf1 == "Big 10" and conf2 == "Big 10") or
+            (conf1 == "Big 12" and conf2 == "Big 12") or
+            (conf1 == "ACC" and conf2 == "ACC")
+        )
+    )
+
     # ---------- FRIDAY x NETWORK ----------
     for net in ["FOX","CBS","NBC","ABC","ESPN","ESPN2","ESPNU","FS1","FS2","BTN","CW","NFLN","ESPNNEWS"]:
         features[f"{net}_Fri"] = int(is_friday and network == net)
