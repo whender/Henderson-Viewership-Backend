@@ -255,7 +255,21 @@ def generate_pregame_prediction(row):
             low = max(pred - 500, 0)
             high = pred + 500
 
-        return f"{pred/1_000:.2f}M ({low/1_000:.2f}–{high/1_000:.2f}M)"
+        # Build output string using STANDARD ASCII dash
+        out = f"{pred/1_000:.2f}M ({low/1_000:.2f}-{high/1_000:.2f}M)"
+
+        # Normalize unicode
+        out = (
+            out.replace("\u2013", "-")
+               .replace("\u2014", "-")
+               .replace("\u2212", "-")
+               .replace("\u00A0", " ")
+               .replace("\u200b", "")
+               .replace("\u200c", "")
+               .replace("\u200d", "")
+        )
+
+        return out
 
     except Exception as e:
         return f"Error: {e}"
