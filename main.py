@@ -251,10 +251,17 @@ def weekly_predictions():
             # =====================================================
             # 🔵 PREGAME ERROR — ORIGINAL WORKING LOGIC
             # =====================================================
-            e_pre = calc_error(
-                g.get("predicted"),
-                g.get("actual")
-            )
+            # 🔥 Normalize predicted + actual to remove hidden newlines/spaces
+            pred_norm = (g.get("predicted") or "").replace("\n", " ").strip()
+            actual_norm = (g.get("actual") or "").replace("\n", " ").strip()
+
+            # 🔥 Re-save normalized predicted string so Firestore stops storing broken ones
+            if pred_norm != g.get("predicted"):
+                g["predicted"] = pred_norm
+                updated = True
+
+            # 🔥 NOW compute error using normalized values
+            e_pre = calc_error(pred_norm, actual_norm)
             g["percent_error"] = e_pre
 
             # 🔥🔥 NEW LINE — ALWAYS SAVE WHEN ERROR CHANGES 🔥🔥
