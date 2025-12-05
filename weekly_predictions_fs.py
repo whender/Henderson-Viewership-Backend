@@ -210,7 +210,17 @@ def build_features(row):
     }.items():
         features[flag_name] = int(both_ranked and same_conf and conf1 == conf_tag)
 
-    # ---------- RIVALRIES ----------
+    # ---------- RIVALRY (DISABLED FOR CONFERENCE CHAMPIONSHIPS) ----------
+    is_cc = bool(row.get("conf_champ", False))
+
+    if not is_cc:
+        auto_rivalry = next(
+            (r for r, (a, b) in rivalries.items() if {team1, team2} == {a, b}),
+            None
+        )
+    else:
+        auto_rivalry = None  # force rivalry OFF for championship games
+
     for r in rivalries:
         features[r] = int(r == auto_rivalry)
 
