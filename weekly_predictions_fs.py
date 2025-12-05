@@ -31,24 +31,36 @@ post_smearing = post_data["smearing_factor"]
 # 🔢 VIEWERSHIP PARSING
 # ======================================================
 
+import re
+
 def parse_viewership(val):
-    try:
-        if val is None:
-            return None
-        val = str(val).strip().upper()
+    """
+    Extracts ONLY the first number of the predicted string.
+    Works for values like:
+       "2.39M"
+       "2.39M (1.65–3.46M)"
+       "8.7M"
+       "8700000"
+    Returns a float in millions.
+    """
 
-        if "\n" in val:
-            val = val.split("\n")[0]
-        if "(" in val:
-            val = val.split("(")[0]
-
-        if val.endswith("M"):
-            return float(val[:-1])
-        if val.endswith("K"):
-            return float(val[:-1]) / 1000
-        return float(val)
-    except:
+    if not val or not isinstance(val, str):
         return None
+
+    # Remove commas, spaces
+    v = val.strip().replace(",", "")
+
+    # Extract the FIRST numeric pattern — including decimals
+    m = re.search(r"(\d+(\.\d+)?)\s*M", v, flags=re.IGNORECASE)
+    if m:
+        return float(m.group(1))
+
+    # Maybe the value is raw number like "8700000"
+    m2 = re.search(r"^\d+(\.\d+)?$", v)
+    if m2:
+        return float(v) / 1_000_000
+
+    return None
 
 
 def calc_error(pred, actual):
