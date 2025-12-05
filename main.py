@@ -234,7 +234,6 @@ def parse_pregame_pred(pred_str):
 
 @app.get("/weekly-predictions")
 def weekly_predictions():
-
     docs = db.collection("weekly-predictions").stream()
     weeks_output = []
 
@@ -247,52 +246,45 @@ def weekly_predictions():
         year = data["year"]
         games = data["games"]
 
-        updated = False  # only save if changes detected
+        updated = False  # we flip this when ANY field changes
 
         for g in games:
 
             # -----------------------------------------------------
-            # Save old values for change detection
+            # Save old values (for change detection)
             # -----------------------------------------------------
-            pre_old     = g.get("predicted", "")
-            post_old    = g.get("post_predicted", "")
-            actual_old  = g.get("actual")
-            pre_err_old = g.get("percent_error")
-            acc_old     = g.get("accuracy")
-            post_err_old = g.get("post_percent_error")
-            post_acc_old = g.get("post_accuracy")
+            pre_old        = g.get("predicted")
+            post_old       = g.get("post_predicted")
+            actual_old     = g.get("actual")
+            pre_err_old    = g.get("percent_error")
+            acc_old        = g.get("accuracy")
+            post_err_old   = g.get("post_percent_error")
+            post_acc_old   = g.get("post_accuracy")
 
             # -----------------------------------------------------
-            # PRE-GAME PREDICTION (NEVER OVERWRITE EXISTING)
+            # PRE-GAME PREDICTION (NEVER OVERWRITE)
             # -----------------------------------------------------
-            if not pre_old or pre_old in ["", None, "nan", "NaN"]:
+            if not pre_old or pre_old in ["", "nan", "NaN", None]:
                 g["predicted"] = generate_pregame_prediction(g)
 
             pred_now = g.get("predicted")
             actual_now = g.get("actual")
 
-            # -----------------------------------------------------
-            # PRE-GAME ERROR — ALWAYS RECALC IF ACTUAL EXISTS
-            # -----------------------------------------------------
+            # Extract numeric predicted value
             pred_mil = parse_pregame_pred(pred_now)
             actual_mil = parse_viewership(actual_now)
 
-            if actual_now not in [None, "", "nan", "NaN"] and actual_mil and actual_mil > 0:
-                # Only calculate if we have valid prediction
-                if pred_mil is not None:
-                    g["percent_error"] = abs((pred_mil - actual_mil) / actual_mil) * 100
-                else:
-                    # Keep older stored error if prediction failed to parse
-                    g["percent_error"] = pre_err_old
+            # -----------------------------------------------------
+            # PRE-GAME ERROR
+            # -----------------------------------------------------
+            if pred_mil is not None and actual_mil is not None and actual_mil > 0:
+                g["percent_error"] = abs((pred_mil - actual_mil) / actual_mil) * 100
             else:
-                # DO NOT ERASE OLD ERROR
-                g["percent_error"] = pre_err_old
+                g["percent_error"] = None
 
-            e_pre = g.get("percent_error")
+            e_pre = g["percent_error"]
 
-            # -----------------------------------------------------
-            # Assign accuracy badge
-            # -----------------------------------------------------
+            # Accuracy badge
             if e_pre is None:
                 g["accuracy"] = ""
             elif e_pre < 5:
@@ -304,31 +296,35 @@ def weekly_predictions():
             else:
                 g["accuracy"] = "🔴"
 
-            # add to metrics
             if isinstance(e_pre, (int, float)) and not math.isnan(e_pre):
                 pre_errors.append(e_pre)
 
             # -----------------------------------------------------
-            # POSTGAME PREDICTION (NEVER OVERWRITE)
+            # POST-GAME PREDICTION (NEVER OVERWRITE OLD VALUE)
             # -----------------------------------------------------
             scores_exist = g.get("score1") is not None and g.get("score2") is not None
             has_post = bool(post_old)
 
             if scores_exist and not has_post:
                 try:
-                    post_pred_str = generate_postgame_prediction(g)
-                    if post_pred_str:
-                        g["post_predicted"] = post_pred_str
+                    new_post = generate_postgame_prediction(g)
                 except:
-                    post_pred_str = None
+                    new_post = None
+
+                if new_post:
+                    g["post_predicted"] = new_post
+                else:
+                    g["post_predicted"] = ""
             else:
-                post_pred_str = g.get("post_predicted") or ""
+                g["post_predicted"] = post_old or ""
+
+            post_pred_now = g.get("post_predicted")
 
             # -----------------------------------------------------
             # POSTGAME ERROR
             # -----------------------------------------------------
-            post_pred_mil = parse_viewership(post_pred_str)
-            actual_mil = parse_viewership(actual_now)
+            post_pred_mil = parse_viewership(post_pred_now)
+            actual_mil = parse_viewership(g.get("actual"))
 
             if actual_mil and post_pred_mil:
                 e_post = abs((post_pred_mil - actual_mil) / actual_mil) * 100
@@ -337,7 +333,7 @@ def weekly_predictions():
 
             g["post_percent_error"] = e_post
 
-            # badge
+            # Badge
             if e_post is None:
                 g["post_accuracy"] = ""
             elif e_post < 5:
@@ -349,34 +345,37 @@ def weekly_predictions():
             else:
                 g["post_accuracy"] = "🔴"
 
-            # metrics
             if isinstance(e_post, (int, float)) and not math.isnan(e_post):
                 post_errors.append(e_post)
 
             # -----------------------------------------------------
-            # CHANGE DETECTION
+            # CHANGE DETECTION — THIS FIXES EVERYTHING
             # -----------------------------------------------------
             if (
-                g.get("predicted") != pre_old
-                or g.get("actual") != actual_old
+                pred_now != pre_old
+                or post_pred_now != post_old
+                or actual_now != actual_old
                 or g.get("percent_error") != pre_err_old
                 or g.get("accuracy") != acc_old
-                or g.get("post_predicted") != post_old
                 or g.get("post_percent_error") != post_err_old
                 or g.get("post_accuracy") != post_acc_old
             ):
                 updated = True
 
         # -----------------------------------------------------
-        # SAVE BACK TO FIRESTORE
+        # SAVE TO FIRESTORE IF ANYTHING CHANGED
         # -----------------------------------------------------
         if updated:
             db.collection("weekly-predictions").document(doc.id).set(data)
 
-        weeks_output.append({"week": week, "year": year, "games": games})
+        weeks_output.append({
+            "week": week,
+            "year": year,
+            "games": games
+        })
 
     # -----------------------------------------------------
-    # METRICS
+    # METRIC CALCULATIONS
     # -----------------------------------------------------
     def compute_stats(arr):
         if not arr:
@@ -403,9 +402,12 @@ def weekly_predictions():
             "mean_error": post_mean,
             "pct_within_10": post_pct10,
             "pct_within_25": post_pct25,
-        },
+        }
     }
 
     weeks_output = sorted(weeks_output, key=lambda w: w["week"], reverse=True)
 
-    return clean_nan({"weeks": weeks_output, "metrics": metrics})
+    return clean_nan({
+        "weeks": weeks_output,
+        "metrics": metrics
+    })
