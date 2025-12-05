@@ -223,67 +223,83 @@ def weekly_predictions():
         year = data["year"]
         games = data["games"]
 
-        updated = False  # flips True if any field changes
+        updated = False  # If anything changes, we write back
 
         for g in games:
 
             # =====================================================
             # 🔵 SAVE OLD VALUES FOR CHANGE DETECTION
             # =====================================================
-            pre_old        = g.get("predicted", "")
-            post_old       = g.get("post_predicted", "")
-            actual_old     = g.get("actual")
-            pre_err_old    = g.get("percent_error")
-            acc_old        = g.get("accuracy")
-            post_err_old   = g.get("post_percent_error")
-            post_acc_old   = g.get("post_accuracy")
+            pre_old      = g.get("predicted", "")
+            post_old     = g.get("post_predicted", "")
+            actual_old   = g.get("actual")
+            pre_err_old  = g.get("percent_error")
+            acc_old      = g.get("accuracy")
+            post_err_old = g.get("post_percent_error")
+            post_acc_old = g.get("post_accuracy")
 
             # =====================================================
             # 🔵 PRE-GAME PREDICTION (NEVER OVERWRITE)
             # =====================================================
-            if not g.get("predicted") or g["predicted"] in ["", None, "nan", "NaN"]:
+            missing_pred = (
+                not g.get("predicted")
+                or g["predicted"] in ["", None, "nan", "NaN"]
+            )
+
+            if missing_pred:
                 g["predicted"] = generate_pregame_prediction(g)
 
-            # detect change
             if g.get("predicted") != pre_old:
                 updated = True
 
             # =====================================================
-            # 🔵 PREGAME ERROR — ORIGINAL WORKING LOGIC
+            # 🔵 PREGAME ERROR — ONLY UPDATE WHEN NEEDED
             # =====================================================
-            e_pre = calc_error(
-                g.get("predicted"),
-                g.get("actual")
-            )
-            
-            g["percent_error"] = e_pre
+            has_actual = g.get("actual") not in [None, "", "nan", "NaN"]
+            has_pred = bool(g.get("predicted"))
 
-            # 🔥🔥 NEW LINE — ALWAYS SAVE WHEN ERROR CHANGES 🔥🔥
-            if e_pre is not None and e_pre != pre_err_old:
+            # sanitize old error
+            old_err = pre_err_old if isinstance(pre_err_old, (int, float)) else None
+
+            # compute possible new error
+            new_err = calc_error(g.get("predicted"), g.get("actual")) if (has_actual and has_pred) else None
+
+            # CASE 1: error is missing, but now we CAN compute → compute it
+            if old_err is None and new_err is not None:
+                g["percent_error"] = new_err
                 updated = True
 
-            # accuracy emoji
-            if e_pre is None:
+            # CASE 2: prediction or actual changed → recompute
+            elif (g.get("predicted") != pre_old or g.get("actual") != actual_old) and new_err is not None:
+                g["percent_error"] = new_err
+                updated = True
+
+            # CASE 3: keep the old error
+            else:
+                g["percent_error"] = old_err
+                new_err = old_err
+
+            # Accuracy emoji
+            if new_err is None:
                 g["accuracy"] = ""
-            elif e_pre < 5:
+            elif new_err < 5:
                 g["accuracy"] = "🟢🎯"
-            elif e_pre < 25:
+            elif new_err < 25:
                 g["accuracy"] = "🟢"
-            elif e_pre < 35:
+            elif new_err < 35:
                 g["accuracy"] = "🟡"
             else:
                 g["accuracy"] = "🔴"
 
-            # collect metric
-            if isinstance(e_pre, (int, float)) and not math.isnan(e_pre):
-                pre_errors.append(e_pre)
-
-            # detect change
-            if g.get("accuracy") != acc_old:
+            if g["accuracy"] != acc_old:
                 updated = True
 
+            # Metrics collector
+            if isinstance(new_err, (int, float)) and not math.isnan(new_err):
+                pre_errors.append(new_err)
+
             # =====================================================
-            # 🔴 POST-GAME PREDICTION — NEVER OVERWRITE
+            # 🔴 POST-GAME PREDICTION (NEVER OVERWRITE)
             # =====================================================
             scores_exist = (
                 g.get("score1") is not None and
@@ -340,7 +356,7 @@ def weekly_predictions():
                 updated = True
 
         # =====================================================
-        # 🔥 WRITE BACK TO FIRESTORE ONLY IF SOMETHING CHANGED
+        # 🔥 WRITE BACK TO FIRESTORE IF ANY FIELD CHANGED
         # =====================================================
         if updated:
             db.collection("weekly-predictions").document(doc.id).set(data)
