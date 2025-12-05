@@ -231,23 +231,23 @@ def weekly_predictions():
         year = data["year"]
         games = data["games"]
 
-        updated = False  # Only write back to Firestore if something changed
+        updated = False  # Firestore write flag
 
         for g in games:
 
             # =====================================================
-            # 🔵 SAVE OLD VALUES FOR CHANGE DETECTION
+            # SAVE OLD VALUES FOR CHANGE DETECTION
             # =====================================================
-            pre_old  = g.get("predicted", "")
-            post_old = g.get("post_predicted", "")
-            actual_old = g.get("actual")
-            err_old = g.get("percent_error")
-            acc_old = g.get("accuracy")
-            post_err_old = g.get("post_percent_error")
-            post_acc_old = g.get("post_accuracy")
+            pre_old       = g.get("predicted")
+            post_old      = g.get("post_predicted")
+            actual_old    = g.get("actual")
+            err_old       = g.get("percent_error")
+            acc_old       = g.get("accuracy")
+            post_err_old  = g.get("post_percent_error")
+            post_acc_old  = g.get("post_accuracy")
 
             # =====================================================
-            # 🔵 PRE-GAME PREDICTION (NEVER OVERWRITE)
+            # PRE-GAME PREDICTION (NEVER OVERWRITE)
             # =====================================================
             missing_pre = (
                 not g.get("predicted")
@@ -257,12 +257,12 @@ def weekly_predictions():
             if missing_pre:
                 g["predicted"] = generate_pregame_prediction(g)
 
-            pred_now = g.get("predicted")
+            pred_now   = g.get("predicted")
             actual_now = g.get("actual")
 
             # =====================================================
-            # 🧮 WHEN TO (RE)CALCULATE PREGAME ERROR?
-            # 1. Actual available AND no existing percent_error
+            # WHEN DO WE RE-CALCULATE PRE-GAME PERCENT ERROR?
+            # 1. Actual exists AND old error missing
             # 2. OR predicted changed
             # 3. OR actual changed
             # =====================================================
@@ -274,9 +274,17 @@ def weekly_predictions():
 
             if should_calc_pre:
                 g["percent_error"] = calc_error(pred_now, actual_now)
+
+                # Force numeric type
+                try:
+                    if g["percent_error"] is not None:
+                        g["percent_error"] = float(g["percent_error"])
+                except:
+                    g["percent_error"] = None
+
                 e_pre = g["percent_error"]
 
-                # ------ accuracy badge ------
+                # Accuracy badge
                 if e_pre is None:
                     g["accuracy"] = ""
                 elif e_pre < 5:
@@ -287,41 +295,44 @@ def weekly_predictions():
                     g["accuracy"] = "🟡"
                 else:
                     g["accuracy"] = "🔴"
-
             else:
+                # Use existing values
                 e_pre = g.get("percent_error")
 
-            # Add to metrics
-            if isinstance(e_pre, (int, float)) and not math.isnan(e_pre):
-                pre_errors.append(e_pre)
+            # =====================================================
+            # ADD PREGAME ERROR TO METRICS (NUMERIC ONLY)
+            # =====================================================
+            try:
+                val = float(e_pre)
+                if not math.isnan(val):
+                    pre_errors.append(val)
+            except:
+                pass
 
             # =====================================================
-            # 🔴 POST-GAME PREDICTION — NEVER OVERWRITE
+            # POST-GAME PREDICTION (NEVER OVERWRITE)
             # =====================================================
-            scores_exist = (
-                g.get("score1") is not None
-                and g.get("score2") is not None
-            )
+            scores_exist = (g.get("score1") is not None and g.get("score2") is not None)
             already_has_post = bool(g.get("post_predicted"))
 
             if scores_exist and not already_has_post:
                 try:
-                    post_pred_str = generate_postgame_prediction(g)
-                    if post_pred_str:
-                        g["post_predicted"] = post_pred_str
+                    post_pred_new = generate_postgame_prediction(g)
+                    if post_pred_new:
+                        g["post_predicted"] = post_pred_new
                 except:
-                    post_pred_str = None
-            else:
-                post_pred_str = g.get("post_predicted") or ""
+                    pass
+
+            post_pred_now = g.get("post_predicted") or ""
 
             # =====================================================
-            # 🔴 POSTGAME ERROR
+            # POSTGAME ERROR CALCULATION
             # =====================================================
-            post_pred_mil = parse_viewership(post_pred_str)
-            actual_mil = parse_viewership(g.get("actual"))
+            post_pred_mil = parse_viewership(post_pred_now)
+            actual_mil = parse_viewership(actual_now)
 
             e_post = None
-            if actual_mil and post_pred_mil:
+            if actual_mil is not None and actual_mil > 0 and post_pred_mil is not None:
                 e_post = abs((post_pred_mil - actual_mil) / actual_mil) * 100
 
             g["post_percent_error"] = e_post
@@ -338,26 +349,30 @@ def weekly_predictions():
             else:
                 g["post_accuracy"] = "🔴"
 
-            # Metrics
-            if isinstance(e_post, (int, float)) and not math.isnan(e_post):
-                post_errors.append(e_post)
+            # Add to metrics
+            try:
+                val2 = float(e_post)
+                if not math.isnan(val2):
+                    post_errors.append(val2)
+            except:
+                pass
 
             # =====================================================
-            # 🔥 CHANGE DETECTION FOR FIRESTORE WRITE
+            # FIRESTORE CHANGE DETECTION
             # =====================================================
             if (
-                g.get("predicted") != pre_old
-                or g.get("actual") != actual_old
-                or g.get("percent_error") != err_old
-                or g.get("accuracy") != acc_old
-                or g.get("post_predicted") != post_old
+                g.get("predicted")          != pre_old
+                or g.get("actual")          != actual_old
+                or g.get("percent_error")   != err_old
+                or g.get("accuracy")        != acc_old
+                or g.get("post_predicted")  != post_old
                 or g.get("post_percent_error") != post_err_old
-                or g.get("post_accuracy") != post_acc_old
+                or g.get("post_accuracy")   != post_acc_old
             ):
                 updated = True
 
         # =====================================================
-        # 🔥 SAVE BACK TO FIRESTORE ONLY IF NEEDED
+        # SAVE BACK TO FIRESTORE IF ANYTHING CHANGED
         # =====================================================
         if updated:
             db.collection("weekly-predictions").document(doc.id).set(data)
@@ -369,17 +384,16 @@ def weekly_predictions():
         })
 
     # =====================================================
-    # 📊 METRICS
+    # METRICS
     # =====================================================
     def compute_stats(arr):
         if len(arr) == 0:
             return (None, None, None, None)
-        return (
-            float(np.median(arr)),
-            float(np.mean(arr)),
-            int(np.mean([e < 10 for e in arr]) * 100),
-            int(np.mean([e < 25 for e in arr]) * 100),
-        )
+        median = float(np.median(arr))
+        mean = float(np.mean(arr))
+        pct10 = int(np.mean([e < 10 for e in arr]) * 100)
+        pct25 = int(np.mean([e < 25 for e in arr]) * 100)
+        return median, mean, pct10, pct25
 
     pre_median, pre_mean, pre_pct10, pre_pct25 = compute_stats(pre_errors)
     post_median, post_mean, post_pct10, post_pct25 = compute_stats(post_errors)
