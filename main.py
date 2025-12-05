@@ -231,19 +231,19 @@ def weekly_predictions():
         year = data["year"]
         games = data["games"]
 
-        updated = False  # flips true only if something actually changes
+        updated = False  # Only write back to Firestore if something changed
 
         for g in games:
 
             # =====================================================
             # 🔵 SAVE OLD VALUES FOR CHANGE DETECTION
             # =====================================================
-            pre_old = g.get("predicted", "")
+            pre_old  = g.get("predicted", "")
             post_old = g.get("post_predicted", "")
             actual_old = g.get("actual")
-            error_old = g.get("percent_error")
+            err_old = g.get("percent_error")
             acc_old = g.get("accuracy")
-            post_error_old = g.get("post_percent_error")
+            post_err_old = g.get("post_percent_error")
             post_acc_old = g.get("post_accuracy")
 
             # =====================================================
@@ -257,23 +257,41 @@ def weekly_predictions():
             if missing_pre:
                 g["predicted"] = generate_pregame_prediction(g)
 
-            # ---------- recompute pregame percent error ----------
-            g["percent_error"] = calc_error(g["predicted"], g.get("actual"))
-            e_pre = g["percent_error"]
+            pred_now = g.get("predicted")
+            actual_now = g.get("actual")
 
-            # ---------- accuracy emoji (pregame) ----------
-            if e_pre is None:
-                g["accuracy"] = ""
-            elif e_pre < 5:
-                g["accuracy"] = "🟢🎯"
-            elif e_pre < 25:
-                g["accuracy"] = "🟢"
-            elif e_pre < 35:
-                g["accuracy"] = "🟡"
+            # =====================================================
+            # 🧮 WHEN TO (RE)CALCULATE PREGAME ERROR?
+            # 1. Actual available AND no existing percent_error
+            # 2. OR predicted changed
+            # 3. OR actual changed
+            # =====================================================
+            should_calc_pre = (
+                (actual_now not in [None, "", "nan"] and err_old in [None, "", "nan"])
+                or pred_now != pre_old
+                or actual_now != actual_old
+            )
+
+            if should_calc_pre:
+                g["percent_error"] = calc_error(pred_now, actual_now)
+                e_pre = g["percent_error"]
+
+                # ------ accuracy badge ------
+                if e_pre is None:
+                    g["accuracy"] = ""
+                elif e_pre < 5:
+                    g["accuracy"] = "🟢🎯"
+                elif e_pre < 25:
+                    g["accuracy"] = "🟢"
+                elif e_pre < 35:
+                    g["accuracy"] = "🟡"
+                else:
+                    g["accuracy"] = "🔴"
+
             else:
-                g["accuracy"] = "🔴"
+                e_pre = g.get("percent_error")
 
-            # Record for metrics
+            # Add to metrics
             if isinstance(e_pre, (int, float)) and not math.isnan(e_pre):
                 pre_errors.append(e_pre)
 
@@ -287,7 +305,6 @@ def weekly_predictions():
             already_has_post = bool(g.get("post_predicted"))
 
             if scores_exist and not already_has_post:
-                # Generate ONLY if missing
                 try:
                     post_pred_str = generate_postgame_prediction(g)
                     if post_pred_str:
@@ -297,19 +314,19 @@ def weekly_predictions():
             else:
                 post_pred_str = g.get("post_predicted") or ""
 
-            # ---------- postgame percent error ----------
-            post_pred_millions = parse_viewership(post_pred_str)
-            actual_millions = parse_viewership(g.get("actual"))
+            # =====================================================
+            # 🔴 POSTGAME ERROR
+            # =====================================================
+            post_pred_mil = parse_viewership(post_pred_str)
+            actual_mil = parse_viewership(g.get("actual"))
 
             e_post = None
-            if actual_millions and post_pred_millions:
-                e_post = abs(
-                    (post_pred_millions - actual_millions) / actual_millions
-                ) * 100
+            if actual_mil and post_pred_mil:
+                e_post = abs((post_pred_mil - actual_mil) / actual_mil) * 100
 
             g["post_percent_error"] = e_post
 
-            # ---------- accuracy emoji (postgame) ----------
+            # Accuracy badge
             if e_post is None:
                 g["post_accuracy"] = ""
             elif e_post < 5:
@@ -321,36 +338,26 @@ def weekly_predictions():
             else:
                 g["post_accuracy"] = "🔴"
 
-            # Record for metrics
+            # Metrics
             if isinstance(e_post, (int, float)) and not math.isnan(e_post):
                 post_errors.append(e_post)
 
             # =====================================================
             # 🔥 CHANGE DETECTION FOR FIRESTORE WRITE
             # =====================================================
-            if g.get("predicted") != pre_old:
-                updated = True
-
-            if g.get("actual") != actual_old:
-                updated = True
-
-            if g.get("percent_error") != error_old:
-                updated = True
-
-            if g.get("accuracy") != acc_old:
-                updated = True
-
-            if g.get("post_predicted") != post_old:
-                updated = True
-
-            if g.get("post_percent_error") != post_error_old:
-                updated = True
-
-            if g.get("post_accuracy") != post_acc_old:
+            if (
+                g.get("predicted") != pre_old
+                or g.get("actual") != actual_old
+                or g.get("percent_error") != err_old
+                or g.get("accuracy") != acc_old
+                or g.get("post_predicted") != post_old
+                or g.get("post_percent_error") != post_err_old
+                or g.get("post_accuracy") != post_acc_old
+            ):
                 updated = True
 
         # =====================================================
-        # 🔥 SAVE CHANGES BACK TO FIRESTORE ONLY IF NEEDED
+        # 🔥 SAVE BACK TO FIRESTORE ONLY IF NEEDED
         # =====================================================
         if updated:
             db.collection("weekly-predictions").document(doc.id).set(data)
