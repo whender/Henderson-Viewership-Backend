@@ -211,13 +211,12 @@ def build_features(row):
         features[flag_name] = int(both_ranked and same_conf and conf1 == conf_tag)
 
     # ---------- RIVALRIES ----------
-    is_conf_champ = bool(row.get("conf_champ", False))
-
-    for r in rivalries:
-        if is_conf_champ:
-            features[r] = 0
-        else:
+    if not is_cc:
+        for r in rivalries:
             features[r] = int(r == auto_rivalry)
+    else:
+        for r in rivalries:
+            features[r] = 0
 
     # ---------- YTTV ----------
     features["YTTV_ABC"] = 0
