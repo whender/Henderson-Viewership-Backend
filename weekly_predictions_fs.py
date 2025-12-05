@@ -234,6 +234,8 @@ def build_features(row):
 
     features["const"] = 1.0
 
+    print("DEBUG conf_champ:", row.get("conf_champ"))
+
     return features
 
 
