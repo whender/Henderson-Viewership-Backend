@@ -257,6 +257,10 @@ def weekly_predictions():
             )
             g["percent_error"] = e_pre
 
+            # 🔥🔥 NEW LINE — ALWAYS SAVE WHEN ERROR CHANGES 🔥🔥
+            if e_pre is not None and e_pre != pre_err_old:
+                updated = True
+
             # accuracy emoji
             if e_pre is None:
                 g["accuracy"] = ""
@@ -274,8 +278,6 @@ def weekly_predictions():
                 pre_errors.append(e_pre)
 
             # detect change
-            if g.get("percent_error") != pre_err_old:
-                updated = True
             if g.get("accuracy") != acc_old:
                 updated = True
 
