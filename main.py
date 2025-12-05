@@ -206,34 +206,11 @@ def brand_years():
 def brand_rankings(year: str = "all"):
     return {"rows": brand_rankings_cache.get(year, [])}
 
-# ============================================
-# NEW: Extract the numeric prediction ("3.21M")
-# ============================================
-
-def parse_pregame_pred(pred_str):
-    """
-    Extract the leading predicted value in MILLIONS from strings like:
-    '3.21M (1.58–4.54M)' → 3.21
-    """
-    if not pred_str or not isinstance(pred_str, str):
-        return None
-    try:
-        main = pred_str.split(" ")[0]  # '3.21M'
-        if main.endswith("M"):
-            return float(main[:-1])
-        if main.endswith("K"):
-            return float(main[:-1]) / 1000
-        return float(main)
-    except:
-        return None
-
-
-# ============================================
 # WEEKLY PREDICTIONS
-# ============================================
 
 @app.get("/weekly-predictions")
 def weekly_predictions():
+
     docs = db.collection("weekly-predictions").stream()
     weeks_output = []
 
@@ -246,45 +223,41 @@ def weekly_predictions():
         year = data["year"]
         games = data["games"]
 
-        updated = False  # we flip this when ANY field changes
+        updated = False  # flips True if any field changes
 
         for g in games:
 
-            # -----------------------------------------------------
-            # Save old values (for change detection)
-            # -----------------------------------------------------
-            pre_old        = g.get("predicted")
-            post_old       = g.get("post_predicted")
+            # =====================================================
+            # 🔵 SAVE OLD VALUES FOR CHANGE DETECTION
+            # =====================================================
+            pre_old        = g.get("predicted", "")
+            post_old       = g.get("post_predicted", "")
             actual_old     = g.get("actual")
             pre_err_old    = g.get("percent_error")
             acc_old        = g.get("accuracy")
             post_err_old   = g.get("post_percent_error")
             post_acc_old   = g.get("post_accuracy")
 
-            # -----------------------------------------------------
-            # PRE-GAME PREDICTION (NEVER OVERWRITE)
-            # -----------------------------------------------------
-            if not pre_old or pre_old in ["", "nan", "NaN", None]:
+            # =====================================================
+            # 🔵 PRE-GAME PREDICTION (NEVER OVERWRITE)
+            # =====================================================
+            if not g.get("predicted") or g["predicted"] in ["", None, "nan", "NaN"]:
                 g["predicted"] = generate_pregame_prediction(g)
 
-            pred_now = g.get("predicted")
-            actual_now = g.get("actual")
+            # detect change
+            if g.get("predicted") != pre_old:
+                updated = True
 
-            # Extract numeric predicted value
-            pred_mil = parse_pregame_pred(pred_now)
-            actual_mil = parse_viewership(actual_now)
+            # =====================================================
+            # 🔵 PREGAME ERROR — ORIGINAL WORKING LOGIC
+            # =====================================================
+            e_pre = calc_error(
+                g.get("predicted"),
+                g.get("actual")
+            )
+            g["percent_error"] = e_pre
 
-            # -----------------------------------------------------
-            # PRE-GAME ERROR
-            # -----------------------------------------------------
-            if pred_mil is not None and actual_mil is not None and actual_mil > 0:
-                g["percent_error"] = abs((pred_mil - actual_mil) / actual_mil) * 100
-            else:
-                g["percent_error"] = None
-
-            e_pre = g["percent_error"]
-
-            # Accuracy badge
+            # accuracy emoji
             if e_pre is None:
                 g["accuracy"] = ""
             elif e_pre < 5:
@@ -296,44 +269,50 @@ def weekly_predictions():
             else:
                 g["accuracy"] = "🔴"
 
+            # collect metric
             if isinstance(e_pre, (int, float)) and not math.isnan(e_pre):
                 pre_errors.append(e_pre)
 
-            # -----------------------------------------------------
-            # POST-GAME PREDICTION (NEVER OVERWRITE OLD VALUE)
-            # -----------------------------------------------------
-            scores_exist = g.get("score1") is not None and g.get("score2") is not None
-            has_post = bool(post_old)
+            # detect change
+            if g.get("percent_error") != pre_err_old:
+                updated = True
+            if g.get("accuracy") != acc_old:
+                updated = True
+
+            # =====================================================
+            # 🔴 POST-GAME PREDICTION — NEVER OVERWRITE
+            # =====================================================
+            scores_exist = (
+                g.get("score1") is not None and
+                g.get("score2") is not None
+            )
+            has_post = bool(g.get("post_predicted"))
 
             if scores_exist and not has_post:
                 try:
-                    new_post = generate_postgame_prediction(g)
+                    post_pred_str = generate_postgame_prediction(g)
+                    if post_pred_str:
+                        g["post_predicted"] = post_pred_str
+                        updated = True
                 except:
-                    new_post = None
+                    pass
 
-                if new_post:
-                    g["post_predicted"] = new_post
-                else:
-                    g["post_predicted"] = ""
-            else:
-                g["post_predicted"] = post_old or ""
+            post_pred_str = g.get("post_predicted") or ""
 
-            post_pred_now = g.get("post_predicted")
+            # =====================================================
+            # 🔴 POSTGAME ERROR
+            # =====================================================
+            post_pred_m = parse_viewership(post_pred_str)
+            actual_m = parse_viewership(g.get("actual"))
 
-            # -----------------------------------------------------
-            # POSTGAME ERROR
-            # -----------------------------------------------------
-            post_pred_mil = parse_viewership(post_pred_now)
-            actual_mil = parse_viewership(g.get("actual"))
-
-            if actual_mil and post_pred_mil:
-                e_post = abs((post_pred_mil - actual_mil) / actual_mil) * 100
+            if post_pred_m and actual_m:
+                e_post = abs((post_pred_m - actual_m) / actual_m) * 100
             else:
                 e_post = None
 
             g["post_percent_error"] = e_post
 
-            # Badge
+            # badge
             if e_post is None:
                 g["post_accuracy"] = ""
             elif e_post < 5:
@@ -345,26 +324,21 @@ def weekly_predictions():
             else:
                 g["post_accuracy"] = "🔴"
 
+            # metrics
             if isinstance(e_post, (int, float)) and not math.isnan(e_post):
                 post_errors.append(e_post)
 
-            # -----------------------------------------------------
-            # CHANGE DETECTION — THIS FIXES EVERYTHING
-            # -----------------------------------------------------
-            if (
-                pred_now != pre_old
-                or post_pred_now != post_old
-                or actual_now != actual_old
-                or g.get("percent_error") != pre_err_old
-                or g.get("accuracy") != acc_old
-                or g.get("post_percent_error") != post_err_old
-                or g.get("post_accuracy") != post_acc_old
-            ):
+            # detect change
+            if g.get("post_predicted") != post_old:
+                updated = True
+            if g.get("post_percent_error") != post_err_old:
+                updated = True
+            if g.get("post_accuracy") != post_acc_old:
                 updated = True
 
-        # -----------------------------------------------------
-        # SAVE TO FIRESTORE IF ANYTHING CHANGED
-        # -----------------------------------------------------
+        # =====================================================
+        # 🔥 WRITE BACK TO FIRESTORE ONLY IF SOMETHING CHANGED
+        # =====================================================
         if updated:
             db.collection("weekly-predictions").document(doc.id).set(data)
 
@@ -374,11 +348,11 @@ def weekly_predictions():
             "games": games
         })
 
-    # -----------------------------------------------------
-    # METRIC CALCULATIONS
-    # -----------------------------------------------------
+    # =====================================================
+    # 📊 METRICS
+    # =====================================================
     def compute_stats(arr):
-        if not arr:
+        if len(arr) == 0:
             return (None, None, None, None)
         return (
             float(np.median(arr)),
@@ -402,7 +376,7 @@ def weekly_predictions():
             "mean_error": post_mean,
             "pct_within_10": post_pct10,
             "pct_within_25": post_pct25,
-        }
+        },
     }
 
     weeks_output = sorted(weeks_output, key=lambda w: w["week"], reverse=True)
