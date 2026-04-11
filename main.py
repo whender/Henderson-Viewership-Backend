@@ -706,6 +706,8 @@ def team_scenario_compare(
     time_bucket: str = "all",
     rank_bucket: str = "all",
     competing_bucket: str = "all",
+    year_start: str = "all",
+    year_end: str = "all",
     include_conf_champ: bool = True,
 ):
     normalized_team = normalize_team(team)
@@ -733,6 +735,10 @@ def team_scenario_compare(
             filtered = filtered[filtered["scenario_rank_detail"] == rank_bucket]
         if competing_bucket != "all":
             filtered = filtered[filtered["scenario_competing_bucket"] == competing_bucket]
+        if year_start != "all":
+            filtered = filtered[pd.to_numeric(filtered["Year"], errors="coerce") >= int(year_start)]
+        if year_end != "all":
+            filtered = filtered[pd.to_numeric(filtered["Year"], errors="coerce") <= int(year_end)]
         if not include_conf_champ:
             filtered = filtered[filtered["scenario_conf_champ"] != 1]
         return filtered
@@ -830,6 +836,8 @@ def team_scenario_compare(
             "time_bucket": time_bucket,
             "rank_bucket": rank_bucket,
             "competing_bucket": competing_bucket,
+            "year_start": year_start,
+            "year_end": year_end,
             "include_conf_champ": include_conf_champ,
         },
         "team_average_viewers": team_avg,
@@ -853,6 +861,7 @@ def team_scenario_compare(
             "time_buckets": ["all", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Monday", "Sunday", "Weekday", "Other"],
             "rank_buckets": rank_detail_options,
             "competing_buckets": ["all", "None", "1 Major Game", "2+ Major Games"],
+            "years": ["all"] + [str(year) for year in sorted(pd.to_numeric(df_all["Year"], errors="coerce").dropna().astype(int).unique().tolist())],
         },
     })
 
