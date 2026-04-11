@@ -481,33 +481,6 @@ def _load_profile_brand_rank_lookup():
 
 brand_rank_lookup = _load_profile_brand_rank_lookup()
 
-
-def _build_brand_trend_lookup():
-    trend_lookup = {}
-
-    for year in available_years:
-        rows = brand_rankings_cache.get(str(year), [])
-        for row in rows:
-            team_name = row.get("team")
-            if not team_name:
-                continue
-
-            trend_lookup.setdefault(team_name, []).append(
-                {
-                    "year": int(year),
-                    "brand_rank": row.get("rank"),
-                    "viewership_lift_pct": row.get("viewership_lift_pct"),
-                }
-            )
-
-    for team_name, rows in trend_lookup.items():
-        rows.sort(key=lambda row: row["year"])
-
-    return trend_lookup
-
-
-brand_trend_lookup = _build_brand_trend_lookup()
-
 @app.get("/brand-years")
 def brand_years():
     return {"years": available_years}
@@ -579,12 +552,31 @@ def _build_team_profile_cache(df):
             year_df = year_df.sort_values("viewers", ascending=False)
             peak_game = year_df.iloc[0]
             low_game = year_df.iloc[-1]
+            year_expected = pd.to_numeric(year_df["expected_viewers"], errors="coerce").dropna()
+            year_actual = pd.to_numeric(year_df["viewers"], errors="coerce").dropna()
+            year_delta_series = pd.to_numeric(year_df["actual_minus_expected"], errors="coerce")
 
             yearly_rows.append({
                 "year": int(year),
                 "games": int(len(year_df)),
                 "average_viewers": float(round(year_df["viewers"].mean(), 1)),
                 "median_viewers": float(round(year_df["viewers"].median(), 1)),
+                "expected_average_viewers": (
+                    float(round(year_expected.mean(), 1))
+                    if not year_expected.empty
+                    else None
+                ),
+                "average_minus_expected": (
+                    float(round(year_actual.mean() - year_expected.mean(), 1))
+                    if not year_actual.empty and not year_expected.empty
+                    else None
+                ),
+                "overperformance_pct": (
+                    float(round(((year_actual.sum() / year_expected.sum()) - 1) * 100, 1))
+                    if not year_actual.empty and not year_expected.empty and year_expected.sum() > 0
+                    else None
+                ),
+                "games_above_expected": int((year_delta_series > 0).sum()) if not year_delta_series.empty else 0,
                 "peak_viewers": float(round(peak_game["viewers"], 1)),
                 "peak_matchup": peak_game["matchup"],
                 "peak_network": peak_game["network"],
@@ -671,7 +663,6 @@ def _build_team_profile_cache(df):
                 "brand_rank": brand_rank_lookup.get(team, {}).get("brand_rank"),
                 "viewership_lift_pct": brand_rank_lookup.get(team, {}).get("viewership_lift_pct"),
                 "conference": brand_rank_lookup.get(team, {}).get("conference", team_conferences.get(team, "Independent")),
-                "brand_trend": brand_trend_lookup.get(team, []),
             },
         }
 
