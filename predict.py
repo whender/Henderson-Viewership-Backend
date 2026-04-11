@@ -87,7 +87,43 @@ team_conferences = {
     "Baylor": "Big 12", "Texas Tech": "Big 12", "TCU": "Big 12", "Kansas": "Big 12",
     "Kansas St.": "Big 12", "Iowa St.": "Big 12", "Oklahoma St.": "Big 12",
     "West Virginia": "Big 12", "Utah": "Big 12", "Arizona": "Big 12", "Arizona St.": "Big 12",
-    "Colorado": "Big 12"
+    "Colorado": "Big 12",
+
+    # AAC
+    "Charlotte": "AAC", "East Carolina": "AAC", "FAU": "AAC", "Memphis": "AAC",
+    "North Texas": "AAC", "Rice": "AAC", "South Florida": "AAC", "Temple": "AAC",
+    "Tulane": "AAC", "Tulsa": "AAC", "UAB": "AAC", "UTSA": "AAC", "Army": "AAC",
+    "Navy": "AAC",
+
+    # Sun Belt
+    "Appalachian St.": "Sun Belt", "Arkansas St.": "Sun Belt", "Coastal Carolina": "Sun Belt",
+    "Georgia Southern": "Sun Belt", "Georgia St.": "Sun Belt", "James Madison": "Sun Belt",
+    "Louisiana": "Sun Belt", "Louisiana Monroe": "Sun Belt", "Marshall": "Sun Belt",
+    "Old Dominion": "Sun Belt", "South Alabama": "Sun Belt", "Southern Miss": "Sun Belt",
+    "Texas St.": "Sun Belt", "Troy": "Sun Belt",
+
+    # Mountain West
+    "Air Force": "Mountain West", "Boise St.": "Mountain West", "Colorado St.": "Mountain West",
+    "Fresno St.": "Mountain West", "Hawaii": "Mountain West", "Nevada": "Mountain West",
+    "New Mexico": "Mountain West", "San Diego St.": "Mountain West", "San Jose St.": "Mountain West",
+    "UNLV": "Mountain West", "Utah St.": "Mountain West", "Wyoming": "Mountain West",
+
+    # MAC
+    "Akron": "MAC", "Ball St.": "MAC", "Bowling Green": "MAC", "Buffalo": "MAC",
+    "Central Michigan": "MAC", "Eastern Michigan": "MAC", "Kent St.": "MAC",
+    "Miami Ohio": "MAC", "Northern Illinois": "MAC", "Ohio": "MAC", "Toledo": "MAC",
+    "Western Michigan": "MAC",
+
+    # Conference USA
+    "Delaware": "Conference USA", "FIU": "Conference USA", "Jacksonville St.": "Conference USA",
+    "Kennesaw State": "Conference USA", "Liberty": "Conference USA", "Louisiana Tech": "Conference USA",
+    "Middle Tennessee St.": "Conference USA", "New Mexico St.": "Conference USA",
+    "Sam Houston": "Conference USA", "UTEP": "Conference USA", "Missouri State": "Conference USA",
+    "Kennesaw St.": "Conference USA", "Western Kentucky": "Conference USA",
+
+    # Independents / others
+    "Massachusetts": "Independent", "Notre Dame": "Independent", "Connecticut": "Independent",
+    "Washington St.": "Pac-12", "Oregon St.": "Pac-12"
 }
 
 rivalries = {
@@ -101,7 +137,8 @@ rivalries = {
     "Oregon_OregonSt": ("Oregon", "Oregon St."), "USC_UCLA": ("USC", "UCLA"),
     "Louisville_Kentucky": ("Louisville", "Kentucky"), "Washington_WashingtonSt": ("Washington", "Washington St."),
     "Kansas_KansasSt": ("Kansas", "Kansas St."), "Minnesota_Wisconsin": ("Minnesota", "Wisconsin"),
-    "Army_Navy": ("Army", "Navy"), "OhioSt_PennSt": ("Ohio St.", "Penn St."),
+    "Army_Navy": ("Army", "Navy"), "Army_AirForce": ("Army", "Air Force"),
+    "Navy_AirForce": ("Navy", "Air Force"), "OhioSt_PennSt": ("Ohio St.", "Penn St."),
     "Alabama_LSU": ("Alabama", "LSU"), "Vanderbilt_Tennessee": ("Vanderbilt", "Tennessee"),
     "Georgia_GeorgiaTech": ("Georgia", "Georgia Tech"), "Alabama_Georgia": ("Alabama", "Georgia")
 }

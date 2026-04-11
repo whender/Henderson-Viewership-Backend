@@ -1,26 +1,36 @@
-# firestore_client.py
 import os
 import json
+from pathlib import Path
 from google.oauth2 import service_account
 from google.cloud import firestore
 
-# ---------------------------------------
-# Load service account from Render env var
-# ---------------------------------------
-raw = os.environ.get("FIREBASE_CREDENTIALS_JSON")
-if not raw:
-    raise RuntimeError(
-        "🔥 FIREBASE_CREDENTIALS_JSON environment variable not set on Render!"
-    )
+BASE_DIR = Path(__file__).resolve().parent
+REPO_ROOT = BASE_DIR.parent
+LOCAL_SERVICE_ACCOUNT_PATH = REPO_ROOT / "serviceAccountKey.json"
 
-info = json.loads(raw)
 
-credentials = service_account.Credentials.from_service_account_info(info)
+def load_firestore_credentials():
+    raw = os.environ.get("FIREBASE_CREDENTIALS_JSON")
+    if raw:
+        info = json.loads(raw)
+        credentials = service_account.Credentials.from_service_account_info(info)
+        return info["project_id"], credentials
 
-# ---------------------------------------
-# Firestore Client
-# ---------------------------------------
-db = firestore.Client(
-    project=info["project_id"],
-    credentials=credentials
+    if LOCAL_SERVICE_ACCOUNT_PATH.exists():
+        with LOCAL_SERVICE_ACCOUNT_PATH.open() as f:
+            info = json.load(f)
+        credentials = service_account.Credentials.from_service_account_file(
+            str(LOCAL_SERVICE_ACCOUNT_PATH)
+        )
+        return info["project_id"], credentials
+
+    return None, None
+
+
+project_id, credentials = load_firestore_credentials()
+
+db = (
+    firestore.Client(project=project_id, credentials=credentials)
+    if project_id and credentials
+    else None
 )
