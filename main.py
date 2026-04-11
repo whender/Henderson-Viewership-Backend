@@ -481,6 +481,33 @@ def _load_profile_brand_rank_lookup():
 
 brand_rank_lookup = _load_profile_brand_rank_lookup()
 
+
+def _build_brand_trend_lookup():
+    trend_lookup = {}
+
+    for year in available_years:
+        rows = brand_rankings_cache.get(str(year), [])
+        for row in rows:
+            team_name = row.get("team")
+            if not team_name:
+                continue
+
+            trend_lookup.setdefault(team_name, []).append(
+                {
+                    "year": int(year),
+                    "brand_rank": row.get("rank"),
+                    "viewership_lift_pct": row.get("viewership_lift_pct"),
+                }
+            )
+
+    for team_name, rows in trend_lookup.items():
+        rows.sort(key=lambda row: row["year"])
+
+    return trend_lookup
+
+
+brand_trend_lookup = _build_brand_trend_lookup()
+
 @app.get("/brand-years")
 def brand_years():
     return {"years": available_years}
@@ -644,6 +671,7 @@ def _build_team_profile_cache(df):
                 "brand_rank": brand_rank_lookup.get(team, {}).get("brand_rank"),
                 "viewership_lift_pct": brand_rank_lookup.get(team, {}).get("viewership_lift_pct"),
                 "conference": brand_rank_lookup.get(team, {}).get("conference", team_conferences.get(team, "Independent")),
+                "brand_trend": brand_trend_lookup.get(team, []),
             },
         }
 
