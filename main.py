@@ -366,7 +366,7 @@ def compute_brand_rankings(df):
 
     for t in team_coefs.index:
         n = counts[t]
-        if n <= 30:
+        if n <= 25:
             adjusted[t] = team_coefs[t] * (n / (n + 10))
 
     lift_pct = (np.exp(adjusted) - 1) * 100
