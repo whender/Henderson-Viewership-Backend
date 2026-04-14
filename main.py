@@ -237,6 +237,19 @@ def detect_time_bucket(row):
     return "Other"
 
 
+def is_primetime_baseline(row):
+    return not any(
+        row.get(flag) == 1
+        for flag in ["Sun", "Monday", "Weekday", "Friday", "Sat Early", "Sat Mid", "Sat Late"]
+    )
+
+
+def display_time_bucket(row):
+    if is_primetime_baseline(row):
+        return "Primetime"
+    return row.get("scenario_time_bucket") or "Other"
+
+
 def detect_rank_bucket(row):
     top_10 = pd.to_numeric(row.get("Top 10 Rankings"), errors="coerce")
     rank_11_25 = pd.to_numeric(row.get("25-11 Rankings"), errors="coerce")
@@ -294,30 +307,62 @@ def _compute_average_team_effect(df):
 
 
 AVERAGE_TEAM_EFFECT = _compute_average_team_effect(df_all)
+MODELED_TEAM_COLUMNS = {column for column in pregame_model.params.index if column in MODEL_TEAM_NAMES}
 
 
-def _compute_expected_viewers(df):
+def _build_pregame_design_matrix(df):
     model_columns = list(pregame_model.params.index)
     X = pd.DataFrame(index=df.index)
 
     for column in model_columns:
         if column == "const":
             X[column] = 1.0
-        elif column in MODEL_TEAM_NAMES:
-            # Replace team effects with an average-FBS-team baseline instead of zero.
-            X[column] = 0.0
         elif column in df.columns:
             X[column] = pd.to_numeric(df[column], errors="coerce").fillna(0).astype(float)
         else:
             X[column] = 0.0
 
-    ln_pred = pregame_model.predict(X) + (2 * AVERAGE_TEAM_EFFECT)
+    team_dummies = pd.get_dummies(df["Team 1"]).add(pd.get_dummies(df["Team 2"]), fill_value=0)
+    team_dummies = team_dummies.reindex(columns=[c for c in model_columns if c in MODELED_TEAM_COLUMNS], fill_value=0)
+
+    for column in team_dummies.columns:
+        X[column] = team_dummies[column].astype(float)
+
+    return X[model_columns]
+
+
+def _predict_viewers_from_design_matrix(X, team_effect_adjustment):
+    ln_pred = pregame_model.predict(X) + team_effect_adjustment
     smearing = getattr(pregame_model, "smearing_factor", 1.0)
     expected = (np.exp(ln_pred) - 1) * smearing
     return pd.to_numeric(expected, errors="coerce")
 
 
+def _compute_expected_viewers(df):
+    X = _build_pregame_design_matrix(df)
+
+    # Neutral matchup baseline: replace both teams with an average-FBS-team effect.
+    for column in MODELED_TEAM_COLUMNS:
+        if column in X.columns:
+            X[column] = 0.0
+
+    return _predict_viewers_from_design_matrix(X, 2 * AVERAGE_TEAM_EFFECT)
+
+
+def _compute_team_specific_expected_viewers(df, focal_team_column):
+    X = _build_pregame_design_matrix(df)
+    focal_teams = df[focal_team_column].fillna("")
+
+    for team_name in focal_teams[focal_teams.isin(MODELED_TEAM_COLUMNS)].unique():
+        X.loc[focal_teams == team_name, team_name] = 0.0
+
+    # Replace only the focal team's brand effect with an average-FBS-team baseline.
+    return _predict_viewers_from_design_matrix(X, AVERAGE_TEAM_EFFECT)
+
+
 df_all["expected_viewers"] = _compute_expected_viewers(df_all)
+df_all["expected_viewers_team1"] = _compute_team_specific_expected_viewers(df_all, "Team 1")
+df_all["expected_viewers_team2"] = _compute_team_specific_expected_viewers(df_all, "Team 2")
 df_all["actual_minus_expected"] = (
     pd.to_numeric(df_all["Persons 2+"], errors="coerce") - df_all["expected_viewers"]
 )
@@ -505,7 +550,7 @@ def _build_team_profile_cache(df):
         game_meta = {
             "date": row.get("Date"),
             "network": detected_network,
-            "time_bucket": row.get("scenario_time_bucket"),
+            "time_bucket": display_time_bucket(row),
             "rank_detail": row.get("scenario_rank_detail"),
             "competing_bucket": row.get("scenario_competing_bucket"),
             "viewers": float(viewers),
@@ -522,21 +567,41 @@ def _build_team_profile_cache(df):
         team_2 = row.get("Team 2")
 
         if pd.notna(team_1):
+            expected_team_1 = pd.to_numeric(row.get("expected_viewers_team1"), errors="coerce")
             records.append({
                 "team": str(team_1),
                 "opponent": str(team_2) if pd.notna(team_2) else None,
                 "matchup": f"{team_1} vs {team_2}" if pd.notna(team_2) else str(team_1),
                 "year": int(year),
-                **game_meta,
+                **{
+                    **game_meta,
+                    "expected_viewers": float(expected_team_1) if pd.notna(expected_team_1) else None,
+                    "actual_minus_expected": float(viewers - expected_team_1) if pd.notna(expected_team_1) else None,
+                    "actual_vs_expected_pct": (
+                        float(((viewers / expected_team_1) - 1) * 100)
+                        if pd.notna(expected_team_1) and expected_team_1 > 0
+                        else None
+                    ),
+                },
             })
 
         if pd.notna(team_2):
+            expected_team_2 = pd.to_numeric(row.get("expected_viewers_team2"), errors="coerce")
             records.append({
                 "team": str(team_2),
                 "opponent": str(team_1) if pd.notna(team_1) else None,
                 "matchup": f"{team_1} vs {team_2}" if pd.notna(team_1) else str(team_2),
                 "year": int(year),
-                **game_meta,
+                **{
+                    **game_meta,
+                    "expected_viewers": float(expected_team_2) if pd.notna(expected_team_2) else None,
+                    "actual_minus_expected": float(viewers - expected_team_2) if pd.notna(expected_team_2) else None,
+                    "actual_vs_expected_pct": (
+                        float(((viewers / expected_team_2) - 1) * 100)
+                        if pd.notna(expected_team_2) and expected_team_2 > 0
+                        else None
+                    ),
+                },
             })
 
     long_df = pd.DataFrame(records)
@@ -714,6 +779,23 @@ def team_scenario_compare(
             games["Team 1"],
         )
         games["matchup"] = games["Team 1"].astype(str) + " vs " + games["Team 2"].astype(str)
+        games["expected_viewers"] = np.where(
+            games["Team 1"] == team_name,
+            pd.to_numeric(games["expected_viewers_team1"], errors="coerce"),
+            pd.to_numeric(games["expected_viewers_team2"], errors="coerce"),
+        )
+        games["actual_minus_expected"] = (
+            pd.to_numeric(games["Persons 2+"], errors="coerce")
+            - pd.to_numeric(games["expected_viewers"], errors="coerce")
+        )
+        games["actual_vs_expected_pct"] = np.where(
+            pd.to_numeric(games["expected_viewers"], errors="coerce") > 0,
+            (
+                (pd.to_numeric(games["Persons 2+"], errors="coerce") / pd.to_numeric(games["expected_viewers"], errors="coerce"))
+                - 1
+            ) * 100,
+            np.nan,
+        )
         return games
 
     def apply_filters(df):
@@ -814,7 +896,7 @@ def team_scenario_compare(
             "date": game.get("Date"),
             "matchup": f"{game['Team 1']} vs {game['Team 2']}",
             "network": game.get("scenario_network"),
-            "time_bucket": game.get("scenario_time_bucket"),
+            "time_bucket": display_time_bucket(game),
             "viewers": float(viewers) if pd.notna(viewers) else None,
             "conf_champ": bool(game.get("scenario_conf_champ") == 1),
         })
@@ -864,6 +946,7 @@ def team_viewership_rankings(
     rank_bucket: str = "all",
     opponent: str = "all",
     min_games: int = 1,
+    include_conf_champ: bool = True,
 ):
     team_aliases = {
         "Kennesaw St.": "Kennesaw State",
@@ -881,9 +964,17 @@ def team_viewership_rankings(
 
         if network != "all" and row.get("scenario_network") != network:
             continue
-        if time_bucket != "all" and row.get("scenario_time_bucket") != time_bucket:
+        if time_bucket == "Primetime":
+            if not is_primetime_baseline(row):
+                continue
+        elif time_bucket == "Other":
+            if row.get("scenario_time_bucket") != "Other" or is_primetime_baseline(row):
+                continue
+        elif time_bucket != "all" and row.get("scenario_time_bucket") != time_bucket:
             continue
         if rank_bucket != "all" and row.get("scenario_rank_detail") != rank_bucket:
+            continue
+        if not include_conf_champ and row.get("scenario_conf_champ") == 1:
             continue
 
         team_1 = row.get("Team 1")
@@ -920,10 +1011,11 @@ def team_viewership_rankings(
                 "rank_bucket": rank_bucket,
                 "opponent": opponent,
                 "min_games": min_games,
+                "include_conf_champ": include_conf_champ,
             },
             "available_filters": {
                 "networks": ["all", "ABC", "CBS", "NBC", "FOX", "ESPN", "ESPN2", "ESPNU", "FS1", "FS2", "BTN", "CW", "NFLN", "ESPNNEWS"],
-                "time_buckets": ["all", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Monday", "Sunday", "Weekday", "Other"],
+                "time_buckets": ["all", "Primetime", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Monday", "Sunday", "Weekday", "Other"],
                 "rank_buckets": rank_detail_options,
                 "opponents": ["all"] + sorted(option for option in opponent_options if option),
             },
@@ -969,10 +1061,11 @@ def team_viewership_rankings(
             "rank_bucket": rank_bucket,
             "opponent": opponent,
             "min_games": min_games,
+            "include_conf_champ": include_conf_champ,
         },
         "available_filters": {
             "networks": ["all", "ABC", "CBS", "NBC", "FOX", "ESPN", "ESPN2", "ESPNU", "FS1", "FS2", "BTN", "CW", "NFLN", "ESPNNEWS"],
-            "time_buckets": ["all", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Monday", "Sunday", "Weekday", "Other"],
+            "time_buckets": ["all", "Primetime", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Monday", "Sunday", "Weekday", "Other"],
             "rank_buckets": rank_detail_options,
             "opponents": ["all"] + sorted(option for option in opponent_options if option),
         },
