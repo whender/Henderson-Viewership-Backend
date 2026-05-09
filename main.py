@@ -19,6 +19,16 @@ from weekly_predictions_fs import (
 )
 
 from firestore_client import db
+from cbb_viewership import (
+    CBBGameInput,
+    cbb_filter_options,
+    cbb_metadata,
+    cbb_team_effects,
+    cbb_team_options,
+    cbb_team_profile,
+    cbb_viewership_rankings,
+    predict_cbb_viewership,
+)
 
 # ======================================================
 # 🚀 FASTAPI SETUP
@@ -62,7 +72,6 @@ class GameInput(BaseModel):
     team2: str
     rank1: int
     rank2: int
-    spread: float
     network: str
     time_slot: str
     comp_tier1: int = 0
@@ -88,12 +97,67 @@ def predict_game(game: GameInput):
         "prediction_formatted": result["formatted"]
     }
 
+
+# ======================================================
+# 🏀 COLLEGE BASKETBALL MODEL
+# ======================================================
+
+@app.get("/cbb/metadata")
+def cbb_model_metadata():
+    return cbb_metadata()
+
+
+@app.get("/cbb/teams")
+def cbb_teams():
+    return cbb_team_options()
+
+
+@app.get("/cbb/filters")
+def cbb_filters():
+    return cbb_filter_options()
+
+
+@app.post("/cbb/predict")
+def predict_cbb_game(game: CBBGameInput):
+    return predict_cbb_viewership(game)
+
+
+@app.get("/cbb/team-effects")
+def cbb_team_effect_rankings(conference: str = "all"):
+    return cbb_team_effects(conference=conference)
+
+
+@app.get("/cbb/viewership-rankings")
+def cbb_team_viewership_rankings(
+    network: str = "all",
+    time_slot: str = "all",
+    stage: str = "all",
+    season: str = "all",
+    opponent: str = "all",
+    min_games: int = 1,
+    include_tournament: bool = True,
+):
+    return cbb_viewership_rankings(
+        network=network,
+        time_slot=time_slot,
+        stage=stage,
+        season=season,
+        opponent=opponent,
+        min_games=min_games,
+        include_tournament=include_tournament,
+    )
+
+
+@app.get("/cbb/team-profile")
+def cbb_profile(team: str):
+    return cbb_team_profile(team)
+
 # ======================================================
 # 🏆 BRAND RANKINGS (POSTGAME MODEL)
 # ======================================================
 
 numeric_features_post = [
-    "Spread","Competing Tier 1","FOX","ESPN","ESPN2","ESPNU","FS1","FS2","NBC","CBS",
+    "Competing Tier 1","FOX","ESPN","ESPN2","ESPNU","FS1","FS2","NBC","CBS",
     "ABC","BTN","CW","NFLN","ESPNNEWS",
     "SEC_ConfChamp","Big10_ConfChamp","Big12_ConfChamp","ACC_ConfChamp","Other_ConfChamp",
     "Sun","Monday","Weekday","Friday",
@@ -345,6 +409,9 @@ def _compute_expected_viewers(df):
     for column in MODELED_TEAM_COLUMNS:
         if column in X.columns:
             X[column] = 0.0
+    for column in ["DeionEra", "DeionEra25"]:
+        if column in X.columns:
+            X[column] = 0.0
 
     return _predict_viewers_from_design_matrix(X, 2 * AVERAGE_TEAM_EFFECT)
 
@@ -355,6 +422,10 @@ def _compute_team_specific_expected_viewers(df, focal_team_column):
 
     for team_name in focal_teams[focal_teams.isin(MODELED_TEAM_COLUMNS)].unique():
         X.loc[focal_teams == team_name, team_name] = 0.0
+    colorado_mask = focal_teams == "Colorado"
+    for column in ["DeionEra", "DeionEra25"]:
+        if column in X.columns:
+            X.loc[colorado_mask, column] = 0.0
 
     # Replace only the focal team's brand effect with an average-FBS-team baseline.
     return _predict_viewers_from_design_matrix(X, AVERAGE_TEAM_EFFECT)
@@ -473,6 +544,274 @@ for y in available_years:
     df_y = df_all[df_all["Year"] == y]
     brand_rankings_cache[str(y)] = compute_brand_rankings(df_y)
 
+FOOTBALL_MEDIA_RIGHTS_WEIGHT = 0.85
+BASKETBALL_MEDIA_RIGHTS_WEIGHT = 0.15
+
+FOOTBALL_BRAND_NAME_ALIASES = {
+    "Appalachian St.": "Appalachian State",
+    "Arizona St.": "Arizona State",
+    "Arkansas St.": "Arkansas State",
+    "Ball St.": "Ball State",
+    "Boise St.": "Boise State",
+    "Connecticut": "UConn",
+    "Colorado St.": "Colorado State",
+    "FAU": "Florida Atlantic",
+    "Florida St.": "Florida State",
+    "Fresno St.": "Fresno State",
+    "Georgia St.": "Georgia State",
+    "Iowa St.": "Iowa State",
+    "Jacksonville St.": "Jacksonville State",
+    "Kansas St.": "Kansas State",
+    "Kent St.": "Kent State",
+    "Miami": "Miami (FL)",
+    "Miami Ohio": "Miami (OH)",
+    "Middle Tennessee St.": "Middle Tennessee",
+    "Michigan St.": "Michigan State",
+    "Mississippi": "Ole Miss",
+    "Mississippi St.": "Mississippi State",
+    "Massachusetts": "UMass",
+    "New Mexico St.": "New Mexico State",
+    "North Carolina St.": "NC State",
+    "Ohio St.": "Ohio State",
+    "Oklahoma St.": "Oklahoma State",
+    "Oregon St.": "Oregon State",
+    "Penn St.": "Penn State",
+    "Pittsburgh": "Pitt",
+    "San Diego St.": "San Diego State",
+    "San Jose St.": "San Jose State",
+    "Texas St.": "Texas State",
+    "Utah St.": "Utah State",
+    "Washington St.": "Washington State",
+}
+
+
+def display_brand_team_name(team):
+    return FOOTBALL_BRAND_NAME_ALIASES.get(team, team)
+
+
+def _mean_std(values):
+    series = pd.Series(values, dtype="float64").dropna()
+    if len(series) < 2:
+        return float(series.mean() or 0), 1.0
+    std = float(series.std(ddof=0))
+    if not std or math.isnan(std):
+        std = 1.0
+    return float(series.mean()), std
+
+
+def _load_football_brand_scores():
+    csv_path = os.path.join(os.path.dirname(__file__), "brand_rankings.csv")
+    scores = {}
+    if not os.path.exists(csv_path):
+        for row in brand_rankings_cache.get("all", []):
+            coefficient = math.log((float(row.get("viewership_lift_pct", 0)) / 100) + 1)
+            team = display_brand_team_name(row["team"])
+            scores[team] = {
+                "team": team,
+                "football_coefficient": coefficient,
+                "football_lift_pct": float(row.get("viewership_lift_pct", 0)),
+                "football_games": int(row.get("games_used", 0)),
+                "football_conference": row.get("conference", "Independent"),
+            }
+        return scores
+
+    try:
+        brand_df = pd.read_csv(csv_path)
+        if not {"Team", "Adjusted (Shrinkage)"}.issubset(brand_df.columns):
+            return scores
+        brand_df = brand_df[~brand_df["Team"].isin(excluded_brand_teams)].copy()
+        brand_df["Adjusted (Shrinkage)"] = pd.to_numeric(brand_df["Adjusted (Shrinkage)"], errors="coerce")
+        brand_df["Games Used"] = pd.to_numeric(brand_df.get("Games Used"), errors="coerce").fillna(0)
+        brand_df = brand_df.dropna(subset=["Team", "Adjusted (Shrinkage)"])
+        for _, row in brand_df.iterrows():
+            raw_team = str(row["Team"])
+            team = display_brand_team_name(raw_team)
+            coefficient = float(row["Adjusted (Shrinkage)"])
+            scores[team] = {
+                "team": team,
+                "football_coefficient": coefficient,
+                "football_lift_pct": float(round((math.exp(coefficient) - 1) * 100, 1)),
+                "football_games": int(row["Games Used"]),
+                "football_conference": team_conferences.get(raw_team, team_conferences.get(team, "Independent")),
+            }
+    except Exception:
+        return {}
+    return scores
+
+
+def colorado_deion_adjustment():
+    model_path = os.path.join(os.path.dirname(__file__), "viewership_postgame_model.joblib")
+    data_path = os.path.join(os.path.dirname(__file__), "viewership_cleaned.csv")
+    if not os.path.exists(model_path) or not os.path.exists(data_path):
+        return 0.0
+    try:
+        model_artifact = joblib.load(model_path)
+        params = model_artifact["model"].params
+        deion_era_coef = float(params.get("DeionEra", 0.0))
+        deion_era_25_coef = float(params.get("DeionEra25", 0.0))
+
+        games = pd.read_csv(data_path)
+        colorado_games = games[
+            games["Team 1"].eq("Colorado") | games["Team 2"].eq("Colorado")
+        ].copy()
+        if colorado_games.empty:
+            return 0.0
+        deion_era_games = pd.to_numeric(colorado_games.get("DeionEra"), errors="coerce").fillna(0).sum()
+        deion_era_25_games = pd.to_numeric(colorado_games.get("DeionEra25"), errors="coerce").fillna(0).sum()
+        total_games = len(colorado_games)
+        return float(((deion_era_games * deion_era_coef) + (deion_era_25_games * deion_era_25_coef)) / total_games)
+    except Exception:
+        return 0.0
+
+
+def apply_colorado_deion_control(football_scores):
+    adjustment = colorado_deion_adjustment()
+    colorado = football_scores.get("Colorado")
+    if not colorado or not adjustment:
+        return football_scores
+    adjusted_scores = {
+        team: values.copy()
+        for team, values in football_scores.items()
+    }
+    adjusted_coefficient = adjusted_scores["Colorado"]["football_coefficient"] - adjustment
+    adjusted_scores["Colorado"]["football_coefficient"] = adjusted_coefficient
+    adjusted_scores["Colorado"]["football_lift_pct"] = float(round((math.exp(adjusted_coefficient) - 1) * 100, 1))
+    adjusted_scores["Colorado"]["deion_adjustment"] = float(round(adjustment, 6))
+    adjusted_scores["Colorado"]["deion_controlled"] = True
+    return adjusted_scores
+
+
+def _load_basketball_brand_scores():
+    try:
+        basketball_rows = cbb_team_effects().get("rows", [])
+    except Exception:
+        basketball_rows = []
+
+    scores = {}
+    for row in basketball_rows:
+        team = display_brand_team_name(row["team"])
+        coefficient = float(row.get("coefficient", 0))
+        scores[team] = {
+            "team": team,
+            "basketball_coefficient": coefficient,
+            "basketball_lift_pct": float(round((math.exp(coefficient) - 1) * 100, 1)),
+            "basketball_games": int(row.get("appearances", 0)),
+            "basketball_conference": row.get("conference", "Unknown"),
+        }
+    return scores
+
+
+def football_brand_rankings_for_main_tab(control_deion=False):
+    football_scores = _load_football_brand_scores()
+    if control_deion:
+        football_scores = apply_colorado_deion_control(football_scores)
+    rows = []
+    for row in football_scores.values():
+        rows.append({
+            "team": row["team"],
+            "conference": row["football_conference"],
+            "viewership_lift_pct": row["football_lift_pct"],
+            "games_used": row["football_games"],
+            "deion_controlled": bool(row.get("deion_controlled", False)),
+            "deion_adjustment": row.get("deion_adjustment"),
+        })
+    rows = sorted(rows, key=lambda row: (-row["viewership_lift_pct"], -row["games_used"], row["team"]))
+    for idx, row in enumerate(rows, start=1):
+        row["rank"] = idx
+    return rows
+
+
+def combined_media_brand_rankings(control_deion=False):
+    football_scores = _load_football_brand_scores()
+    if control_deion:
+        football_scores = apply_colorado_deion_control(football_scores)
+    basketball_scores = _load_basketball_brand_scores()
+    football_mean, football_std = _mean_std(
+        row["football_coefficient"] for row in football_scores.values()
+    )
+    basketball_mean, basketball_std = _mean_std(
+        row["basketball_coefficient"] for row in basketball_scores.values()
+    )
+    last_place_football_z = min(
+        ((row["football_coefficient"] - football_mean) / football_std for row in football_scores.values()),
+        default=0.0,
+    )
+    last_place_basketball_z = min(
+        ((row["basketball_coefficient"] - basketball_mean) / basketball_std for row in basketball_scores.values()),
+        default=0.0,
+    )
+
+    rows = []
+    teams = sorted(set(football_scores) | set(basketball_scores))
+    for team in teams:
+        football = football_scores.get(team, {})
+        basketball = basketball_scores.get(team, {})
+        football_z = (
+            (football["football_coefficient"] - football_mean) / football_std
+            if football else last_place_football_z
+        )
+        basketball_z = (
+            (basketball["basketball_coefficient"] - basketball_mean) / basketball_std
+            if basketball else last_place_basketball_z
+        )
+        weighted_score = (
+            FOOTBALL_MEDIA_RIGHTS_WEIGHT * football_z
+            + BASKETBALL_MEDIA_RIGHTS_WEIGHT * basketball_z
+        )
+        media_index = 100 + 15 * weighted_score
+        conference = football.get("football_conference") or basketball.get("basketball_conference") or "Independent"
+        if basketball and conference == "Independent" and team != "Notre Dame":
+            conference = basketball.get("basketball_conference") or conference
+        primary_driver = "Football"
+        if basketball and not football:
+            primary_driver = "Basketball"
+        elif football and basketball:
+            primary_driver = "Football" if abs(FOOTBALL_MEDIA_RIGHTS_WEIGHT * football_z) >= abs(BASKETBALL_MEDIA_RIGHTS_WEIGHT * basketball_z) else "Basketball"
+
+        rows.append({
+            "team": team,
+            "conference": conference,
+            "media_brand_index": float(round(media_index, 1)),
+            "combined_score": float(round(weighted_score, 4)),
+            "_sort_score": float(weighted_score),
+            "football_score": float(round(football_z, 3)),
+            "basketball_score": float(round(basketball_z, 3)),
+            "football_contribution": float(round(FOOTBALL_MEDIA_RIGHTS_WEIGHT * football_z, 3)),
+            "basketball_contribution": float(round(BASKETBALL_MEDIA_RIGHTS_WEIGHT * basketball_z, 3)),
+            "football_lift_pct": football.get("football_lift_pct"),
+            "basketball_lift_pct": basketball.get("basketball_lift_pct"),
+            "football_games": int(football.get("football_games", 0)),
+            "basketball_games": int(basketball.get("basketball_games", 0)),
+            "primary_driver": primary_driver,
+            "deion_controlled": bool(football.get("deion_controlled", False)),
+            "deion_adjustment": football.get("deion_adjustment"),
+        })
+
+    rows = sorted(
+        rows,
+        key=lambda row: (-row["_sort_score"], -row["football_games"], -row["basketball_games"], row["team"]),
+    )
+    for idx, row in enumerate(rows, start=1):
+        row["rank"] = idx
+        row.pop("_sort_score", None)
+    return rows
+
+
+def basketball_brand_rankings_for_main_tab():
+    rows = []
+    for row in cbb_team_effects().get("rows", []):
+        lift_pct = (float(row.get("viewer_multiplier", 1)) - 1) * 100
+        rows.append({
+            "rank": row["rank"],
+            "team": row["team"],
+            "conference": row["conference"],
+            "viewership_lift_pct": float(round(lift_pct, 1)),
+            "games_used": int(row["appearances"]),
+            "basketball_lift_pct": float(round(lift_pct, 1)),
+            "basketball_games": int(row["appearances"]),
+        })
+    return rows
+
 def _load_profile_brand_rank_lookup():
     if csv_brand_rankings:
         return {
@@ -531,8 +870,38 @@ def brand_years():
     return {"years": available_years}
 
 @app.get("/brand-rankings")
-def brand_rankings(year: str = "all"):
-    return {"rows": brand_rankings_cache.get(year, [])}
+def brand_rankings(year: str = "all", scope: str = "combined", control_deion: bool = False):
+    normalized_scope = str(scope or "combined").lower()
+    if normalized_scope == "football":
+        return {
+            "rows": football_brand_rankings_for_main_tab(control_deion=control_deion) if year == "all" else brand_rankings_cache.get(year, []),
+            "metadata": {
+                "scope": "football",
+                "description": "Football-only brand pull ranking.",
+                "control_deion": control_deion,
+                "colorado_deion_adjustment": float(round(colorado_deion_adjustment(), 6)) if control_deion else 0.0,
+            },
+        }
+    if normalized_scope == "basketball":
+        return {
+            "rows": basketball_brand_rankings_for_main_tab(),
+            "metadata": {
+                "scope": "basketball",
+                "description": "Men's basketball-only brand pull ranking.",
+                "control_deion": False,
+            },
+        }
+    return {
+        "rows": combined_media_brand_rankings(control_deion=control_deion),
+        "metadata": {
+            "scope": "combined",
+            "football_weight": FOOTBALL_MEDIA_RIGHTS_WEIGHT,
+            "basketball_weight": BASKETBALL_MEDIA_RIGHTS_WEIGHT,
+            "description": "Media rights brand index using 85% football and 15% men's basketball weights.",
+            "control_deion": control_deion,
+            "colorado_deion_adjustment": float(round(colorado_deion_adjustment(), 6)) if control_deion else 0.0,
+        },
+    }
 
 
 def _build_team_profile_cache(df):

@@ -167,7 +167,6 @@ def predict_viewership(p):
 
     rank1 = p["rank1"]
     rank2 = p["rank2"]
-    spread = p["spread"]
     network = p["network"]
     time_slot = p["time_slot"]
     comp_tier1 = p.get("comp_tier1", 0)
@@ -192,7 +191,6 @@ def predict_viewership(p):
 
     # Build feature vector
     features = {
-        "Spread": spread,
         "Competing Tier 1": comp_tier1,
 
         "ABC": int(network == "ABC"), "CBS": int(network == "CBS"),

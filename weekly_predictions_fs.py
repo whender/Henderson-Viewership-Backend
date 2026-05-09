@@ -85,7 +85,6 @@ def build_features(row):
 
     rank1 = int(row["rank1"])
     rank2 = int(row["rank2"])
-    spread = float(row["spread"])
     network = row["network"]
     time_slot = str(row["time_slot"])
     comp_tier1 = int(row.get("comp_tier1", 0))
@@ -140,7 +139,6 @@ def build_features(row):
 
     # ---------- BASE FEATURES ----------
     features = {
-        "Spread": spread,
         "Competing Tier 1": comp_tier1,
         "DeionEra": deion_era,
         "DeionEra25": deion_era25,
