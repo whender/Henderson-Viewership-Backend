@@ -11,7 +11,9 @@ from predict import (
     FEUD_START,
     FEUD_END,
     MODEL_TEAM_NAMES,
-    format_viewers
+    format_viewers,
+    black_friday_date,
+    is_power_football_team,
 )
 
 import joblib
@@ -106,6 +108,8 @@ def build_features(row):
     # ---------- CONFERENCES ----------
     conf1 = team_conferences.get(team1, "Group of 6")
     conf2 = team_conferences.get(team2, "Group of 6")
+    is_power_friday = False
+    is_non_power_friday = False
 
     both_ranked = rank1 > 0 and rank2 > 0
     same_conf = conf1 == conf2 and conf1 in ["SEC", "Big 10", "ACC", "Big 12"]
@@ -117,10 +121,24 @@ def build_features(row):
     rank_25_11 = t1_mid + t2_mid
 
     # ---------- DAY OF WEEK ----------
-    is_friday = (
-        str(day).strip().lower() == "fri"
-        or "fri" in str(day).lower()
+    parsed_game_date = pd.to_datetime(date_str, errors="coerce")
+    is_black_friday = (
+        "Black Friday" in time_slot
+        or (
+            pd.notna(parsed_game_date)
+            and parsed_game_date.date() == black_friday_date(parsed_game_date.year)
+        )
     )
+    is_friday = (
+        not is_black_friday
+        and (
+            str(day).strip().lower() == "fri"
+            or "fri" in str(day).lower()
+            or "Friday" in time_slot
+        )
+    )
+    is_power_friday = is_friday and is_power_football_team(team1, conf1) and is_power_football_team(team2, conf2)
+    is_non_power_friday = is_friday and not is_power_friday
 
     # ---------- RIVALRY ----------
     auto_rivalry = next(
@@ -133,9 +151,9 @@ def build_features(row):
     mid_keywords = ["2:30p","3:00p","3:30p","4:00p","4:30p","5:00p","5:30p","6:00p","6:30p"]
     late_keywords = ["9:30p","10:00p","10:30","11:00p","11:30p"]
 
-    sat_early = (not is_friday and any(t in time_slot for t in early_keywords))
-    sat_mid   = (not is_friday and any(t in time_slot for t in mid_keywords))
-    sat_late  = (not is_friday and any(t in time_slot for t in late_keywords))
+    sat_early = (not is_friday and not is_black_friday and any(t in time_slot for t in early_keywords))
+    sat_mid   = (not is_friday and not is_black_friday and any(t in time_slot for t in mid_keywords))
+    sat_late  = (not is_friday and not is_black_friday and any(t in time_slot for t in late_keywords))
 
     # ---------- BASE FEATURES ----------
     features = {
@@ -162,6 +180,9 @@ def build_features(row):
         "Monday": int("Monday" in time_slot),
         "Weekday": int("Weekday" in time_slot),
         "Friday": int(is_friday),
+        "Friday Power": int(is_power_friday),
+        "Friday Non-Power": int(is_non_power_friday),
+        "Black Friday": int(is_black_friday),
 
         "Sat Early": int(sat_early),
         "Sat Mid": int(sat_mid),
@@ -194,10 +215,6 @@ def build_features(row):
             (conf1 == "ACC" and conf2 == "ACC")
         )
     )
-
-    # ---------- FRIDAY x NETWORK ----------
-    for net in ["FOX","CBS","NBC","ABC","ESPN","ESPN2","ESPNU","FS1","FS2","BTN","CW","NFLN","ESPNNEWS"]:
-        features[f"{net}_Fri"] = int(is_friday and network == net)
 
     # ---------- POSTSEASON FLAGS ----------
     for conf_tag, flag_name in {

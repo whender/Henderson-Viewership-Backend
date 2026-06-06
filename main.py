@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import pandas as pd
 import numpy as np
 import joblib
@@ -9,6 +9,7 @@ from sklearn.linear_model import RidgeCV
 import os
 import math
 from datetime import datetime
+from collections import Counter, defaultdict
 
 from weekly_predictions_fs import (
     generate_pregame_prediction,
@@ -65,7 +66,15 @@ def clean_nan(obj):
 # ======================================================
 # 📦 IMPORT PREGAME PREDICTOR LOGIC
 # ======================================================
-from predict import predict_viewership, teams_list, normalize_team, model as pregame_model, MODEL_TEAM_NAMES
+from predict import (
+    predict_viewership,
+    teams_list,
+    normalize_team,
+    model as pregame_model,
+    MODEL_TEAM_NAMES,
+    rivalries,
+    black_friday_date,
+)
 
 class GameInput(BaseModel):
     team1: str
@@ -75,6 +84,29 @@ class GameInput(BaseModel):
     network: str
     time_slot: str
     comp_tier1: int = 0
+
+
+class RealignmentSimulationInput(BaseModel):
+    conference: str = "Big 10"
+    expansion_teams: list[str] = Field(default_factory=lambda: ["Utah"])
+    protected_opponents: list[str] = Field(default_factory=list)
+    protected_opponents_by_team: dict[str, list[str]] = Field(default_factory=dict)
+    games_per_team: int = 9
+    network_policy: str = "big_ten_tv_mix"
+    ranking_policy: str = "brand_tiers"
+
+
+class SuperleagueSimulationInput(BaseModel):
+    teams: list[str] = Field(default_factory=list)
+    games_per_team: int = 9
+    ranking_policy: str = "brand_tiers"
+
+
+class LeagueRealignmentSimulationInput(BaseModel):
+    memberships: dict[str, str] = Field(default_factory=dict)
+    protected_matchups_by_team: dict[str, list[str]] = Field(default_factory=dict)
+    games_per_team: int = 9
+    ranking_policy: str = "brand_tiers"
 
 @app.get("/")
 def root():
@@ -160,7 +192,7 @@ numeric_features_post = [
     "Competing Tier 1","FOX","ESPN","ESPN2","ESPNU","FS1","FS2","NBC","CBS",
     "ABC","BTN","CW","NFLN","ESPNNEWS",
     "SEC_ConfChamp","Big10_ConfChamp","Big12_ConfChamp","ACC_ConfChamp","Other_ConfChamp",
-    "Sun","Monday","Weekday","Friday",
+    "Sun","Monday","Weekday","Friday Power","Friday Non-Power","Black Friday",
     "Sat Early","Sat Mid","Sat Late","Top 10 Rankings","25-11 Rankings",
     "SEC_PostseasonImplications","Big10_PostseasonImplications",
     "Big12_PostseasonImplications","ACC_PostseasonImplications",
@@ -270,6 +302,23 @@ excluded_viewership_ranking_teams = {
 
 df_all = pd.read_csv("viewership_cleaned.csv", low_memory=False)
 
+parsed_game_dates = pd.to_datetime(df_all.get("ParsedDate"), errors="coerce")
+df_all["Black Friday"] = parsed_game_dates.map(
+    lambda value: int(pd.notna(value) and value.date() == black_friday_date(value.year))
+)
+df_all["Friday"] = np.where(
+    df_all["Black Friday"].eq(1),
+    0,
+    pd.to_numeric(df_all.get("Friday"), errors="coerce").fillna(0).astype(int),
+)
+POWER_FOOTBALL_CONFERENCES = {"SEC", "Big 10", "ACC", "Big 12"}
+df_all["Friday Power"] = (
+    df_all["Friday"].eq(1)
+    & df_all["Team 1"].map(lambda team: team_conferences.get(team) in POWER_FOOTBALL_CONFERENCES or team == "Notre Dame")
+    & df_all["Team 2"].map(lambda team: team_conferences.get(team) in POWER_FOOTBALL_CONFERENCES or team == "Notre Dame")
+).astype(int)
+df_all["Friday Non-Power"] = (df_all["Friday"].eq(1) & df_all["Friday Power"].eq(0)).astype(int)
+
 NETWORK_LABELS = [
     "ABC", "CBS", "NBC", "FOX", "ESPN2",
     "ESPNU", "FS1", "FS2", "BTN", "CW", "NFLN", "ESPNNEWS"
@@ -290,6 +339,8 @@ def detect_time_bucket(row):
         return "Monday"
     if row.get("Weekday") == 1:
         return "Weekday"
+    if row.get("Black Friday") == 1:
+        return "Black Friday"
     if row.get("Friday") == 1:
         return "Friday"
     if row.get("Sat Early") == 1:
@@ -304,7 +355,7 @@ def detect_time_bucket(row):
 def is_primetime_baseline(row):
     return not any(
         row.get(flag) == 1
-        for flag in ["Sun", "Monday", "Weekday", "Friday", "Sat Early", "Sat Mid", "Sat Late"]
+        for flag in ["Sun", "Monday", "Weekday", "Friday", "Black Friday", "Sat Early", "Sat Mid", "Sat Late"]
     )
 
 
@@ -865,6 +916,1841 @@ def _load_profile_brand_rank_lookup():
 
 brand_rank_lookup = _load_profile_brand_rank_lookup()
 
+
+REALIGNMENT_NETWORK_PLANS = {
+    "Big 10": {
+        "label": "Big Ten TV Mix",
+        "premium": [
+            {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 0},
+            {"network": "CBS", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 0},
+            {"network": "NBC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 0},
+            {"network": "FOX", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1},
+        ],
+        "secondary": [
+            {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+            {"network": "CBS", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "NBC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1},
+            {"network": "FS1", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+        ],
+        "cable": [
+            {"network": "BTN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+            {"network": "FS1", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "BTN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2},
+            {"network": "FS1", "time_slot": "Friday", "comp_tier1": 1},
+        ],
+    },
+    "SEC": {
+        "label": "SEC ESPN/ABC Mix",
+        "premium": [
+            {"network": "ABC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 0},
+            {"network": "ABC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 0},
+            {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 0},
+            {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+        ],
+        "secondary": [
+            {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1},
+            {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+        ],
+        "cable": [
+            {"network": "ESPN2", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+            {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "ESPN2", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1},
+            {"network": "ESPN2", "time_slot": "Friday", "comp_tier1": 1},
+        ],
+    },
+    "Big 12": {
+        "label": "Big 12 ESPN/FOX Mix",
+        "premium": [
+            {"network": "ABC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 0},
+            {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 0},
+            {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 0},
+            {"network": "FOX", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1},
+        ],
+        "secondary": [
+            {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+            {"network": "FS1", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "ESPN2", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1},
+        ],
+        "cable": [
+            {"network": "FS1", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+            {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2},
+            {"network": "FS1", "time_slot": "Friday", "comp_tier1": 1},
+        ],
+    },
+    "ACC": {
+        "label": "ACC ESPN/ABC/CW Mix",
+        "premium": [
+            {"network": "ABC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 0},
+            {"network": "ABC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 0},
+            {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 0},
+            {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+        ],
+        "secondary": [
+            {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "ESPN2", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1},
+            {"network": "CW", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "ESPN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+        ],
+        "cable": [
+            {"network": "ESPN2", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+            {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "CW", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2},
+            {"network": "ESPN2", "time_slot": "Friday", "comp_tier1": 1},
+        ],
+    },
+    "Superleague": {
+        "label": "Superleague National TV Mix",
+        "premium": [
+            {"network": "ABC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 0},
+            {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 0},
+            {"network": "CBS", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 0},
+            {"network": "NBC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 0},
+            {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1},
+        ],
+        "secondary": [
+            {"network": "ABC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "FOX", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1},
+            {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "NBC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1},
+        ],
+        "cable": [
+            {"network": "ESPN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1},
+            {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1},
+            {"network": "FS1", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2},
+            {"network": "ESPN2", "time_slot": "Friday", "comp_tier1": 1},
+        ],
+    },
+}
+
+DEFAULT_REALIGNMENT_NETWORK_PLAN = {
+    "label": "ESPN/ABC Mix",
+    "premium": REALIGNMENT_NETWORK_PLANS["SEC"]["premium"],
+    "secondary": REALIGNMENT_NETWORK_PLANS["SEC"]["secondary"],
+    "cable": REALIGNMENT_NETWORK_PLANS["SEC"]["cable"],
+}
+
+REALIGNMENT_WEEKLY_TV_INVENTORY = {
+    "Big 10": {"premium": 3, "secondary": 2, "cable": 2},
+    "SEC": {"premium": 3, "secondary": 2, "cable": 1},
+    "Big 12": {"premium": 2, "secondary": 2, "cable": 2},
+    "ACC": {"premium": 2, "secondary": 2, "cable": 1},
+    "Superleague": {"premium": 4, "secondary": 3, "cable": 2},
+}
+
+REALIGNMENT_REGULAR_SEASON_WEEKS = 13
+REALIGNMENT_PRIMARY_CONFERENCE_WEEKS = list(range(4, 14))
+REALIGNMENT_EARLY_CONFERENCE_WEEKS = [1, 2, 3]
+REALIGNMENT_EARLY_CONFERENCE_GAME_SHARE = 0.015
+
+REALIGNMENT_NATIONAL_TV_SCORE_FLOOR = {
+    "Big 10": 1.05,
+    "SEC": 1.00,
+    "Big 12": 0.75,
+    "ACC": 0.55,
+    "Superleague": 0.0,
+}
+
+REALIGNMENT_SEASONAL_RATED_SHARE = {
+    "Big 10": 0.85,
+    "SEC": 0.70,
+    "Big 12": 0.67,
+    "ACC": 0.56,
+    "Superleague": 1.00,
+}
+
+REALIGNMENT_SEASONAL_SLOT_MIX = {
+    "Big 10": [
+        {
+            "share": 0.29,
+            "slot": {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium"},
+        },
+        {
+            "share": 0.19,
+            "slot": {"network": "NBC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium"},
+        },
+        {
+            "share": 0.16,
+            "slot": {"network": "CBS", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium"},
+        },
+        {
+            "share": 0.16,
+            "slot": {"network": "FS1", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable"},
+        },
+        {
+            "share": 0.20,
+            "slot": {"network": "BTN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "cable"},
+        },
+    ],
+    "SEC": [
+        {
+            "share": 0.38,
+            "slot": {"network": "ABC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 0, "tv_tier": "premium"},
+        },
+        {
+            "share": 0.26,
+            "slot": {"network": "ABC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 0, "tv_tier": "premium"},
+        },
+        {
+            "share": 0.07,
+            "slot": {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium"},
+        },
+        {
+            "share": 0.23,
+            "slot": {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "secondary"},
+        },
+        {
+            "share": 0.06,
+            "slot": {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "secondary"},
+        },
+    ],
+    "Big 12": [
+        {
+            "share": 0.03,
+            "slot": {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium"},
+        },
+        {
+            "share": 0.25,
+            "slot": {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium"},
+        },
+        {
+            "share": 0.36,
+            "slot": {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "secondary"},
+        },
+        {
+            "share": 0.22,
+            "slot": {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable"},
+        },
+        {
+            "share": 0.08,
+            "slot": {"network": "FS1", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable"},
+        },
+        {
+            "share": 0.06,
+            "slot": {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable"},
+        },
+    ],
+    "ACC": [
+        {
+            "share": 0.06,
+            "slot": {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium"},
+        },
+        {
+            "share": 0.59,
+            "slot": {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "secondary"},
+        },
+        {
+            "share": 0.23,
+            "slot": {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable"},
+        },
+        {
+            "share": 0.12,
+            "slot": {"network": "CW", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable"},
+        },
+    ],
+}
+
+REALIGNMENT_WEEKLY_SLOT_POOLS = {
+    "Big 10": [
+        {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "FOX", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "cadence": 3, "offset": 0},
+        {"network": "NBC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "CBS", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "FS1", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable", "cadence": 2, "offset": 0},
+        {"network": "FS1", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable"},
+        {"network": "BTN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "cable"},
+        {"network": "BTN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable"},
+        {"network": "BTN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 2, "tv_tier": "cable", "cadence": 2, "offset": 1},
+        {"network": "FS1", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "cadence": 2, "offset": 1},
+    ],
+    "SEC": [
+        {"network": "ABC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 0, "tv_tier": "premium"},
+        {"network": "ABC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 0, "tv_tier": "premium"},
+        {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium", "cadence": 2, "offset": 0},
+        {"network": "ESPN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "secondary"},
+        {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "secondary"},
+        {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "secondary", "cadence": 2, "offset": 1},
+        {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable"},
+        {"network": "ESPN2", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable", "cadence": 2, "offset": 0},
+        {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "cadence": 4, "offset": 1},
+        {"network": "ESPN", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "secondary", "cadence": 4, "offset": 1},
+        {"network": "ESPN2", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "cadence": 4, "offset": 3},
+    ],
+    "Big 12": [
+        {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium", "cadence": 6, "offset": 1},
+        {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "FOX", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "cadence": 2, "offset": 1},
+        {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "secondary"},
+        {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "secondary", "cadence": 2, "offset": 0},
+        {"network": "ESPN", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "secondary"},
+        {"network": "ESPN", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "secondary", "cadence": 2, "offset": 1},
+        {"network": "ESPN2", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable"},
+        {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable"},
+        {"network": "ESPN2", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "cable", "cadence": 2, "offset": 0},
+        {"network": "FS1", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable"},
+        {"network": "FS1", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable"},
+        {"network": "FS1", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "cadence": 2, "offset": 0},
+        {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "cadence": 4, "offset": 0},
+        {"network": "ESPN2", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "cadence": 2, "offset": 1},
+        {"network": "FS1", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable", "cadence": 2, "offset": 0},
+        {"network": "FS1", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "cable", "cadence": 2, "offset": 1},
+        {"network": "CW", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "cadence": 3, "offset": 1},
+        {"network": "CW", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 2, "tv_tier": "cable", "cadence": 4, "offset": 0},
+    ],
+    "ACC": [
+        {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium", "cadence": 4, "offset": 0},
+        {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "secondary"},
+        {"network": "ESPN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "secondary"},
+        {"network": "ESPN", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "secondary", "cadence": 2, "offset": 1},
+        {"network": "ESPN", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "secondary"},
+        {"network": "ESPN2", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable"},
+        {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable"},
+        {"network": "ESPN2", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable", "cadence": 2, "offset": 1},
+        {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "cadence": 4, "offset": 2},
+        {"network": "CW", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "cadence": 2, "offset": 1},
+        {"network": "CW", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "cable", "cadence": 2, "offset": 0},
+        {"network": "CW", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 2, "tv_tier": "cable", "cadence": 2, "offset": 1},
+        {"network": "CW", "time_slot": "Friday", "comp_tier1": 2, "tv_tier": "cable", "cadence": 3, "offset": 2},
+        {"network": "ESPN2", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "cadence": 3, "offset": 1},
+        {"network": "ESPN2", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "cable", "cadence": 3, "offset": 0},
+    ],
+}
+
+REALIGNMENT_EXPANSION_WEEKLY_SLOTS = {
+    "Big 10": [
+        {
+            "min_teams": 20,
+            "slot": {"network": "FS1", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable"},
+        },
+        {
+            "min_teams": 22,
+            "slot": {"network": "BTN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 2, "tv_tier": "cable"},
+        },
+    ],
+    "SEC": [
+        {
+            "min_teams": 18,
+            "slot": {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable"},
+        },
+        {
+            "min_teams": 20,
+            "slot": {"network": "ESPNU", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "cable"},
+        },
+    ],
+    "Big 12": [
+        {
+            "min_teams": 18,
+            "slot": {"network": "ESPN2", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable"},
+        },
+        {
+            "min_teams": 20,
+            "slot": {"network": "FS1", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable"},
+        },
+        {
+            "min_teams": 22,
+            "slot": {"network": "ESPN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "secondary"},
+        },
+        {
+            "min_teams": 24,
+            "slot": {"network": "FOX", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "cadence": 2, "offset": 0},
+        },
+    ],
+    "ACC": [
+        {
+            "min_teams": 18,
+            "slot": {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable"},
+        },
+    ],
+}
+
+REALIGNMENT_BLACK_FRIDAY_WEEK = max(REALIGNMENT_PRIMARY_CONFERENCE_WEEKS)
+
+REALIGNMENT_BLACK_FRIDAY_EXTRA_SLOTS = {
+    "Big 10": [
+        {"network": "FOX", "time_slot": "Black Friday Early", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "CBS", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "NBC", "time_slot": "Black Friday Primetime", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "FS1", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "cable"},
+    ],
+    "SEC": [
+        {"network": "ABC", "time_slot": "Black Friday Early", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "ABC", "time_slot": "Black Friday Primetime", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "ESPN", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "secondary"},
+        {"network": "ESPN2", "time_slot": "Black Friday Primetime", "comp_tier1": 1, "tv_tier": "cable"},
+    ],
+    "Big 12": [
+        {"network": "FOX", "time_slot": "Black Friday Early", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "FOX", "time_slot": "Black Friday Primetime", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "ABC", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "ESPN", "time_slot": "Black Friday Primetime", "comp_tier1": 1, "tv_tier": "secondary"},
+        {"network": "FS1", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "cable"},
+        {"network": "ESPN2", "time_slot": "Black Friday Late", "comp_tier1": 1, "tv_tier": "cable"},
+    ],
+    "ACC": [
+        {"network": "ABC", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "premium"},
+        {"network": "ESPN", "time_slot": "Black Friday Early", "comp_tier1": 1, "tv_tier": "secondary"},
+        {"network": "ESPN2", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "cable"},
+        {"network": "CW", "time_slot": "Black Friday Primetime", "comp_tier1": 2, "tv_tier": "cable"},
+    ],
+}
+
+
+def _realignment_network_plan(conference):
+    return REALIGNMENT_NETWORK_PLANS.get(conference, DEFAULT_REALIGNMENT_NETWORK_PLAN)
+
+
+def _realignment_weekly_tv_inventory(conference):
+    return REALIGNMENT_WEEKLY_TV_INVENTORY.get(conference, REALIGNMENT_WEEKLY_TV_INVENTORY["SEC"])
+
+
+def _realignment_seasonal_rated_cap(conference, scheduled_games):
+    share = REALIGNMENT_SEASONAL_RATED_SHARE.get(conference, REALIGNMENT_SEASONAL_RATED_SHARE["SEC"])
+    return max(0, min(int(scheduled_games), int(round(int(scheduled_games) * share))))
+
+
+def _select_realignment_tv_slot(game_index, total_games, conference):
+    plan = _realignment_network_plan(conference)
+    premium_slots = plan["premium"]
+    secondary_slots = plan["secondary"]
+    cable_slots = plan["cable"]
+
+    premium_cutoff = max(8, math.ceil(total_games * 0.25))
+    secondary_cutoff = max(premium_cutoff + 1, math.ceil(total_games * 0.65))
+
+    if game_index < premium_cutoff:
+        return premium_slots[game_index % len(premium_slots)]
+    if game_index < secondary_cutoff:
+        return secondary_slots[(game_index - premium_cutoff) % len(secondary_slots)]
+    return cable_slots[(game_index - secondary_cutoff) % len(cable_slots)]
+
+
+def _slot_available_in_week(slot, week):
+    cadence = int(slot.get("cadence") or 1)
+    offset = int(slot.get("offset") or 0)
+    return ((int(week or 1) - 1 - offset) % cadence) == 0
+
+
+def _slot_identity(slot):
+    return (
+        slot.get("network"),
+        slot.get("time_slot"),
+        int(slot.get("comp_tier1") or 0),
+        slot.get("tv_tier"),
+        int(slot.get("cadence") or 1),
+        int(slot.get("offset") or 0),
+    )
+
+
+def _clean_slot(slot):
+    return {
+        key: value
+        for key, value in dict(slot).items()
+        if key not in {"cadence", "offset"}
+    }
+
+
+def _slot_for_week(slot, week):
+    cleaned = _clean_slot(slot)
+    if int(week or 0) == REALIGNMENT_BLACK_FRIDAY_WEEK and cleaned.get("time_slot") == "Friday":
+        cleaned["time_slot"] = "Black Friday Early"
+    return cleaned
+
+
+def _black_friday_extra_slots(conference, week):
+    if int(week or 0) != REALIGNMENT_BLACK_FRIDAY_WEEK:
+        return []
+    return [dict(slot) for slot in REALIGNMENT_BLACK_FRIDAY_EXTRA_SLOTS.get(conference, [])]
+
+
+def _is_top_saturday_slot(slot):
+    time_slot = str(slot.get("time_slot") or "")
+    return slot.get("tv_tier") == "premium" and "Friday" not in time_slot
+
+
+def _weekly_tv_slots(conference, week=None, team_count=None, transferred_slots=None, removed_slots=None):
+    if conference in REALIGNMENT_WEEKLY_SLOT_POOLS:
+        slots = list(REALIGNMENT_WEEKLY_SLOT_POOLS[conference])
+        if team_count is not None:
+            slots.extend(
+                expansion_slot["slot"]
+                for expansion_slot in REALIGNMENT_EXPANSION_WEEKLY_SLOTS.get(conference, [])
+                if int(team_count) >= int(expansion_slot["min_teams"])
+            )
+        removal_counts = Counter(_slot_identity(slot) for slot in (removed_slots or []))
+        kept_slots = []
+        for slot in slots:
+            key = _slot_identity(slot)
+            if removal_counts[key] > 0:
+                removal_counts[key] -= 1
+                continue
+            kept_slots.append(slot)
+        base_slots = kept_slots + list(transferred_slots or [])
+        top_saturday_slots = [slot for slot in base_slots if _is_top_saturday_slot(slot)]
+        remaining_slots = [slot for slot in base_slots if not _is_top_saturday_slot(slot)]
+        slots = top_saturday_slots + _black_friday_extra_slots(conference, week) + remaining_slots
+        return [
+            _slot_for_week(slot, week)
+            for slot in slots
+            if week is None or _slot_available_in_week(slot, week)
+        ]
+    plan = _realignment_network_plan(conference)
+    inventory = _realignment_weekly_tv_inventory(conference)
+    slots = []
+    top_saturday_slots = []
+    remaining_slots = []
+    for tier in ["premium", "secondary", "cable"]:
+        tier_slots = plan[tier]
+        for idx in range(int(inventory.get(tier, 0))):
+            slot = dict(tier_slots[idx % len(tier_slots)])
+            slot["tv_tier"] = tier
+            if _is_top_saturday_slot(slot):
+                top_saturday_slots.append(slot)
+            else:
+                remaining_slots.append(slot)
+    slots = top_saturday_slots + _black_friday_extra_slots(conference, week) + remaining_slots
+    slots = [_slot_for_week(slot, week) for slot in slots]
+    return slots
+
+
+def _slot_key(slot):
+    return (
+        slot.get("network"),
+        slot.get("time_slot"),
+        int(slot.get("comp_tier1") or 0),
+        slot.get("tv_tier"),
+    )
+
+
+def _seasonal_slot_sequence(conference, slot_count):
+    slot_mix = REALIGNMENT_SEASONAL_SLOT_MIX.get(conference)
+    if not slot_mix or slot_count <= 0:
+        return []
+
+    counts = []
+    allocated = 0
+    for idx, item in enumerate(slot_mix):
+        if idx == len(slot_mix) - 1:
+            count = slot_count - allocated
+        else:
+            count = int(round(slot_count * float(item["share"])))
+        count = max(0, count)
+        counts.append(count)
+        allocated += count
+
+    while allocated > slot_count:
+        for idx in range(len(counts) - 1, -1, -1):
+            if counts[idx] > 0 and allocated > slot_count:
+                counts[idx] -= 1
+                allocated -= 1
+    while allocated < slot_count:
+        largest_idx = max(range(len(slot_mix)), key=lambda idx: slot_mix[idx]["share"])
+        counts[largest_idx] += 1
+        allocated += 1
+
+    sequence = []
+    for item, count in zip(slot_mix, counts):
+        sequence.extend([dict(item["slot"]) for _ in range(count)])
+    return sequence
+
+
+def _seasonal_slot_counts(conference, slot_count):
+    return Counter(slot.get("network") for slot in _seasonal_slot_sequence(conference, slot_count))
+
+
+def _allocate_counts(total, weights_by_key):
+    if total <= 0 or not weights_by_key:
+        return {key: 0 for key in weights_by_key}
+    weight_total = sum(weights_by_key.values())
+    raw_allocations = {
+        key: (total * weight / weight_total)
+        for key, weight in weights_by_key.items()
+    }
+    allocations = {
+        key: int(math.floor(value))
+        for key, value in raw_allocations.items()
+    }
+    remaining = total - sum(allocations.values())
+    for key, _ in sorted(
+        raw_allocations.items(),
+        key=lambda item: (-(item[1] - math.floor(item[1])), item[0]),
+    )[:remaining]:
+        allocations[key] += 1
+    return allocations
+
+
+def _conference_tv_slot_transfers(memberships):
+    original_memberships = {
+        team: conference
+        for team, conference in team_conferences.items()
+        if conference in REALIGNMENT_EDITABLE_CONFERENCES and team in MODEL_TEAM_NAMES
+    }
+    moved_by_source_destination = Counter()
+    current_counts = Counter()
+    original_counts = Counter(original_memberships.values())
+
+    for team, destination in memberships.items():
+        if destination in REALIGNMENT_EDITABLE_CONFERENCES:
+            current_counts[destination] += 1
+        source = original_memberships.get(team)
+        if (
+            source in REALIGNMENT_EDITABLE_CONFERENCES
+            and destination in REALIGNMENT_EDITABLE_CONFERENCES
+            and source != destination
+        ):
+            moved_by_source_destination[(source, destination)] += 1
+
+    transferred_slots = {conference: [] for conference in REALIGNMENT_EDITABLE_CONFERENCES}
+    removed_slots = {conference: [] for conference in REALIGNMENT_EDITABLE_CONFERENCES}
+    transfer_rows = []
+
+    for source in REALIGNMENT_EDITABLE_CONFERENCES:
+        source_moves = {
+            destination: count
+            for (move_source, destination), count in moved_by_source_destination.items()
+            if move_source == source
+        }
+        moved_out = sum(source_moves.values())
+        if moved_out <= 0:
+            continue
+        source_pool = REALIGNMENT_WEEKLY_SLOT_POOLS.get(source, [])
+        if not source_pool:
+            continue
+        original_count = max(1, original_counts.get(source, len(source_pool)))
+        remaining_count = current_counts.get(source, 0)
+        reclaimable_limit = len(source_pool) if remaining_count < 4 else max(0, len(source_pool) - 1)
+        reclaimed_count = min(
+            reclaimable_limit,
+            max(0, int(round(len(source_pool) * (moved_out / original_count) * 1.5))),
+        )
+        if reclaimed_count <= 0:
+            continue
+        reclaimed_slots = list(source_pool[:reclaimed_count])
+        removed_slots[source].extend(reclaimed_slots)
+
+        allocations = _allocate_counts(reclaimed_count, source_moves)
+        slot_index = 0
+        for destination, slot_count in sorted(allocations.items(), key=lambda item: (-item[1], item[0])):
+            for _ in range(slot_count):
+                if slot_index >= len(reclaimed_slots):
+                    break
+                slot = dict(reclaimed_slots[slot_index])
+                slot["transferred_from"] = source
+                transferred_slots[destination].append(slot)
+                transfer_rows.append({
+                    "source": source,
+                    "destination": destination,
+                    "teams_moved": int(source_moves[destination]),
+                    "network": slot.get("network"),
+                    "time_slot": slot.get("time_slot"),
+                    "tv_tier": slot.get("tv_tier"),
+                })
+                slot_index += 1
+
+    return transferred_slots, removed_slots, transfer_rows
+
+
+def _viewer_total(values):
+    series = pd.Series(values, dtype="float64").dropna()
+    return float(series.sum()) if not series.empty else 0.0
+
+
+def _viewer_average(values):
+    series = pd.Series(values, dtype="float64").dropna()
+    return float(series.mean()) if not series.empty else 0.0
+
+
+def _football_team_coefficient(team):
+    normalized_team = normalize_team(team)
+    try:
+        return float(pregame_model.params.get(normalized_team, 0.0))
+    except Exception:
+        return 0.0
+
+
+def _conference_members(conference):
+    members = [
+        team
+        for team, team_conference in team_conferences.items()
+        if team_conference == conference and team in MODEL_TEAM_NAMES
+    ]
+    return sorted(
+        set(members),
+        key=lambda team: (-_football_team_coefficient(team), team),
+    )
+
+
+@app.get("/realignment/conference-members")
+def realignment_conference_members(conference: str = "Big 10"):
+    return {"conference": conference, "teams": _conference_members(conference)}
+
+
+REALIGNMENT_EDITABLE_CONFERENCES = ["Big 10", "SEC", "Big 12", "ACC"]
+
+
+@app.get("/realignment/memberships")
+def realignment_memberships():
+    memberships = {
+        team: conference
+        for team, conference in team_conferences.items()
+        if conference in REALIGNMENT_EDITABLE_CONFERENCES and team in MODEL_TEAM_NAMES
+    }
+    return {
+        "conferences": REALIGNMENT_EDITABLE_CONFERENCES,
+        "memberships": memberships,
+        "conference_teams": {
+            conference: sorted(
+                [team for team, team_conference in memberships.items() if team_conference == conference],
+                key=lambda team: (-_football_team_coefficient(team), team),
+            )
+            for conference in REALIGNMENT_EDITABLE_CONFERENCES
+        },
+    }
+
+
+def _rivalry_bonus(team_1, team_2):
+    rivalry_pairs = _rivalry_pair_keys()
+    return 0.75 if tuple(sorted([team_1, team_2])) in rivalry_pairs else 0.0
+
+
+def _rivalry_pair_keys():
+    return {
+        tuple(sorted([normalize_team(team_1), normalize_team(team_2)]))
+        for team_1, team_2 in rivalries.values()
+        if normalize_team(team_1) and normalize_team(team_2)
+    }
+
+
+RIVALRY_WEEK_PRIORITY = {
+    tuple(sorted(pair)): priority
+    for priority, pair in {
+        100: ("Alabama", "Auburn"),
+        98: ("Michigan", "Ohio St."),
+        96: ("Florida", "Florida St."),
+        94: ("Georgia", "Georgia Tech"),
+        92: ("Clemson", "South Carolina"),
+        90: ("USC", "UCLA"),
+        88: ("Oregon", "Washington"),
+        86: ("Washington", "Washington St."),
+        84: ("Arizona", "Arizona St."),
+        82: ("BYU", "Utah"),
+        80: ("Kansas", "Kansas St."),
+        78: ("Minnesota", "Wisconsin"),
+        76: ("Texas", "Texas A&M"),
+        74: ("Mississippi", "Mississippi St."),
+        72: ("Louisville", "Kentucky"),
+        70: ("Vanderbilt", "Tennessee"),
+        68: ("Navy", "Army"),
+    }.items()
+}
+
+
+def _rivalry_week_priority(team_1, team_2):
+    return RIVALRY_WEEK_PRIORITY.get(tuple(sorted([team_1, team_2])), 0)
+
+
+def _protected_rivalry_pairs_for_teams(teams):
+    team_set = set(teams)
+    return sorted(
+        [
+            pair
+            for pair in _rivalry_pair_keys()
+            if pair[0] in team_set and pair[1] in team_set
+        ]
+    )
+
+
+ESPN_2026_PRESEASON_RANKINGS = {
+    "Ohio St.": 1,
+    "Oregon": 2,
+    "Georgia": 3,
+    "Notre Dame": 4,
+    "Texas": 5,
+    "Indiana": 6,
+    "Miami": 7,
+    "Texas Tech": 8,
+    "Mississippi": 9,
+    "Texas A&M": 10,
+    "LSU": 11,
+    "BYU": 12,
+    "Oklahoma": 13,
+    "Michigan": 14,
+    "Penn St.": 15,
+    "Alabama": 16,
+    "Washington": 17,
+    "Utah": 18,
+    "Iowa": 19,
+    "USC": 20,
+    "Louisville": 21,
+    "SMU": 22,
+    "TCU": 23,
+    "Houston": 24,
+    "Tennessee": 25,
+}
+
+FINAL_AP_2021_2025_AGGREGATE_RANKINGS = {
+    "Georgia": 1,
+    "Ohio St.": 2,
+    "Alabama": 3,
+    "Oregon": 4,
+    "Notre Dame": 5,
+    "Michigan": 6,
+    "Mississippi": 7,
+    "Texas": 8,
+    "Penn St.": 9,
+    "Tennessee": 10,
+    "Clemson": 11,
+    "Utah": 12,
+    "Washington": 13,
+    "Indiana": 14,
+    "Oklahoma": 15,
+    "BYU": 16,
+    "Florida St.": 17,
+    "Miami": 18,
+    "Oklahoma St.": 19,
+    "TCU": 20,
+    "Tulane": 21,
+    "LSU": 22,
+    "Missouri": 23,
+    "Cincinnati": 24,
+    "Baylor": 25,
+}
+
+
+def _build_rank_map(teams, ranking_policy):
+    if ranking_policy == "unranked":
+        return {team: 0 for team in teams}
+    if ranking_policy == "espn_2026_preseason":
+        return {
+            team: ESPN_2026_PRESEASON_RANKINGS.get(team, 0)
+            for team in teams
+        }
+    if ranking_policy == "final_ap_2021_2025":
+        return {
+            team: FINAL_AP_2021_2025_AGGREGATE_RANKINGS.get(team, 0)
+            for team in teams
+        }
+
+    ranked_teams = sorted(
+        teams,
+        key=lambda team: (-_football_team_coefficient(team), team),
+    )
+    rank_slots = [3, 6, 9, 12, 15, 18, 21, 24]
+    return {
+        team: rank_slots[idx] if idx < len(rank_slots) else 0
+        for idx, team in enumerate(ranked_teams)
+    }
+
+
+def _matchup_score(team_1, team_2, rank_map):
+    rank_1 = rank_map.get(team_1, 0)
+    rank_2 = rank_map.get(team_2, 0)
+    ranking_score = 0.0
+    for rank in [rank_1, rank_2]:
+        if 1 <= rank <= 10:
+            ranking_score += 0.45
+        elif 11 <= rank <= 25:
+            ranking_score += 0.25
+
+    return (
+        _football_team_coefficient(team_1)
+        + _football_team_coefficient(team_2)
+        + ranking_score
+        + _rivalry_bonus(team_1, team_2)
+    )
+
+
+def _interleaved_schedule_order(teams):
+    seeded = sorted(
+        teams,
+        key=lambda team: (-_football_team_coefficient(team), team),
+    )
+    tiers = [seeded[0::3], seeded[1::3], seeded[2::3]]
+    ordered = []
+    max_len = max((len(tier) for tier in tiers), default=0)
+    for idx in range(max_len):
+        for tier in tiers:
+            if idx < len(tier):
+                ordered.append(tier[idx])
+    return ordered
+
+
+def _round_robin_pairs(teams):
+    rotation = _interleaved_schedule_order(teams)
+    if len(rotation) % 2 == 1:
+        rotation.append(None)
+
+    rounds = []
+    team_count = len(rotation)
+    for _ in range(team_count - 1):
+        round_pairs = []
+        for idx in range(team_count // 2):
+            team_1 = rotation[idx]
+            team_2 = rotation[team_count - 1 - idx]
+            if team_1 is not None and team_2 is not None:
+                round_pairs.append((team_1, team_2))
+        rounds.append(round_pairs)
+        rotation = [rotation[0], rotation[-1], *rotation[1:-1]]
+    return rounds
+
+
+def _generate_conference_schedule(teams, games_per_team, rank_map, protected_pairs=None):
+    teams = list(dict.fromkeys(teams))
+    requested_games = max(1, min(int(games_per_team or 9), max(1, len(teams) - 1)))
+    protected_pair_keys = {
+        tuple(sorted([team_1, team_2]))
+        for team_1, team_2 in (protected_pairs or [])
+        if team_1 in teams and team_2 in teams and team_1 != team_2
+    }
+    counts = {team: 0 for team in teams}
+    selected = []
+    selected_keys = set()
+
+    def add_pair(team_1, team_2, protected=False):
+        pair_key = tuple(sorted([team_1, team_2]))
+        if pair_key in selected_keys:
+            return False
+        if not protected and (counts[team_1] >= max_games or counts[team_2] >= max_games):
+            return False
+        selected.append({
+            "team1": team_1,
+            "team2": team_2,
+            "score": _matchup_score(team_1, team_2, rank_map),
+            "protected": protected,
+            "rivalry_week_priority": _rivalry_week_priority(team_1, team_2),
+        })
+        selected_keys.add(pair_key)
+        counts[team_1] += 1
+        counts[team_2] += 1
+        return True
+
+    max_games = requested_games
+
+    for team_1, team_2 in sorted(protected_pair_keys):
+        add_pair(team_1, team_2, protected=True)
+
+    max_games = max(requested_games, max(counts.values(), default=requested_games))
+
+    for round_pairs in _round_robin_pairs(teams):
+        for team_1, team_2 in round_pairs:
+            add_pair(team_1, team_2, protected=False)
+        if all(count >= max_games for count in counts.values()):
+            break
+
+    all_pairs = []
+    for i, team_1 in enumerate(teams):
+        for team_2 in teams[i + 1:]:
+            pair_key = tuple(sorted([team_1, team_2]))
+            if pair_key in selected_keys:
+                continue
+            all_pairs.append((team_1, team_2))
+
+    while any(count < max_games for count in counts.values()):
+        candidates = [
+            (team_1, team_2)
+            for team_1, team_2 in all_pairs
+            if counts[team_1] < max_games and counts[team_2] < max_games
+        ]
+        if not candidates:
+            break
+
+        team_1, team_2 = sorted(
+            candidates,
+            key=lambda pair: (
+                counts[pair[0]] + counts[pair[1]],
+                abs(_football_team_coefficient(pair[0]) - _football_team_coefficient(pair[1])),
+                pair[0],
+                pair[1],
+            ),
+        )[0]
+        add_pair(team_1, team_2, protected=False)
+        pair_key = tuple(sorted([team_1, team_2]))
+        all_pairs = [
+            pair for pair in all_pairs
+            if tuple(sorted(pair)) != pair_key
+        ]
+
+    return selected, counts
+
+
+def _assign_schedule_weeks(schedule, teams, games_per_team):
+    early_game_limit = min(
+        len(REALIGNMENT_EARLY_CONFERENCE_WEEKS),
+        int(round(len(schedule) * REALIGNMENT_EARLY_CONFERENCE_GAME_SHARE)),
+    )
+    early_game_limit = max(0, early_game_limit)
+    weeks = [
+        {"number": week_number, "games": [], "teams": set(), "score": 0.0}
+        for week_number in [
+            *REALIGNMENT_EARLY_CONFERENCE_WEEKS,
+            *REALIGNMENT_PRIMARY_CONFERENCE_WEEKS,
+        ]
+    ]
+    early_week_numbers = set(REALIGNMENT_EARLY_CONFERENCE_WEEKS)
+    primary_week_numbers = set(REALIGNMENT_PRIMARY_CONFERENCE_WEEKS)
+    early_pair_keys = {
+        tuple(sorted([game["team1"], game["team2"]]))
+        for game in sorted(
+            [game for game in schedule if not game.get("protected", False)],
+            key=lambda row: (row["score"], row["team1"], row["team2"]),
+        )[:early_game_limit]
+    }
+
+    def add_game_to_week(game, target_week):
+        game_with_week = {**game, "week": target_week["number"]}
+        target_week["games"].append(game_with_week)
+        target_week["teams"].update([game["team1"], game["team2"]])
+        target_week["score"] += float(game["score"])
+
+    remaining_games = []
+    for game in schedule:
+        pair_key = tuple(sorted([game["team1"], game["team2"]]))
+        if pair_key in early_pair_keys:
+            early_candidates = [
+                week for week in weeks
+                if week["number"] in early_week_numbers
+                and game["team1"] not in week["teams"]
+                and game["team2"] not in week["teams"]
+            ]
+            if early_candidates:
+                add_game_to_week(
+                    game,
+                    sorted(early_candidates, key=lambda week: (len(week["games"]), week["number"]))[0],
+                )
+                continue
+        remaining_games.append(game)
+
+    primary_weeks = [week for week in weeks if week["number"] in primary_week_numbers]
+
+    def schedule_with_primary_week_coloring(games_to_schedule):
+        game_items = sorted(
+            list(enumerate(games_to_schedule)),
+            key=lambda item: (
+                not item[1].get("protected", False),
+                -int(item[1].get("rivalry_week_priority") or 0),
+                -item[1]["score"],
+                item[1]["team1"],
+                item[1]["team2"],
+            ),
+        )
+        used_team_weeks = {
+            (team, week["number"])
+            for week in weeks
+            for scheduled_game in week["games"]
+            for team in [scheduled_game["team1"], scheduled_game["team2"]]
+        }
+        week_loads = Counter({week["number"]: len(week["games"]) for week in primary_weeks})
+        week_scores = Counter({week["number"]: week["score"] for week in primary_weeks})
+        assignments = {}
+
+        def available_weeks(game):
+            return [
+                week["number"]
+                for week in primary_weeks
+                if (game["team1"], week["number"]) not in used_team_weeks
+                and (game["team2"], week["number"]) not in used_team_weeks
+            ]
+
+        def search(unassigned_items):
+            if not unassigned_items:
+                return True
+            candidate_options = []
+            for item_index, (game_index, game) in enumerate(unassigned_items):
+                options = available_weeks(game)
+                if not options:
+                    return False
+                candidate_options.append((
+                    len(options),
+                    not game.get("protected", False),
+                    -int(game.get("rivalry_week_priority") or 0),
+                    -game["score"],
+                    game["team1"],
+                    game["team2"],
+                    item_index,
+                    game_index,
+                    game,
+                    options,
+                ))
+            *_, item_index, game_index, game, options = sorted(candidate_options)[0]
+            remaining_items = unassigned_items[:item_index] + unassigned_items[item_index + 1:]
+            if game.get("protected", False):
+                ordered_options = sorted(
+                    options,
+                    key=lambda number: (
+                        -number,
+                        week_loads[number],
+                        week_scores[number],
+                    ),
+                )
+            else:
+                ordered_options = sorted(
+                    options,
+                    key=lambda number: (
+                        week_loads[number],
+                        week_scores[number],
+                        number,
+                    ),
+                )
+            for week_number in ordered_options:
+                assignments[game_index] = week_number
+                used_team_weeks.add((game["team1"], week_number))
+                used_team_weeks.add((game["team2"], week_number))
+                week_loads[week_number] += 1
+                week_scores[week_number] += float(game["score"])
+                if search(remaining_items):
+                    return True
+                week_scores[week_number] -= float(game["score"])
+                week_loads[week_number] -= 1
+                used_team_weeks.remove((game["team1"], week_number))
+                used_team_weeks.remove((game["team2"], week_number))
+                assignments.pop(game_index, None)
+            return False
+
+        if not search(game_items):
+            return False
+        weeks_by_number = {week["number"]: week for week in primary_weeks}
+        for game_index, game in enumerate(games_to_schedule):
+            add_game_to_week(game, weeks_by_number[assignments[game_index]])
+        return True
+
+    if schedule_with_primary_week_coloring(remaining_games):
+        return [
+            game
+            for week in sorted(weeks, key=lambda row: row["number"])
+            for game in week["games"]
+        ]
+
+    remaining_games = sorted(
+        remaining_games,
+        key=lambda row: (
+            not row.get("protected", False),
+            -int(row.get("rivalry_week_priority") or 0),
+            -row["score"],
+            row["team1"],
+            row["team2"],
+        ),
+    )
+    while remaining_games:
+        made_progress = False
+        for week in sorted(primary_weeks, key=lambda row: (len(row["games"]), row["score"], row["number"])):
+            candidate = next(
+                (
+                    game for game in remaining_games
+                    if game["team1"] not in week["teams"] and game["team2"] not in week["teams"]
+                ),
+                None,
+            )
+            if not candidate:
+                continue
+            add_game_to_week(candidate, week)
+            remaining_games.remove(candidate)
+            made_progress = True
+        if not made_progress:
+            break
+
+    for game in remaining_games:
+        target_week = sorted(
+            primary_weeks,
+            key=lambda week: (
+                int(game["team1"] in week["teams"]) + int(game["team2"] in week["teams"]),
+                len(week["games"]),
+                week["score"],
+                week["number"],
+            ),
+        )[0]
+        add_game_to_week(game, target_week)
+
+    def rebuild_week_state(week):
+        week["teams"] = set()
+        week["score"] = 0.0
+        for scheduled_game in week["games"]:
+            week["teams"].update([scheduled_game["team1"], scheduled_game["team2"]])
+            week["score"] += float(scheduled_game["score"])
+
+    for _ in range(200):
+        moved_game = False
+        for week in primary_weeks:
+            games_by_team = defaultdict(list)
+            for scheduled_game in week["games"]:
+                games_by_team[scheduled_game["team1"]].append(scheduled_game)
+                games_by_team[scheduled_game["team2"]].append(scheduled_game)
+            conflicted_games = []
+            for games in games_by_team.values():
+                conflicted_games.extend(games[1:])
+            for scheduled_game in conflicted_games:
+                destination_week = next(
+                    (
+                        candidate_week for candidate_week in sorted(
+                            primary_weeks,
+                            key=lambda row: (len(row["games"]), row["score"], row["number"]),
+                        )
+                        if candidate_week is not week
+                        and scheduled_game["team1"] not in candidate_week["teams"]
+                        and scheduled_game["team2"] not in candidate_week["teams"]
+                    ),
+                    None,
+                )
+                if not destination_week:
+                    continue
+                week["games"].remove(scheduled_game)
+                scheduled_game["week"] = destination_week["number"]
+                destination_week["games"].append(scheduled_game)
+                rebuild_week_state(week)
+                rebuild_week_state(destination_week)
+                moved_game = True
+                break
+            if moved_game:
+                break
+        if not moved_game:
+            break
+
+    return [
+        game
+        for week in sorted(weeks, key=lambda row: row["number"])
+        for game in week["games"]
+    ]
+
+
+def _realistic_tv_slots_for_schedule(
+    schedule,
+    conference,
+    team_count=None,
+    transferred_slots=None,
+    removed_slots=None,
+):
+    weeks = sorted({game.get("week", 1) for game in schedule})
+    if not weeks:
+        return {}
+    score_floor = REALIGNMENT_NATIONAL_TV_SCORE_FLOOR.get(
+        conference,
+        REALIGNMENT_NATIONAL_TV_SCORE_FLOOR["SEC"],
+    )
+    selected_slots = {}
+    used_weekly_slot_indexes = defaultdict(set)
+    ordered_games = sorted(
+        schedule,
+        key=lambda row: (-row["score"], row.get("week", 1), row["team1"], row["team2"]),
+    )
+    for game in ordered_games:
+        if float(game.get("score") or 0.0) < score_floor:
+            continue
+        week = game.get("week", 1)
+        weekly_slots = _weekly_tv_slots(
+            conference,
+            week,
+            team_count=team_count,
+            transferred_slots=transferred_slots,
+            removed_slots=removed_slots,
+        )
+        pair_key = tuple(sorted([game["team1"], game["team2"]]))
+        if pair_key in selected_slots:
+            continue
+        for slot_idx, slot in enumerate(weekly_slots):
+            if slot_idx in used_weekly_slot_indexes[week]:
+                continue
+            selected_slots[pair_key] = dict(slot)
+            used_weekly_slot_indexes[week].add(slot_idx)
+            break
+
+    return selected_slots
+
+
+def _global_tv_slot_key(slot):
+    return (
+        slot.get("network"),
+        slot.get("time_slot"),
+    )
+
+
+def _mark_realignment_row_unrated(row):
+    row["network"] = "Not nationally rated"
+    row["time_slot"] = "No national TV window"
+    row["comp_tier1"] = None
+    row["tv_tier"] = "unrated"
+    row["nationally_rated"] = False
+    row["predicted_viewers"] = 0.0
+    row["predicted_viewers_formatted"] = "Not rated"
+
+
+def _apply_tv_slot_to_realignment_row(row, slot, conference, conference_teams):
+    prediction = predict_viewership({
+        "team1": row["team1"],
+        "team2": row["team2"],
+        "rank1": row.get("rank1", 0),
+        "rank2": row.get("rank2", 0),
+        "network": slot["network"],
+        "time_slot": slot["time_slot"],
+        "comp_tier1": slot["comp_tier1"],
+        "conference_overrides": {team: conference for team in conference_teams},
+    })
+    row["network"] = slot["network"]
+    row["time_slot"] = slot["time_slot"]
+    row["comp_tier1"] = slot["comp_tier1"]
+    row["tv_tier"] = slot.get("tv_tier")
+    row["nationally_rated"] = True
+    row["predicted_viewers"] = float(prediction["raw"])
+    row["predicted_viewers_formatted"] = prediction["formatted"]
+
+
+def _refresh_realignment_slate_summary(slate):
+    rows = slate.get("rows", [])
+    rated_rows = [row for row in rows if row.get("nationally_rated", True)]
+    slate["summary"] = {
+        "teams": len(slate.get("teams", [])),
+        "games": len(rated_rows),
+        "scheduled_games": len(rows),
+        "nationally_rated_games": len(rated_rows),
+        "unrated_games": len(rows) - len(rated_rows),
+        "total_viewers": _viewer_total(row["predicted_viewers"] for row in rated_rows),
+        "average_viewers": _viewer_average(row["predicted_viewers"] for row in rated_rows),
+    }
+
+
+def _apply_global_tv_slots_to_league_slates(conference_slates, transferred_slots_by_conference, removed_slots_by_conference):
+    candidates = []
+    for conference, slate in conference_slates.items():
+        for row in slate.get("rows", []):
+            _mark_realignment_row_unrated(row)
+            candidates.append({
+                "conference": conference,
+                "row": row,
+                "team_count": len(slate.get("teams", [])),
+                "conference_teams": slate.get("teams", []),
+            })
+
+    used_slots_by_week = defaultdict(set)
+    ordered_candidates = sorted(
+        candidates,
+        key=lambda item: (
+            -float(item["row"].get("matchup_score") or 0.0),
+            int(item["row"].get("week") or 1),
+            item["conference"],
+            item["row"].get("team1", ""),
+            item["row"].get("team2", ""),
+        ),
+    )
+
+    for candidate in ordered_candidates:
+        conference = candidate["conference"]
+        row = candidate["row"]
+        if float(row.get("matchup_score") or 0.0) < REALIGNMENT_NATIONAL_TV_SCORE_FLOOR.get(
+            conference,
+            REALIGNMENT_NATIONAL_TV_SCORE_FLOOR["SEC"],
+        ):
+            continue
+        week = int(row.get("week") or 1)
+        weekly_slots = _weekly_tv_slots(
+            conference,
+            week,
+            team_count=candidate["team_count"],
+            transferred_slots=transferred_slots_by_conference.get(conference, []),
+            removed_slots=removed_slots_by_conference.get(conference, []),
+        )
+        for slot in weekly_slots:
+            slot_key = _global_tv_slot_key(slot)
+            if slot_key in used_slots_by_week[week]:
+                continue
+            used_slots_by_week[week].add(slot_key)
+            _apply_tv_slot_to_realignment_row(
+                row,
+                slot,
+                conference,
+                candidate["conference_teams"],
+            )
+            break
+
+    for slate in conference_slates.values():
+        _refresh_realignment_slate_summary(slate)
+
+
+def _predict_realignment_slate(
+    teams,
+    conference,
+    sim,
+    protected_pairs=None,
+    realistic_tv_inventory=False,
+    transferred_slots=None,
+    removed_slots=None,
+):
+    normalized_teams = [normalize_team(team) for team in teams]
+    rank_map = _build_rank_map(normalized_teams, sim.ranking_policy)
+    schedule, counts = _generate_conference_schedule(
+        normalized_teams,
+        sim.games_per_team,
+        rank_map,
+        protected_pairs=protected_pairs,
+    )
+    if realistic_tv_inventory:
+        schedule = _assign_schedule_weeks(schedule, normalized_teams, sim.games_per_team)
+        scheduled_tv_slots = _realistic_tv_slots_for_schedule(
+            schedule,
+            conference,
+            team_count=len(normalized_teams),
+            transferred_slots=transferred_slots,
+            removed_slots=removed_slots,
+        )
+    else:
+        schedule = sorted(schedule, key=lambda row: (-row["score"], row["team1"], row["team2"]))
+        scheduled_tv_slots = {}
+    conference_overrides = {team: conference for team in normalized_teams}
+
+    rows = []
+    total_games = len(schedule)
+    for idx, game in enumerate(schedule):
+        pair_key = tuple(sorted([game["team1"], game["team2"]]))
+        slot = (
+            scheduled_tv_slots.get(pair_key)
+            if realistic_tv_inventory
+            else _select_realignment_tv_slot(idx, total_games, conference)
+        )
+        if slot:
+            prediction = predict_viewership({
+                "team1": game["team1"],
+                "team2": game["team2"],
+                "rank1": rank_map.get(game["team1"], 0),
+                "rank2": rank_map.get(game["team2"], 0),
+                "network": slot["network"],
+                "time_slot": slot["time_slot"],
+                "comp_tier1": slot["comp_tier1"],
+                "conference_overrides": conference_overrides,
+            })
+            viewers = float(prediction["raw"])
+            predicted_viewers_formatted = prediction["formatted"]
+            network = slot["network"]
+            time_slot = slot["time_slot"]
+            comp_tier1 = slot["comp_tier1"]
+            tv_tier = slot.get("tv_tier")
+            nationally_rated = True
+        else:
+            viewers = 0.0
+            predicted_viewers_formatted = "Not rated"
+            network = "Not nationally rated"
+            time_slot = "No national TV window"
+            comp_tier1 = None
+            tv_tier = "unrated"
+            nationally_rated = False
+        rows.append({
+            "game_number": idx + 1,
+            "week": game.get("week"),
+            "team1": game["team1"],
+            "team2": game["team2"],
+            "matchup": f"{game['team1']} vs {game['team2']}",
+            "rank1": rank_map.get(game["team1"], 0),
+            "rank2": rank_map.get(game["team2"], 0),
+            "network": network,
+            "time_slot": time_slot,
+            "comp_tier1": comp_tier1,
+            "tv_tier": tv_tier,
+            "nationally_rated": nationally_rated,
+            "matchup_score": float(round(game["score"], 4)),
+            "protected": bool(game.get("protected", False)),
+            "predicted_viewers": viewers,
+            "predicted_viewers_formatted": predicted_viewers_formatted,
+        })
+
+    rated_rows = [row for row in rows if row.get("nationally_rated", True)]
+    return {
+        "teams": normalized_teams,
+        "team_game_counts": counts,
+        "rank_map": rank_map,
+        "rows": rows,
+        "summary": {
+            "teams": len(normalized_teams),
+            "games": len(rated_rows) if realistic_tv_inventory else len(rows),
+            "scheduled_games": len(rows),
+            "nationally_rated_games": len(rated_rows),
+            "unrated_games": len(rows) - len(rated_rows),
+            "total_viewers": _viewer_total(row["predicted_viewers"] for row in rated_rows),
+            "average_viewers": _viewer_average(row["predicted_viewers"] for row in rated_rows),
+        },
+    }
+
+
+@app.post("/realignment/simulate")
+def realignment_simulation(sim: RealignmentSimulationInput):
+    conference = sim.conference or "Big 10"
+    expansion_teams = [
+        normalize_team(team)
+        for team in sim.expansion_teams
+        if normalize_team(team)
+    ]
+    protected_opponents = [
+        normalize_team(team)
+        for team in sim.protected_opponents
+        if normalize_team(team)
+    ]
+    protected_opponents_by_team = {}
+    for raw_team, raw_opponents in (sim.protected_opponents_by_team or {}).items():
+        expansion_team = normalize_team(raw_team)
+        if not expansion_team or expansion_team not in expansion_teams:
+            continue
+        protected_opponents_by_team[expansion_team] = [
+            normalize_team(opponent)
+            for opponent in (raw_opponents or [])
+            if normalize_team(opponent)
+        ]
+    if expansion_teams and protected_opponents:
+        first_expansion_team = expansion_teams[0]
+        protected_opponents_by_team[first_expansion_team] = list(dict.fromkeys([
+            *protected_opponents_by_team.get(first_expansion_team, []),
+            *protected_opponents,
+        ]))
+    baseline_teams = [
+        team
+        for team in _conference_members(conference)
+        if team not in expansion_teams
+    ]
+    expanded_teams = sorted(
+        set(baseline_teams) | set(expansion_teams),
+        key=lambda team: (-_football_team_coefficient(team), team),
+    )
+
+    user_protected_pairs = [
+        (team, opponent)
+        for team, opponents in protected_opponents_by_team.items()
+        for opponent in opponents
+        if team in expanded_teams and opponent in expanded_teams and opponent != team
+    ]
+    user_protected_pairs = sorted(set(
+        tuple(sorted([team, opponent]))
+        for team, opponent in user_protected_pairs
+    ))
+    normalized_protected_opponents_by_team = {
+        team: [
+            opponent
+            for opponent in opponents
+            if opponent in expanded_teams and opponent != team
+        ]
+        for team, opponents in protected_opponents_by_team.items()
+        if team in expanded_teams
+    }
+    baseline_rivalry_pairs = _protected_rivalry_pairs_for_teams(baseline_teams)
+    expanded_rivalry_pairs = _protected_rivalry_pairs_for_teams(expanded_teams)
+    expanded_protected_pairs = sorted(
+        set(expanded_rivalry_pairs) | {
+            tuple(sorted([team_1, team_2]))
+            for team_1, team_2 in user_protected_pairs
+        }
+    )
+
+    baseline = _predict_realignment_slate(
+        baseline_teams,
+        conference,
+        sim,
+        protected_pairs=baseline_rivalry_pairs,
+    )
+    expanded = _predict_realignment_slate(
+        expanded_teams,
+        conference,
+        sim,
+        protected_pairs=expanded_protected_pairs,
+    )
+
+    baseline_summary = baseline["summary"]
+    expanded_summary = expanded["summary"]
+    expansion_game_rows = [
+        row
+        for row in expanded["rows"]
+        if row["team1"] in expansion_teams or row["team2"] in expansion_teams
+    ]
+    scheduled_pair_keys = {
+        tuple(sorted([row["team1"], row["team2"]]))
+        for row in expanded["rows"]
+    }
+    protected_matchups = []
+    for team_1, team_2 in user_protected_pairs:
+        key = tuple(sorted([team_1, team_2]))
+        game = next(
+            (
+                row for row in expanded["rows"]
+                if tuple(sorted([row["team1"], row["team2"]])) == key
+            ),
+            None,
+        )
+        protected_matchups.append({
+            "expansion_team": team_1 if team_1 in expansion_teams else team_2,
+            "opponent": team_2 if team_1 in expansion_teams else team_1,
+            "team1": team_1,
+            "team2": team_2,
+            "matchup": f"{team_1} vs {team_2}",
+            "scheduled": key in scheduled_pair_keys,
+            "game_number": game.get("game_number") if game else None,
+            "predicted_viewers": game.get("predicted_viewers") if game else None,
+        })
+
+    total_delta = expanded_summary["total_viewers"] - baseline_summary["total_viewers"]
+    average_delta = expanded_summary["average_viewers"] - baseline_summary["average_viewers"]
+    expansion_average = _viewer_average(row["predicted_viewers"] for row in expansion_game_rows)
+    expansion_vs_baseline_average = expansion_average - baseline_summary["average_viewers"]
+
+    return clean_nan({
+        "realignment_simulator_version": 3,
+        "conference": conference,
+        "expansion_teams": expansion_teams,
+        "settings": {
+            "games_per_team": sim.games_per_team,
+            "network_policy": _realignment_network_plan(conference)["label"],
+            "tv_network_plan": _realignment_network_plan(conference)["label"],
+            "ranking_policy": sim.ranking_policy,
+            "protected_opponents": protected_opponents,
+            "protected_opponents_by_team": normalized_protected_opponents_by_team,
+        },
+        "protected_matchups": protected_matchups,
+        "automatic_protected_rivalries": [
+            {"team1": team_1, "team2": team_2, "matchup": f"{team_1} vs {team_2}"}
+            for team_1, team_2 in expanded_rivalry_pairs
+        ],
+        "protected_missing_count": int(sum(1 for row in protected_matchups if not row["scheduled"])),
+        "baseline": baseline,
+        "expanded": expanded,
+        "impact": {
+            "total_viewer_delta": float(total_delta),
+            "average_viewer_delta": float(average_delta),
+            "game_inventory_delta": int(expanded_summary["games"] - baseline_summary["games"]),
+            "expansion_team_games": int(len(expansion_game_rows)),
+            "expansion_team_average_viewers": float(expansion_average),
+            "expansion_vs_baseline_average": float(expansion_vs_baseline_average),
+        },
+        "top_expansion_games": sorted(
+            expansion_game_rows,
+            key=lambda row: row["predicted_viewers"],
+            reverse=True,
+        )[:12],
+        "available_options": {
+            "conferences": sorted(set(team_conferences.values())),
+            "network_policies": [],
+            "ranking_policies": ["brand_tiers", "espn_2026_preseason", "final_ap_2021_2025", "unranked"],
+        },
+        "methodology": (
+            "Generates a deterministic conference slate by locking known rivalry games, "
+            "then selecting available matchups until teams reach the requested conference-game cap. "
+            "Expansion teams are temporarily treated as members of the target conference "
+            "inside the football viewership model."
+        ),
+    })
+
+
+@app.post("/realignment/superleague")
+def superleague_simulation(sim: SuperleagueSimulationInput):
+    selected_teams = sorted(
+        {
+            normalize_team(team)
+            for team in sim.teams
+            if normalize_team(team) in MODEL_TEAM_NAMES
+        },
+        key=lambda team: (-_football_team_coefficient(team), team),
+    )
+    if len(selected_teams) < 2:
+        return clean_nan({
+            "realignment_simulator_version": 3,
+            "mode": "superleague",
+            "settings": {
+                "teams": selected_teams,
+                "games_per_team": sim.games_per_team,
+                "ranking_policy": sim.ranking_policy,
+                "tv_network_plan": _realignment_network_plan("Superleague")["label"],
+            },
+            "slate": {
+                "teams": selected_teams,
+                "team_game_counts": {},
+                "rank_map": {},
+                "rows": [],
+                "summary": {
+                    "teams": len(selected_teams),
+                    "games": 0,
+                    "total_viewers": 0.0,
+                    "average_viewers": 0.0,
+                },
+            },
+            "top_games": [],
+            "automatic_protected_rivalries": [],
+            "methodology": "Draft at least two teams to generate a superleague slate.",
+        })
+
+    protected_rivalry_pairs = _protected_rivalry_pairs_for_teams(selected_teams)
+    slate = _predict_realignment_slate(
+        selected_teams,
+        "Superleague",
+        sim,
+        protected_pairs=protected_rivalry_pairs,
+    )
+    top_games = sorted(
+        slate["rows"],
+        key=lambda row: row["predicted_viewers"],
+        reverse=True,
+    )[:40]
+
+    return clean_nan({
+        "realignment_simulator_version": 3,
+        "mode": "superleague",
+        "settings": {
+            "teams": selected_teams,
+            "games_per_team": sim.games_per_team,
+            "ranking_policy": sim.ranking_policy,
+            "tv_network_plan": _realignment_network_plan("Superleague")["label"],
+        },
+        "slate": slate,
+        "impact": {
+            "total_viewers": slate["summary"]["total_viewers"],
+            "average_viewers": slate["summary"]["average_viewers"],
+            "games": slate["summary"]["games"],
+            "teams": slate["summary"]["teams"],
+        },
+        "top_games": top_games,
+        "automatic_protected_rivalries": [
+            {"team1": team_1, "team2": team_2, "matchup": f"{team_1} vs {team_2}"}
+            for team_1, team_2 in protected_rivalry_pairs
+        ],
+        "available_options": {
+            "ranking_policies": ["brand_tiers", "espn_2026_preseason", "final_ap_2021_2025", "unranked"],
+        },
+        "methodology": (
+            "Builds a custom superleague from the drafted teams, locks known rivalry games, "
+            "then fills a deterministic conference-style slate using the selected games-per-team cap. "
+            "Games use a national Superleague TV mix and the football viewership model."
+        ),
+    })
+
+
+@app.post("/realignment/league-simulate")
+def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
+    normalized_memberships = {}
+    for raw_team, raw_conference in (sim.memberships or {}).items():
+        team = normalize_team(raw_team)
+        conference = raw_conference if raw_conference in REALIGNMENT_EDITABLE_CONFERENCES else None
+        if team in MODEL_TEAM_NAMES and conference:
+            normalized_memberships[team] = conference
+
+    if not normalized_memberships:
+        normalized_memberships = {
+            team: conference
+            for team, conference in team_conferences.items()
+            if conference in REALIGNMENT_EDITABLE_CONFERENCES and team in MODEL_TEAM_NAMES
+        }
+
+    user_protected_pairs = set()
+    for raw_team, raw_opponents in (sim.protected_matchups_by_team or {}).items():
+        team = normalize_team(raw_team)
+        if team not in normalized_memberships:
+            continue
+        for raw_opponent in raw_opponents or []:
+            opponent = normalize_team(raw_opponent)
+            if (
+                opponent in normalized_memberships
+                and opponent != team
+                and normalized_memberships.get(opponent) == normalized_memberships.get(team)
+            ):
+                user_protected_pairs.add(tuple(sorted([team, opponent])))
+
+    transferred_tv_slots, removed_tv_slots, tv_slot_transfer_rows = _conference_tv_slot_transfers(normalized_memberships)
+    conference_slates = {}
+    for conference in REALIGNMENT_EDITABLE_CONFERENCES:
+        members = sorted(
+            [
+                team
+                for team, team_conference in normalized_memberships.items()
+                if team_conference == conference
+            ],
+            key=lambda team: (-_football_team_coefficient(team), team),
+        )
+        if len(members) < 2:
+            conference_slates[conference] = {
+                "teams": members,
+                "team_game_counts": {},
+                "rank_map": {},
+                "rows": [],
+                "summary": {
+                    "teams": len(members),
+                    "games": 0,
+                    "total_viewers": 0.0,
+                    "average_viewers": 0.0,
+                },
+            }
+            continue
+
+        protected_rivalry_pairs = _protected_rivalry_pairs_for_teams(members)
+        protected_pairs = sorted(
+            set(protected_rivalry_pairs) | {
+                pair for pair in user_protected_pairs
+                if pair[0] in members and pair[1] in members
+            }
+        )
+        slate = _predict_realignment_slate(
+            members,
+            conference,
+            sim,
+            protected_pairs=protected_pairs,
+            realistic_tv_inventory=True,
+            transferred_slots=transferred_tv_slots.get(conference, []),
+            removed_slots=removed_tv_slots.get(conference, []),
+        )
+        conference_slates[conference] = slate
+
+    _apply_global_tv_slots_to_league_slates(
+        conference_slates,
+        transferred_tv_slots,
+        removed_tv_slots,
+    )
+
+    all_rows = []
+    for conference, slate in conference_slates.items():
+        for row in slate["rows"]:
+            all_rows.append({
+                **row,
+                "conference": conference,
+                "tv_network_plan": _realignment_network_plan(conference)["label"],
+            })
+
+    all_rows = sorted(
+        all_rows,
+        key=lambda row: (-row["predicted_viewers"], row["conference"], row["game_number"]),
+    )
+    for idx, row in enumerate(all_rows):
+        row["global_game_number"] = idx + 1
+
+    conference_summaries = {
+        conference: slate["summary"]
+        for conference, slate in conference_slates.items()
+    }
+    rated_rows = [row for row in all_rows if row.get("nationally_rated", True)]
+    total_viewers = _viewer_total(row["predicted_viewers"] for row in rated_rows)
+    average_viewers = _viewer_average(row["predicted_viewers"] for row in rated_rows)
+
+    return clean_nan({
+        "realignment_simulator_version": 3,
+        "mode": "league_realignment",
+        "settings": {
+            "games_per_team": sim.games_per_team,
+            "ranking_policy": sim.ranking_policy,
+            "conferences": REALIGNMENT_EDITABLE_CONFERENCES,
+            "tv_slot_transfers": tv_slot_transfer_rows,
+        },
+        "memberships": normalized_memberships,
+        "conference_slates": conference_slates,
+        "conference_summaries": conference_summaries,
+        "rows": all_rows,
+        "summary": {
+            "conferences": len(REALIGNMENT_EDITABLE_CONFERENCES),
+            "teams": len(normalized_memberships),
+            "games": len(rated_rows),
+            "scheduled_games": len(all_rows),
+            "nationally_rated_games": len(rated_rows),
+            "unrated_games": len(all_rows) - len(rated_rows),
+            "total_viewers": total_viewers,
+            "average_viewers": average_viewers,
+        },
+        "top_games": rated_rows[:40],
+        "methodology": (
+            "Schedules every edited conference using the selected games-per-team cap, "
+            "locks known rivalry games within each conference, assigns a limited weekly "
+            "national TV inventory from each conference's partner mix, marks the rest as "
+            "not nationally rated, and aggregates rated TV games by projected viewership."
+        ),
+    })
+
+
 @app.get("/brand-years")
 def brand_years():
     return {"years": available_years}
@@ -1300,7 +3186,7 @@ def team_scenario_compare(
         "head_to_head_count": int(len(head_to_head_rows)),
         "available_filters": {
             "networks": ["all", "ABC", "CBS", "NBC", "FOX", "ESPN", "ESPN2", "ESPNU", "FS1", "FS2", "BTN", "CW", "NFLN", "ESPNNEWS"],
-            "time_buckets": ["all", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Monday", "Sunday", "Weekday", "Other"],
+            "time_buckets": ["all", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Black Friday", "Monday", "Sunday", "Weekday", "Other"],
             "rank_buckets": rank_detail_options,
             "competing_buckets": ["all", "None", "1 Major Game", "2+ Major Games"],
             "years": ["all"] + [str(year) for year in sorted(pd.to_numeric(df_all["Year"], errors="coerce").dropna().astype(int).unique().tolist())],
@@ -1384,7 +3270,7 @@ def team_viewership_rankings(
             },
             "available_filters": {
                 "networks": ["all", "ABC", "CBS", "NBC", "FOX", "ESPN", "ESPN2", "ESPNU", "FS1", "FS2", "BTN", "CW", "NFLN", "ESPNNEWS"],
-                "time_buckets": ["all", "Primetime", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Monday", "Sunday", "Weekday", "Other"],
+                "time_buckets": ["all", "Primetime", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Black Friday", "Monday", "Sunday", "Weekday", "Other"],
                 "rank_buckets": rank_detail_options,
                 "opponents": ["all"] + sorted(option for option in opponent_options if option),
             },
@@ -1434,7 +3320,7 @@ def team_viewership_rankings(
         },
         "available_filters": {
             "networks": ["all", "ABC", "CBS", "NBC", "FOX", "ESPN", "ESPN2", "ESPNU", "FS1", "FS2", "BTN", "CW", "NFLN", "ESPNNEWS"],
-            "time_buckets": ["all", "Primetime", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Monday", "Sunday", "Weekday", "Other"],
+            "time_buckets": ["all", "Primetime", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Black Friday", "Monday", "Sunday", "Weekday", "Other"],
             "rank_buckets": rank_detail_options,
             "opponents": ["all"] + sorted(option for option in opponent_options if option),
         },

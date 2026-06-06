@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from model_loader import load_viewership_model
 
@@ -23,25 +23,37 @@ teams_list = {
     "Georgia Southern": "Georgia Southern", "Georgia State": "Georgia St.", "Georgia Tech": "Georgia Tech",
     "Hawai'i": "Hawaii", "Houston": "Houston", "Illinois": "Illinois", "Indiana": "Indiana",
     "Iowa": "Iowa", "Iowa State": "Iowa St.", "Kansas": "Kansas", "Kansas State": "Kansas St.",
-    "Kentucky": "Kentucky", "Liberty": "Liberty", "Louisiana": "Louisiana", "Louisville": "Louisville",
+    "Jacksonville State": "Jacksonville St.", "James Madison": "James Madison",
+    "Kent State": "Kent St.", "Kentucky": "Kentucky", "Kennesaw State": "Kennesaw St.",
+    "Liberty": "Liberty", "Louisiana": "Louisiana", "Louisiana Monroe": "Louisiana Monroe",
+    "Louisiana Tech": "Louisiana Tech", "Louisville": "Louisville",
     "LSU": "LSU", "Marshall": "Marshall", "Maryland": "Maryland", "Memphis": "Memphis",
-    "Miami": "Miami", "Michigan": "Michigan", "Michigan State": "Michigan St.", "Minnesota": "Minnesota",
-    "Mississippi State": "Mississippi St.", "Missouri": "Missouri", "Navy": "Navy",
+    "Miami": "Miami", "Miami Ohio": "Miami Ohio", "Michigan": "Michigan",
+    "Michigan State": "Michigan St.", "Middle Tennessee": "Middle Tennessee St.",
+    "Minnesota": "Minnesota", "Mississippi State": "Mississippi St.", "Missouri": "Missouri",
+    "Missouri State": "Missouri State", "Navy": "Navy",
     "NC State": "North Carolina St.", "Nebraska": "Nebraska", "Nevada": "Nevada",
-    "New Mexico": "New Mexico", "New Mexico State": "New Mexico St.",
+    "New Mexico": "New Mexico", "New Mexico State": "New Mexico St.", "Northern Illinois": "Northern Illinois",
     "North Carolina": "North Carolina", "North Texas": "North Texas", "Northwestern": "Northwestern",
-    "Notre Dame": "Notre Dame", "Ohio": "Ohio", "Ohio State": "Ohio St.", "Oklahoma": "Oklahoma",
+    "Notre Dame": "Notre Dame", "Ohio": "Ohio", "Ohio State": "Ohio St.", "Old Dominion": "Old Dominion",
+    "Oklahoma": "Oklahoma",
     "Oklahoma State": "Oklahoma St.", "Ole Miss": "Mississippi", "Oregon": "Oregon", "Oregon State": "Oregon St.",
     "Penn State": "Penn St.", "Pittsburgh": "Pittsburgh", "Purdue": "Purdue",
-    "Rutgers": "Rutgers", "San Diego State": "San Diego St.", "SMU": "SMU",
-    "South Carolina": "South Carolina", "Stanford": "Stanford", "Syracuse": "Syracuse",
+    "Rutgers": "Rutgers", "Sam Houston": "Sam Houston", "San Diego State": "San Diego St.",
+    "San Jose State": "San Jose St.", "SMU": "SMU",
+    "Rice": "Rice", "South Alabama": "South Alabama", "South Carolina": "South Carolina",
+    "South Florida": "South Florida", "Southern Miss": "Southern Miss", "Stanford": "Stanford",
+    "Syracuse": "Syracuse", "Temple": "Temple",
     "TCU": "TCU", "Tennessee": "Tennessee", "Texas": "Texas", "Texas A&M": "Texas A&M",
-    "Texas Tech": "Texas Tech", "Toledo": "Toledo", "Troy": "Troy", "Tulane": "Tulane",
-    "UAB": "UAB", "UCF": "UCF", "UCLA": "UCLA", "UConn": "Connecticut", "UNLV": "UNLV",
+    "Texas State": "Texas St.", "Texas Tech": "Texas Tech", "Toledo": "Toledo", "Troy": "Troy",
+    "Tulane": "Tulane", "Tulsa": "Tulsa", "UAB": "UAB", "UCF": "UCF", "UCLA": "UCLA",
+    "UConn": "Connecticut", "UMass": "Massachusetts", "UNLV": "UNLV",
     "USC": "USC", "Utah": "Utah", "Utah State": "Utah St.", "Vanderbilt": "Vanderbilt",
     "Virginia": "Virginia", "Virginia Tech": "Virginia Tech", "Wake Forest": "Wake Forest",
     "Washington": "Washington", "Washington State": "Washington St.", "West Virginia": "West Virginia",
-    "Wisconsin": "Wisconsin", "Wyoming": "Wyoming"
+    "Western Kentucky": "Western Kentucky", "Western Michigan": "Western Michigan",
+    "Wisconsin": "Wisconsin", "Wyoming": "Wyoming", "Delaware": "Delaware", "UTEP": "UTEP",
+    "UTSA": "UTSA"
 }
 
 def normalize_team(name):
@@ -146,6 +158,21 @@ rivalries = {
 FEUD_START = datetime(2025, 10, 30)
 FEUD_END = datetime(2025, 11, 13)
 
+
+def black_friday_date(year):
+    first_day = datetime(int(year), 11, 1)
+    first_thursday = first_day + timedelta(days=(3 - first_day.weekday()) % 7)
+    return (first_thursday + timedelta(days=22)).date()
+
+
+def is_black_friday_slot(time_slot, date_value=None):
+    if "Black Friday" in str(time_slot):
+        return True
+    if not date_value:
+        return False
+    parsed_date = pd.to_datetime(date_value, errors="coerce")
+    return pd.notna(parsed_date) and parsed_date.date() == black_friday_date(parsed_date.year)
+
 def rank_to_coefs(r):
     if 1 <= r <= 10: return (1, 0)
     if 11 <= r <= 25: return (0, 1)
@@ -159,6 +186,12 @@ def format_viewers(val):
     return f"{val:.0f}"
 
 MODEL_TEAM_NAMES = set(teams_list.values())
+POWER_FOOTBALL_CONFERENCES = {"SEC", "Big 10", "ACC", "Big 12"}
+
+
+def is_power_football_team(team, conference=None):
+    resolved_conference = conference if conference is not None else team_conferences.get(team, "Group of 6")
+    return resolved_conference in POWER_FOOTBALL_CONFERENCES or team == "Notre Dame"
 
 def predict_viewership(p):
     # Normalize the incoming names
@@ -170,9 +203,14 @@ def predict_viewership(p):
     network = p["network"]
     time_slot = p["time_slot"]
     comp_tier1 = p.get("comp_tier1", 0)
+    is_black_friday = is_black_friday_slot(time_slot, p.get("date"))
+    is_friday = ("Friday" in str(time_slot)) and not is_black_friday
 
-    conf1 = team_conferences.get(team1, "Group of 6")
-    conf2 = team_conferences.get(team2, "Group of 6")
+    conference_overrides = p.get("conference_overrides", {}) or {}
+    conf1 = conference_overrides.get(team1, team_conferences.get(team1, "Group of 6"))
+    conf2 = conference_overrides.get(team2, team_conferences.get(team2, "Group of 6"))
+    is_power_friday = is_friday and is_power_football_team(team1, conf1) and is_power_football_team(team2, conf2)
+    is_non_power_friday = is_friday and not is_power_friday
 
     both_ranked = rank1 > 0 and rank2 > 0
     same_conf = (conf1 == conf2 and conf1 in ["SEC", "Big 10", "ACC", "Big 12"])
@@ -204,10 +242,13 @@ def predict_viewership(p):
         "Sun": int("Sunday" in time_slot),
         "Monday": int("Monday" in time_slot),
         "Weekday": int("Weekday" in time_slot),
-        "Friday": int("Friday" in time_slot),
-        "Sat Early": int("Early" in time_slot),
-        "Sat Mid": int("Mid" in time_slot),
-        "Sat Late": int("Late" in time_slot),
+        "Friday": int(is_friday),
+        "Friday Power": int(is_power_friday),
+        "Friday Non-Power": int(is_non_power_friday),
+        "Black Friday": int(is_black_friday),
+        "Sat Early": int(not is_black_friday and "Early" in time_slot),
+        "Sat Mid": int(not is_black_friday and "Mid" in time_slot),
+        "Sat Late": int(not is_black_friday and "Late" in time_slot),
 
         "Top 10 Rankings": top10,
         "25-11 Rankings": rank_25_11,
@@ -217,26 +258,6 @@ def predict_viewership(p):
         "ACC": (conf1 == "ACC") + (conf2 == "ACC"),
         "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
     }
-
-    # ======================================================
-    # 🆕 Friday × Network Interactions (MUST MATCH REGRESSION)
-    # ======================================================
-
-    network_dummies = [
-        "FOX","CBS","NBC","ABC",
-        "ESPN2","ESPNU","FS1","FS2",
-        "BTN","CW","NFLN","ESPNNEWS"
-    ]
-
-    # Create _Fri dummies for every non-baseline network
-    for net in network_dummies:
-        features[f"{net}_Fri"] = int(network == net and features["Friday"] == 1)
-
-    # ESPN is baseline — no ESPN column — but we DO need ESPN_Fri
-    features["ESPN_Fri"] = int(
-        features["Friday"] == 1 and
-        network == "ESPN"
-    )
 
     # postseason implication flags
     for conf_tag, flag_name in {
@@ -274,8 +295,6 @@ def predict_viewership(p):
     # BTN × Ohio State adjustment
     if "OhioSt_BTN" in model.params.index:
         features["OhioSt_BTN"] = int(("Ohio St." in [team1, team2]) and network == "BTN")
-
-    print("\n\nMODEL COLUMNS:", model.params.index.tolist(), "\n\n")
 
     X = pd.DataFrame([[features[c] for c in model.params.index]], columns=model.params.index)
 
