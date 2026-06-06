@@ -14,6 +14,8 @@ from predict import (
     format_viewers,
     black_friday_date,
     is_power_football_team,
+    is_week_zero_power_game,
+    is_week_one_power_game,
 )
 
 import joblib
@@ -139,6 +141,8 @@ def build_features(row):
     )
     is_power_friday = is_friday and is_power_football_team(team1, conf1) and is_power_football_team(team2, conf2)
     is_non_power_friday = is_friday and not is_power_friday
+    is_week_zero_power = is_week_zero_power_game(team1, team2, conf1, conf2, date_str, time_slot)
+    is_week_one_power = is_week_one_power_game(team1, team2, conf1, conf2, date_str, time_slot)
 
     # ---------- RIVALRY ----------
     auto_rivalry = next(
@@ -183,6 +187,8 @@ def build_features(row):
         "Friday Power": int(is_power_friday),
         "Friday Non-Power": int(is_non_power_friday),
         "Black Friday": int(is_black_friday),
+        "Week 0 Power": int(is_week_zero_power),
+        "Week 1 Power": int(is_week_one_power),
 
         "Sat Early": int(sat_early),
         "Sat Mid": int(sat_mid),

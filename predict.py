@@ -165,6 +165,11 @@ def black_friday_date(year):
     return (first_thursday + timedelta(days=22)).date()
 
 
+def labor_day_date(year):
+    september_first = datetime(int(year), 9, 1)
+    return (september_first + timedelta(days=(0 - september_first.weekday()) % 7)).date()
+
+
 def is_black_friday_slot(time_slot, date_value=None):
     if "Black Friday" in str(time_slot):
         return True
@@ -193,6 +198,36 @@ def is_power_football_team(team, conference=None):
     resolved_conference = conference if conference is not None else team_conferences.get(team, "Group of 6")
     return resolved_conference in POWER_FOOTBALL_CONFERENCES or team == "Notre Dame"
 
+
+def is_week_zero_power_game(team1, team2, conf1, conf2, date_value=None, time_slot=None):
+    if not (is_power_football_team(team1, conf1) and is_power_football_team(team2, conf2)):
+        return False
+    if "Week 0" in str(time_slot):
+        return True
+    if not date_value:
+        return False
+    parsed_date = pd.to_datetime(date_value, errors="coerce")
+    return (
+        pd.notna(parsed_date)
+        and parsed_date.month == 8
+        and parsed_date.day <= 28
+    )
+
+
+def is_week_one_power_game(team1, team2, conf1, conf2, date_value=None, time_slot=None):
+    if not (is_power_football_team(team1, conf1) and is_power_football_team(team2, conf2)):
+        return False
+    if "Week 1" in str(time_slot):
+        return True
+    if not date_value:
+        return False
+    parsed_date = pd.to_datetime(date_value, errors="coerce")
+    return (
+        pd.notna(parsed_date)
+        and parsed_date.date() >= datetime(parsed_date.year, 8, 29).date()
+        and parsed_date.date() <= labor_day_date(parsed_date.year)
+    )
+
 def predict_viewership(p):
     # Normalize the incoming names
     team1 = normalize_team(p["team1"])
@@ -211,6 +246,8 @@ def predict_viewership(p):
     conf2 = conference_overrides.get(team2, team_conferences.get(team2, "Group of 6"))
     is_power_friday = is_friday and is_power_football_team(team1, conf1) and is_power_football_team(team2, conf2)
     is_non_power_friday = is_friday and not is_power_friday
+    is_week_zero_power = is_week_zero_power_game(team1, team2, conf1, conf2, p.get("date"), time_slot)
+    is_week_one_power = is_week_one_power_game(team1, team2, conf1, conf2, p.get("date"), time_slot)
 
     both_ranked = rank1 > 0 and rank2 > 0
     same_conf = (conf1 == conf2 and conf1 in ["SEC", "Big 10", "ACC", "Big 12"])
@@ -246,6 +283,8 @@ def predict_viewership(p):
         "Friday Power": int(is_power_friday),
         "Friday Non-Power": int(is_non_power_friday),
         "Black Friday": int(is_black_friday),
+        "Week 0 Power": int(is_week_zero_power),
+        "Week 1 Power": int(is_week_one_power),
         "Sat Early": int(not is_black_friday and "Early" in time_slot),
         "Sat Mid": int(not is_black_friday and "Mid" in time_slot),
         "Sat Late": int(not is_black_friday and "Late" in time_slot),

@@ -192,7 +192,7 @@ numeric_features_post = [
     "Competing Tier 1","FOX","ESPN","ESPN2","ESPNU","FS1","FS2","NBC","CBS",
     "ABC","BTN","CW","NFLN","ESPNNEWS",
     "SEC_ConfChamp","Big10_ConfChamp","Big12_ConfChamp","ACC_ConfChamp","Other_ConfChamp",
-    "Sun","Monday","Weekday","Friday Power","Friday Non-Power","Black Friday",
+    "Sun","Monday","Weekday","Friday Power","Friday Non-Power","Black Friday","Week 0 Power","Week 1 Power",
     "Sat Early","Sat Mid","Sat Late","Top 10 Rankings","25-11 Rankings",
     "SEC_PostseasonImplications","Big10_PostseasonImplications",
     "Big12_PostseasonImplications","ACC_PostseasonImplications",
@@ -318,6 +318,28 @@ df_all["Friday Power"] = (
     & df_all["Team 2"].map(lambda team: team_conferences.get(team) in POWER_FOOTBALL_CONFERENCES or team == "Notre Dame")
 ).astype(int)
 df_all["Friday Non-Power"] = (df_all["Friday"].eq(1) & df_all["Friday Power"].eq(0)).astype(int)
+df_all["Week 0 Power"] = (
+    parsed_game_dates.notna()
+    & parsed_game_dates.dt.month.eq(8)
+    & parsed_game_dates.dt.day.le(28)
+    & df_all["Team 1"].map(lambda team: team_conferences.get(team) in POWER_FOOTBALL_CONFERENCES or team == "Notre Dame")
+    & df_all["Team 2"].map(lambda team: team_conferences.get(team) in POWER_FOOTBALL_CONFERENCES or team == "Notre Dame")
+).astype(int)
+labor_day_dates = parsed_game_dates.map(
+    lambda value: (
+        pd.Timestamp(value.year, 9, 1)
+        + pd.Timedelta(days=(0 - pd.Timestamp(value.year, 9, 1).weekday()) % 7)
+    ).date()
+    if pd.notna(value)
+    else None
+)
+df_all["Week 1 Power"] = (
+    parsed_game_dates.notna()
+    & (parsed_game_dates.dt.date >= parsed_game_dates.map(lambda value: pd.Timestamp(value.year, 8, 29).date() if pd.notna(value) else None))
+    & (parsed_game_dates.dt.date <= labor_day_dates)
+    & df_all["Team 1"].map(lambda team: team_conferences.get(team) in POWER_FOOTBALL_CONFERENCES or team == "Notre Dame")
+    & df_all["Team 2"].map(lambda team: team_conferences.get(team) in POWER_FOOTBALL_CONFERENCES or team == "Notre Dame")
+).astype(int)
 
 NETWORK_LABELS = [
     "ABC", "CBS", "NBC", "FOX", "ESPN2",
