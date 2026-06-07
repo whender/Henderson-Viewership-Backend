@@ -238,6 +238,12 @@ def predict_viewership(p):
     network = p["network"]
     time_slot = p["time_slot"]
     comp_tier1 = p.get("comp_tier1", 0)
+    warnings = []
+    if "Monday" in str(time_slot) and network != "ESPN":
+        warnings.append(
+            "No Monday games in the training data aired on this network. "
+            "The Monday effect is estimated from ESPN Monday games, so this prediction extrapolates outside observed support."
+        )
     is_black_friday = is_black_friday_slot(time_slot, p.get("date"))
     is_friday = ("Friday" in str(time_slot)) and not is_black_friday
 
@@ -346,5 +352,6 @@ def predict_viewership(p):
 
     return {
         "raw": float(pred),
-        "formatted": format_viewers(pred)
+        "formatted": format_viewers(pred),
+        "warnings": warnings,
     }

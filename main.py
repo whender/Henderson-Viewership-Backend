@@ -126,7 +126,8 @@ def predict_game(game: GameInput):
     result = predict_viewership(game.dict())
     return {
         "prediction_raw": result["raw"],
-        "prediction_formatted": result["formatted"]
+        "prediction_formatted": result["formatted"],
+        "warnings": result.get("warnings", []),
     }
 
 
