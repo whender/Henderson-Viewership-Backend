@@ -8,6 +8,7 @@ import statsmodels.api as sm
 from sklearn.linear_model import RidgeCV
 import os
 import math
+import random
 from datetime import datetime
 from collections import Counter, defaultdict
 
@@ -1830,12 +1831,17 @@ def _generate_conference_schedule(teams, games_per_team, rank_map, protected_pai
     counts = {team: 0 for team in teams}
     selected = []
     selected_keys = set()
+    max_games = requested_games
 
-    def add_pair(team_1, team_2, protected=False):
+    def add_pair(team_1, team_2, protected=False, allow_over_target=False):
         pair_key = tuple(sorted([team_1, team_2]))
         if pair_key in selected_keys:
             return False
-        if not protected and (counts[team_1] >= max_games or counts[team_2] >= max_games):
+        if (
+            not protected
+            and not allow_over_target
+            and (counts[team_1] >= max_games or counts[team_2] >= max_games)
+        ):
             return False
         selected.append({
             "team1": team_1,
@@ -1849,51 +1855,216 @@ def _generate_conference_schedule(teams, games_per_team, rank_map, protected_pai
         counts[team_2] += 1
         return True
 
-    max_games = requested_games
-
     for team_1, team_2 in sorted(protected_pair_keys):
         add_pair(team_1, team_2, protected=True)
 
     max_games = max(requested_games, max(counts.values(), default=requested_games))
+    protected_selected = list(selected)
+    protected_selected_keys = set(selected_keys)
+    protected_counts = dict(counts)
+    max_attempts = max(1, len(teams) * max_games * 2)
 
-    for round_pairs in _round_robin_pairs(teams):
-        for team_1, team_2 in round_pairs:
-            add_pair(team_1, team_2, protected=False)
-        if all(count >= max_games for count in counts.values()):
+    def exact_fill_attempt(seed):
+        rng = random.Random(seed)
+        local_selected = [dict(game) for game in protected_selected]
+        local_selected_keys = set(protected_selected_keys)
+        local_counts = dict(protected_counts)
+        if any(count > max_games for count in local_counts.values()):
+            return None
+
+        for _ in range(max_attempts):
+            deficit_teams = [team for team in teams if local_counts[team] < max_games]
+            if not deficit_teams:
+                return local_selected, local_selected_keys, local_counts
+
+            team_1 = sorted(
+                deficit_teams,
+                key=lambda team: (
+                    -(max_games - local_counts[team]),
+                    local_counts[team],
+                    rng.random(),
+                    team,
+                ),
+            )[0]
+            candidates = [
+                team_2
+                for team_2 in deficit_teams
+                if team_2 != team_1
+                and tuple(sorted([team_1, team_2])) not in local_selected_keys
+            ]
+            if not candidates:
+                return None
+
+            team_2 = sorted(
+                candidates,
+                key=lambda opponent: (
+                    -(max_games - local_counts[opponent]),
+                    -_matchup_score(team_1, opponent, rank_map),
+                    rng.random(),
+                    opponent,
+                ),
+            )[0]
+            pair_key = tuple(sorted([team_1, team_2]))
+            local_selected.append({
+                "team1": team_1,
+                "team2": team_2,
+                "score": _matchup_score(team_1, team_2, rank_map),
+                "protected": False,
+                "rivalry_week_priority": _rivalry_week_priority(team_1, team_2),
+            })
+            local_selected_keys.add(pair_key)
+            local_counts[team_1] += 1
+            local_counts[team_2] += 1
+
+        if all(count == max_games for count in local_counts.values()):
+            return local_selected, local_selected_keys, local_counts
+        return None
+
+    for seed in range(250):
+        exact_fill = exact_fill_attempt(seed)
+        if exact_fill:
+            return exact_fill[0], exact_fill[2]
+
+    all_pairs = [
+        (team_1, team_2)
+        for i, team_1 in enumerate(teams)
+        for team_2 in teams[i + 1:]
+    ]
+
+    # Fill each team's target count as a bounded b-matching problem. The previous
+    # round-robin-first approach could trap dense slates with a few teams short
+    # of the requested count even though valid unused pairings still existed.
+    for _ in range(max_attempts):
+        deficit_teams = [team for team in teams if counts[team] < max_games]
+        if not deficit_teams:
             break
 
-    all_pairs = []
-    for i, team_1 in enumerate(teams):
-        for team_2 in teams[i + 1:]:
-            pair_key = tuple(sorted([team_1, team_2]))
-            if pair_key in selected_keys:
-                continue
-            all_pairs.append((team_1, team_2))
-
-    while any(count < max_games for count in counts.values()):
+        team_1 = sorted(
+            deficit_teams,
+            key=lambda team: (
+                -(max_games - counts[team]),
+                counts[team],
+                -_football_team_coefficient(team),
+                team,
+            ),
+        )[0]
         candidates = [
-            (team_1, team_2)
-            for team_1, team_2 in all_pairs
-            if counts[team_1] < max_games and counts[team_2] < max_games
+            team_2
+            for team_2 in deficit_teams
+            if team_2 != team_1 and tuple(sorted([team_1, team_2])) not in selected_keys
         ]
         if not candidates:
             break
 
-        team_1, team_2 = sorted(
+        team_2 = sorted(
             candidates,
-            key=lambda pair: (
-                counts[pair[0]] + counts[pair[1]],
-                abs(_football_team_coefficient(pair[0]) - _football_team_coefficient(pair[1])),
-                pair[0],
-                pair[1],
+            key=lambda opponent: (
+                -(max_games - counts[opponent]),
+                -_matchup_score(team_1, opponent, rank_map),
+                abs(_football_team_coefficient(team_1) - _football_team_coefficient(opponent)),
+                opponent,
             ),
         )[0]
         add_pair(team_1, team_2, protected=False)
-        pair_key = tuple(sorted([team_1, team_2]))
-        all_pairs = [
-            pair for pair in all_pairs
-            if tuple(sorted(pair)) != pair_key
-        ]
+
+    if any(count < max_games for count in counts.values()):
+        for team_1, team_2 in sorted(
+            all_pairs,
+            key=lambda pair: (
+                -(max_games - counts[pair[0]]) - (max_games - counts[pair[1]]),
+                -_matchup_score(pair[0], pair[1], rank_map),
+                pair[0],
+                pair[1],
+            ),
+        ):
+            if counts[team_1] >= max_games and counts[team_2] >= max_games:
+                continue
+            if tuple(sorted([team_1, team_2])) in selected_keys:
+                continue
+            add_pair(team_1, team_2, protected=False, allow_over_target=True)
+            if all(count >= max_games for count in counts.values()):
+                break
+
+    while any(count > max_games for count in counts.values()):
+        removable_game = next(
+            (
+                game for game in sorted(
+                    selected,
+                    key=lambda row: (
+                        row.get("protected", False),
+                        row["score"],
+                        row["team1"],
+                        row["team2"],
+                    ),
+                )
+                if not game.get("protected", False)
+                and counts[game["team1"]] > max_games
+                and counts[game["team2"]] > max_games
+            ),
+            None,
+        )
+        if not removable_game:
+            break
+        selected.remove(removable_game)
+        selected_keys.remove(tuple(sorted([removable_game["team1"], removable_game["team2"]])))
+        counts[removable_game["team1"]] -= 1
+        counts[removable_game["team2"]] -= 1
+
+    for _ in range(max_attempts):
+        if not any(count > max_games for count in counts.values()):
+            break
+        removable_game = next(
+            (
+                game for game in sorted(
+                    selected,
+                    key=lambda row: (
+                        not (
+                            counts[row["team1"]] > max_games
+                            or counts[row["team2"]] > max_games
+                        ),
+                        row.get("protected", False),
+                        row["score"],
+                        row["team1"],
+                        row["team2"],
+                    ),
+                )
+                if not game.get("protected", False)
+                and (
+                    counts[game["team1"]] > max_games
+                    or counts[game["team2"]] > max_games
+                )
+            ),
+            None,
+        )
+        if not removable_game:
+            break
+        selected.remove(removable_game)
+        selected_keys.remove(tuple(sorted([removable_game["team1"], removable_game["team2"]])))
+        counts[removable_game["team1"]] -= 1
+        counts[removable_game["team2"]] -= 1
+
+        for _ in range(max_attempts):
+            deficit_teams = [team for team in teams if counts[team] < max_games]
+            if not deficit_teams:
+                break
+            candidates = [
+                (team_1, team_2)
+                for i, team_1 in enumerate(deficit_teams)
+                for team_2 in deficit_teams[i + 1:]
+                if tuple(sorted([team_1, team_2])) not in selected_keys
+            ]
+            if not candidates:
+                break
+            team_1, team_2 = sorted(
+                candidates,
+                key=lambda pair: (
+                    -(max_games - counts[pair[0]]) - (max_games - counts[pair[1]]),
+                    -_matchup_score(pair[0], pair[1], rank_map),
+                    pair[0],
+                    pair[1],
+                ),
+            )[0]
+            add_pair(team_1, team_2, protected=False)
 
     return selected, counts
 
@@ -2038,7 +2209,13 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
             add_game_to_week(game, weeks_by_number[assignments[game_index]])
         return True
 
-    if schedule_with_primary_week_coloring(remaining_games):
+    dense_primary_slate = int(games_per_team or 9) >= len(primary_weeks)
+    use_exact_primary_coloring = (
+        not dense_primary_slate
+        and len(remaining_games) <= 72
+        and len(primary_weeks) <= 10
+    )
+    if use_exact_primary_coloring and schedule_with_primary_week_coloring(remaining_games):
         return [
             game
             for week in sorted(weeks, key=lambda row: row["number"])
