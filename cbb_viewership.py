@@ -681,6 +681,78 @@ def cbb_viewership_rankings(
     return clean_nan({"rows": rows, "available_filters": cbb_filter_options()})
 
 
+def cbb_game_viewership_rankings(
+    network="all",
+    time_slot="all",
+    stage="all",
+    season="all",
+    conference="all",
+    team="all",
+    rank_bucket="all",
+    include_tournament=True,
+):
+    df = filtered_games(network, time_slot, stage, season, include_tournament)
+    if conference != "all":
+        df = df[
+            df["team1"].map(lambda value: CBB_TEAM_CONFERENCES.get(value, "Unknown") == conference)
+            | df["team2"].map(lambda value: CBB_TEAM_CONFERENCES.get(value, "Unknown") == conference)
+        ]
+    if team != "all":
+        df = df[(df["team1"] == team) | (df["team2"] == team)]
+
+    if rank_bucket == "Any Ranked":
+        df = df[(df["team1_rank"].fillna(0).astype(int) > 0) | (df["team2_rank"].fillna(0).astype(int) > 0)]
+    elif rank_bucket == "Both Ranked":
+        df = df[(df["team1_rank"].fillna(0).astype(int) > 0) & (df["team2_rank"].fillna(0).astype(int) > 0)]
+    elif rank_bucket == "Any Top 10":
+        df = df[(df["team1_top_10"].fillna(0).astype(int) == 1) | (df["team2_top_10"].fillna(0).astype(int) == 1)]
+    elif rank_bucket == "Unranked":
+        df = df[(df["team1_rank"].fillna(0).astype(int) <= 0) & (df["team2_rank"].fillna(0).astype(int) <= 0)]
+
+    rows = []
+    sorted_df = df.sort_values(["viewers", "date"], ascending=[False, False])
+    for idx, (_, row) in enumerate(sorted_df.iterrows(), start=1):
+        team1_rank = int(row["team1_rank"]) if pd.notna(row.get("team1_rank")) and int(row.get("team1_rank") or 0) > 0 else 0
+        team2_rank = int(row["team2_rank"]) if pd.notna(row.get("team2_rank")) and int(row.get("team2_rank") or 0) > 0 else 0
+        rows.append({
+            "rank": idx,
+            "date": row.get("date"),
+            "season": row.get("season_label"),
+            "matchup": row.get("matchup_label") or row.get("matchup"),
+            "team1": row.get("team1"),
+            "team2": row.get("team2"),
+            "team1_conference": CBB_TEAM_CONFERENCES.get(row.get("team1"), "Unknown"),
+            "team2_conference": CBB_TEAM_CONFERENCES.get(row.get("team2"), "Unknown"),
+            "team1_rank": team1_rank,
+            "team2_rank": team2_rank,
+            "network": row.get("network"),
+            "time_slot": row.get("time_slot"),
+            "stage": row.get("stage"),
+            "viewers": float(row.get("viewers", 0)),
+            "expected_viewers": float(row["expected_neutral_viewers"]) if pd.notna(row.get("expected_neutral_viewers")) else None,
+            "actual_minus_expected": float(row["actual_minus_expected"]) if pd.notna(row.get("actual_minus_expected")) else None,
+            "actual_vs_expected_pct": float(row["actual_vs_expected_pct"]) if pd.notna(row.get("actual_vs_expected_pct")) else None,
+        })
+
+    filters = cbb_filter_options()
+    filters["teams"] = filters.get("opponents", ["all"])
+    filters["rank_buckets"] = ["all", "Any Ranked", "Both Ranked", "Any Top 10", "Unranked"]
+    return clean_nan({
+        "rows": rows,
+        "available_filters": filters,
+        "filters": {
+            "network": network,
+            "time_slot": time_slot,
+            "stage": stage,
+            "season": season,
+            "conference": conference,
+            "team": team,
+            "rank_bucket": rank_bucket,
+            "include_tournament": include_tournament,
+        },
+    })
+
+
 def expected_summary_fields(df, expected_column="expected_neutral_viewers", delta_column="actual_minus_expected"):
     expected_df = df.dropna(subset=[expected_column]).copy()
     if expected_df.empty:

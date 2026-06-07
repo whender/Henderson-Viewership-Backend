@@ -25,6 +25,7 @@ from firestore_client import db
 from cbb_viewership import (
     CBBGameInput,
     cbb_filter_options,
+    cbb_game_viewership_rankings,
     cbb_metadata,
     cbb_team_effects,
     cbb_team_options,
@@ -188,6 +189,29 @@ def cbb_team_viewership_rankings(
         season=season,
         opponent=opponent,
         min_games=min_games,
+        include_tournament=include_tournament,
+    )
+
+
+@app.get("/cbb/game-viewership-rankings")
+def cbb_game_viewership_rankings_endpoint(
+    network: str = "all",
+    time_slot: str = "all",
+    stage: str = "all",
+    season: str = "all",
+    conference: str = "all",
+    team: str = "all",
+    rank_bucket: str = "all",
+    include_tournament: bool = True,
+):
+    return cbb_game_viewership_rankings(
+        network=network,
+        time_slot=time_slot,
+        stage=stage,
+        season=season,
+        conference=conference,
+        team=team,
+        rank_bucket=rank_bucket,
         include_tournament=include_tournament,
     )
 
@@ -3793,6 +3817,113 @@ def team_viewership_rankings(
             "time_buckets": ["all", "Primetime", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Black Friday", "Monday", "Sunday", "Weekday", "Other"],
             "rank_buckets": rank_detail_options,
             "opponents": ["all"] + sorted(option for option in opponent_options if option),
+        },
+    })
+
+
+@app.get("/game-viewership-rankings")
+def game_viewership_rankings(
+    season: str = "all",
+    conference: str = "all",
+    network: str = "all",
+    time_bucket: str = "all",
+    team: str = "all",
+    rank_bucket: str = "all",
+    include_conf_champ: bool = True,
+):
+    team_aliases = {
+        "Kennesaw St.": "Kennesaw State",
+    }
+    normalized_team = normalize_team(team) if team != "all" else "all"
+    rows = []
+
+    for _, row in df_all.iterrows():
+        viewers = pd.to_numeric(row.get("Persons 2+"), errors="coerce")
+        year = row.get("Year")
+        if pd.isna(viewers) or pd.isna(year):
+            continue
+
+        if season != "all" and str(int(year)) != str(season):
+            continue
+        if network != "all" and row.get("scenario_network") != network:
+            continue
+        if time_bucket == "Primetime":
+            if not is_primetime_baseline(row):
+                continue
+        elif time_bucket == "Other":
+            if row.get("scenario_time_bucket") != "Other" or is_primetime_baseline(row):
+                continue
+        elif time_bucket != "all" and row.get("scenario_time_bucket") != time_bucket:
+            continue
+        if rank_bucket != "all" and row.get("scenario_rank_detail") != rank_bucket:
+            continue
+        if not include_conf_champ and row.get("scenario_conf_champ") == 1:
+            continue
+
+        team_1 = row.get("Team 1")
+        team_2 = row.get("Team 2")
+        team_1_conference = team_conferences.get(team_1, "Independent")
+        team_2_conference = team_conferences.get(team_2, "Independent")
+        if conference != "all" and conference not in {team_1_conference, team_2_conference}:
+            continue
+        if normalized_team != "all" and normalized_team not in {team_1, team_2}:
+            continue
+
+        team_1_display = team_aliases.get(str(team_1), str(team_1)) if pd.notna(team_1) else ""
+        team_2_display = team_aliases.get(str(team_2), str(team_2)) if pd.notna(team_2) else ""
+        rows.append({
+            "date": row.get("Date"),
+            "season": int(year),
+            "matchup": f"{team_1_display} vs {team_2_display}",
+            "team1": team_1_display,
+            "team2": team_2_display,
+            "team1_conference": team_1_conference,
+            "team2_conference": team_2_conference,
+            "network": row.get("scenario_network"),
+            "time_slot": row.get("scenario_time_bucket"),
+            "raw_time_slot": row.get("Time Slot"),
+            "rank_bucket": row.get("scenario_rank_detail"),
+            "competing_bucket": row.get("scenario_competing_bucket"),
+            "conference_championship": bool(row.get("scenario_conf_champ") == 1),
+            "viewers": float(viewers),
+        })
+
+    rows = sorted(
+        rows,
+        key=lambda game: (
+            -(game["viewers"] or 0),
+            -int(game["season"] or 0),
+            str(game["date"] or ""),
+            game["matchup"],
+        ),
+    )
+    for idx, row in enumerate(rows, start=1):
+        row["rank"] = idx
+
+    return clean_nan({
+        "rows": rows,
+        "filters": {
+            "season": season,
+            "conference": conference,
+            "network": network,
+            "time_bucket": time_bucket,
+            "team": team,
+            "rank_bucket": rank_bucket,
+            "include_conf_champ": include_conf_champ,
+        },
+        "available_filters": {
+            "seasons": ["all"] + [str(year) for year in sorted(pd.to_numeric(df_all["Year"], errors="coerce").dropna().astype(int).unique().tolist(), reverse=True)],
+            "conferences": ["all"] + sorted(set(team_conferences.values()) | {"Independent"}),
+            "networks": ["all", "ABC", "CBS", "NBC", "FOX", "ESPN", "ESPN2", "ESPNU", "FS1", "FS2", "BTN", "CW", "NFLN", "ESPNNEWS"],
+            "time_buckets": ["all", "Primetime", "Sat Early", "Sat Mid", "Sat Late", "Friday", "Black Friday", "Monday", "Sunday", "Weekday", "Other"],
+            "rank_buckets": rank_detail_options,
+            "teams": ["all"] + sorted(
+                team for team in {
+                    *(team_aliases.get(str(value), str(value)) for value in df_all["Team 1"].dropna().unique()),
+                    *(team_aliases.get(str(value), str(value)) for value in df_all["Team 2"].dropna().unique()),
+                }
+                if team and team not in excluded_viewership_ranking_teams
+            ),
         },
     })
 
