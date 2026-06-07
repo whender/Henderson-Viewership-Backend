@@ -75,6 +75,15 @@ from predict import (
     MODEL_TEAM_NAMES,
     rivalries,
     black_friday_date,
+    FEUD_END,
+    FEUD_START,
+    format_viewers,
+    is_black_friday_slot,
+    is_power_football_team,
+    is_week_one_power_game,
+    is_week_zero_power_game,
+    rank_to_coefs,
+    team_conferences,
 )
 
 class GameInput(BaseModel):
@@ -2374,6 +2383,107 @@ def _mark_realignment_row_unrated(row):
     row["predicted_viewers_formatted"] = "Not rated"
 
 
+def _batch_predict_realignment_rows(row_contexts):
+    if not row_contexts:
+        return
+
+    model_columns = list(pregame_model.params.index)
+    now = datetime.now()
+    feud_active = (now >= FEUD_START) and (FEUD_END is None or now <= FEUD_END)
+    feature_rows = []
+
+    for context in row_contexts:
+        row = context["row"]
+        conference_overrides = context.get("conference_overrides", {}) or {}
+        team1 = normalize_team(row["team1"])
+        team2 = normalize_team(row["team2"])
+        rank1 = int(row.get("rank1") or 0)
+        rank2 = int(row.get("rank2") or 0)
+        network = row.get("network") or ""
+        time_slot = row.get("time_slot") or ""
+        comp_tier1 = row.get("comp_tier1") or 0
+        conf1 = conference_overrides.get(team1, team_conferences.get(team1, "Group of 6"))
+        conf2 = conference_overrides.get(team2, team_conferences.get(team2, "Group of 6"))
+        is_black_friday = is_black_friday_slot(time_slot, row.get("date"))
+        is_friday = ("Friday" in str(time_slot)) and not is_black_friday
+        is_power_friday = (
+            is_friday
+            and is_power_football_team(team1, conf1)
+            and is_power_football_team(team2, conf2)
+        )
+        is_non_power_friday = is_friday and not is_power_friday
+        both_ranked = rank1 > 0 and rank2 > 0
+        same_conf = conf1 == conf2 and conf1 in ["SEC", "Big 10", "ACC", "Big 12"]
+        t1_top10, t1_25_11 = rank_to_coefs(rank1)
+        t2_top10, t2_25_11 = rank_to_coefs(rank2)
+        auto_rivalry = next(
+            (r for r, (a, b) in rivalries.items() if {team1, team2} == {a, b}),
+            None,
+        )
+
+        features = {
+            "const": 1.0,
+            "Competing Tier 1": comp_tier1,
+            "ABC": int(network == "ABC"),
+            "CBS": int(network == "CBS"),
+            "NBC": int(network == "NBC"),
+            "FOX": int(network == "FOX"),
+            "ESPN": int(network == "ESPN"),
+            "ESPN2": int(network == "ESPN2"),
+            "ESPNU": int(network == "ESPNU"),
+            "FS1": int(network == "FS1"),
+            "FS2": int(network == "FS2"),
+            "BTN": int(network == "BTN"),
+            "NFLN": int(network == "NFLN"),
+            "CW": int(network == "CW"),
+            "ESPNNEWS": int(network == "ESPNNEWS"),
+            "Sun": int("Sunday" in time_slot),
+            "Monday": int("Monday" in time_slot),
+            "Weekday": int("Weekday" in time_slot),
+            "Friday": int(is_friday),
+            "Friday Power": int(is_power_friday),
+            "Friday Non-Power": int(is_non_power_friday),
+            "Black Friday": int(is_black_friday),
+            "Week 0 Power": int(is_week_zero_power_game(team1, team2, conf1, conf2, row.get("date"), time_slot)),
+            "Week 1 Power": int(is_week_one_power_game(team1, team2, conf1, conf2, row.get("date"), time_slot)),
+            "Sat Early": int(not is_black_friday and "Early" in time_slot),
+            "Sat Mid": int(not is_black_friday and "Mid" in time_slot),
+            "Sat Late": int(not is_black_friday and "Late" in time_slot),
+            "Top 10 Rankings": t1_top10 + t2_top10,
+            "25-11 Rankings": t1_25_11 + t2_25_11,
+            "SEC": int(conf1 == "SEC") + int(conf2 == "SEC"),
+            "Big 10": int(conf1 == "Big 10") + int(conf2 == "Big 10"),
+            "ACC": int(conf1 == "ACC") + int(conf2 == "ACC"),
+            "Big 12": int(conf1 == "Big 12") + int(conf2 == "Big 12"),
+            "SEC_PostseasonImplications": int(both_ranked and same_conf and conf1 == "SEC"),
+            "Big10_PostseasonImplications": int(both_ranked and same_conf and conf1 == "Big 10"),
+            "Big12_PostseasonImplications": int(both_ranked and same_conf and conf1 == "Big 12"),
+            "ACC_PostseasonImplications": int(both_ranked and same_conf and conf1 == "ACC"),
+            "YTTV_ABC": int(feud_active and network == "ABC"),
+            "YTTV_ESPN": int(feud_active and network == "ESPN"),
+        }
+
+        for rivalry_key in rivalries:
+            features[rivalry_key] = int(rivalry_key == auto_rivalry)
+        for team_column in MODEL_TEAM_NAMES:
+            features[team_column] = int(team_column in [team1, team2])
+        if "OhioSt_BTN" in model_columns:
+            features["OhioSt_BTN"] = int(("Ohio St." in [team1, team2]) and network == "BTN")
+
+        feature_rows.append({column: features.get(column, 0.0) for column in model_columns})
+
+    X = pd.DataFrame.from_records(feature_rows, columns=model_columns)
+    ln_pred = pregame_model.predict(X)
+    smearing = getattr(pregame_model, "smearing_factor", 1.0)
+    predictions = (np.exp(ln_pred) - 1) * smearing * 1000
+
+    for context, prediction in zip(row_contexts, predictions):
+        viewers = float(prediction)
+        row = context["row"]
+        row["predicted_viewers"] = viewers
+        row["predicted_viewers_formatted"] = format_viewers(viewers)
+
+
 def _apply_tv_slot_to_realignment_row(row, slot, conference, conference_teams):
     prediction = predict_viewership({
         "team1": row["team1"],
@@ -2421,6 +2531,7 @@ def _apply_global_tv_slots_to_league_slates(conference_slates, transferred_slots
             })
 
     used_slots_by_week = defaultdict(set)
+    assigned_row_contexts = []
     ordered_candidates = sorted(
         candidates,
         key=lambda item: (
@@ -2453,13 +2564,21 @@ def _apply_global_tv_slots_to_league_slates(conference_slates, transferred_slots
             if slot_key in used_slots_by_week[week]:
                 continue
             used_slots_by_week[week].add(slot_key)
-            _apply_tv_slot_to_realignment_row(
-                row,
-                slot,
-                conference,
-                candidate["conference_teams"],
-            )
+            row["network"] = slot["network"]
+            row["time_slot"] = slot["time_slot"]
+            row["comp_tier1"] = slot["comp_tier1"]
+            row["tv_tier"] = slot.get("tv_tier")
+            row["nationally_rated"] = True
+            assigned_row_contexts.append({
+                "row": row,
+                "conference_overrides": {
+                    team: conference
+                    for team in candidate["conference_teams"]
+                },
+            })
             break
+
+    _batch_predict_realignment_rows(assigned_row_contexts)
 
     for slate in conference_slates.values():
         _refresh_realignment_slate_summary(slate)
@@ -2473,6 +2592,7 @@ def _predict_realignment_slate(
     realistic_tv_inventory=False,
     transferred_slots=None,
     removed_slots=None,
+    assign_preliminary_tv=True,
 ):
     normalized_teams = [normalize_team(team) for team in teams]
     rank_map = _build_rank_map(normalized_teams, sim.ranking_policy)
@@ -2484,12 +2604,16 @@ def _predict_realignment_slate(
     )
     if realistic_tv_inventory:
         schedule = _assign_schedule_weeks(schedule, normalized_teams, sim.games_per_team)
-        scheduled_tv_slots = _realistic_tv_slots_for_schedule(
-            schedule,
-            conference,
-            team_count=len(normalized_teams),
-            transferred_slots=transferred_slots,
-            removed_slots=removed_slots,
+        scheduled_tv_slots = (
+            _realistic_tv_slots_for_schedule(
+                schedule,
+                conference,
+                team_count=len(normalized_teams),
+                transferred_slots=transferred_slots,
+                removed_slots=removed_slots,
+            )
+            if assign_preliminary_tv
+            else {}
         )
     else:
         schedule = sorted(schedule, key=lambda row: (-row["score"], row["team1"], row["team2"]))
@@ -2885,6 +3009,7 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
             realistic_tv_inventory=True,
             transferred_slots=transferred_tv_slots.get(conference, []),
             removed_slots=removed_tv_slots.get(conference, []),
+            assign_preliminary_tv=False,
         )
         conference_slates[conference] = slate
 
