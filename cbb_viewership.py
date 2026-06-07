@@ -681,6 +681,13 @@ def cbb_viewership_rankings(
     return clean_nan({"rows": rows, "available_filters": cbb_filter_options()})
 
 
+def short_date_label(value):
+    parsed = pd.to_datetime(value, errors="coerce")
+    if pd.isna(parsed):
+        return value
+    return f"{parsed.month}/{parsed.day}/{str(parsed.year)[-2:]}"
+
+
 def cbb_game_viewership_rankings(
     network="all",
     time_slot="all",
@@ -716,7 +723,7 @@ def cbb_game_viewership_rankings(
         team2_rank = int(row["team2_rank"]) if pd.notna(row.get("team2_rank")) and int(row.get("team2_rank") or 0) > 0 else 0
         rows.append({
             "rank": idx,
-            "date": row.get("date"),
+            "date": short_date_label(row.get("date")),
             "season": row.get("season_label"),
             "matchup": row.get("matchup_label") or row.get("matchup"),
             "team1": row.get("team1"),
