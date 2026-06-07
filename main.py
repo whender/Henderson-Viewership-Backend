@@ -1331,6 +1331,73 @@ REALIGNMENT_BLACK_FRIDAY_EXTRA_SLOTS = {
     ],
 }
 
+REALIGNMENT_GLOBAL_DRAFT_SLOT_FLOORS = {
+    "premium": 1_000_000,
+    "secondary": 900_000,
+    "cable": 500_000,
+    "deep_cable": 550_000,
+}
+
+REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS = [
+    # Top Saturday windows draft first.
+    {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC"]},
+    {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"]},
+    {"network": "CBS", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10"]},
+    {"network": "ABC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC"]},
+    {"network": "FOX", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"]},
+    {"network": "NBC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10"]},
+    {"network": "ABC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC"]},
+    {"network": "FOX", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 2, "offset": 1},
+
+    # ESPN-family and cable windows are real inventory, but should not force low-value
+    # conference games onto TV when OOC/G5 inventory would realistically fill them.
+    {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["ACC", "Big 12"], "cadence": 4, "offset": 1, "min_viewers": 1_000_000},
+    {"network": "ABC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["ACC", "Big 12"], "cadence": 5, "offset": 2, "min_viewers": 1_000_000},
+    {"network": "ABC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["ACC", "Big 12"], "cadence": 6, "offset": 3, "min_viewers": 1_000_000},
+    {"network": "ESPN", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["ACC", "Big 12"], "cadence": 2, "offset": 1, "min_viewers": 600_000},
+    {"network": "FOX", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 2, "offset": 0},
+    {"network": "ESPN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["ACC", "Big 12"], "min_viewers": 600_000},
+    {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["SEC", "ACC", "Big 12"]},
+    {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["SEC", "ACC", "Big 12"]},
+    {"network": "ESPN", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["ACC", "Big 12"], "cadence": 2, "offset": 0, "min_viewers": 600_000},
+    {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["Big 12"], "cadence": 2, "offset": 0, "min_viewers": 600_000},
+    {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["Big 12"], "cadence": 2, "offset": 1, "min_viewers": 600_000},
+    {"network": "ESPN2", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 3, "offset": 0},
+    {"network": "ESPN2", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 2, "offset": 0},
+    {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"]},
+    {"network": "ESPN2", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 2, "offset": 1},
+    {"network": "ESPN2", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 4, "offset": 1},
+    {"network": "FS1", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 3, "offset": 1},
+    {"network": "FS1", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 2, "offset": 0},
+    {"network": "FS1", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"]},
+    {"network": "FS1", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 3, "offset": 2},
+    {"network": "FS1", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 6, "offset": 0},
+    {"network": "FOX", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 12"], "cadence": 2, "offset": 0, "min_viewers": 600_000},
+    {"network": "BTN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["Big 10"]},
+    {"network": "BTN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["Big 10"]},
+    {"network": "BTN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["Big 10"], "cadence": 2, "offset": 1},
+    {"network": "CW", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"], "cadence": 4, "offset": 0, "min_viewers": 650_000},
+    {"network": "CW", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"], "cadence": 2, "offset": 1, "min_viewers": 650_000},
+    {"network": "CW", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"], "cadence": 4, "offset": 2, "min_viewers": 650_000},
+    {"network": "CW", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"], "cadence": 6, "offset": 0, "min_viewers": 650_000},
+    {"network": "ESPNU", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 3, "offset": 0},
+    {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 3, "offset": 1},
+    {"network": "ESPNU", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 3, "offset": 2},
+]
+
+REALIGNMENT_GLOBAL_BLACK_FRIDAY_DRAFT_SLOTS = [
+    {"network": "ABC", "time_slot": "Black Friday Early", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC"]},
+    {"network": "FOX", "time_slot": "Black Friday Early", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"]},
+    {"network": "CBS", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10"]},
+    {"network": "ABC", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["ACC", "Big 12"], "min_viewers": 1_000_000},
+    {"network": "FOX", "time_slot": "Black Friday Primetime", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"]},
+    {"network": "NBC", "time_slot": "Black Friday Primetime", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10"]},
+    {"network": "ABC", "time_slot": "Black Friday Primetime", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC"]},
+    {"network": "ESPN", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["SEC", "ACC", "Big 12"]},
+    {"network": "ESPN2", "time_slot": "Black Friday Primetime", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"]},
+    {"network": "FS1", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"]},
+]
+
 
 def _realignment_network_plan(conference):
     return REALIGNMENT_NETWORK_PLANS.get(conference, DEFAULT_REALIGNMENT_NETWORK_PLAN)
@@ -2235,6 +2302,26 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
             for game in week["games"]
         ]
 
+    rivalry_week = max(primary_week_numbers)
+    rivalry_week_row = next(
+        (week for week in primary_weeks if week["number"] == rivalry_week),
+        None,
+    )
+    if rivalry_week_row:
+        for game in sorted(
+            [game for game in remaining_games if int(game.get("rivalry_week_priority") or 0) > 0],
+            key=lambda row: (
+                -int(row.get("rivalry_week_priority") or 0),
+                -row["score"],
+                row["team1"],
+                row["team2"],
+            ),
+        ):
+            if game["team1"] in rivalry_week_row["teams"] or game["team2"] in rivalry_week_row["teams"]:
+                continue
+            add_game_to_week(game, rivalry_week_row)
+            remaining_games.remove(game)
+
     remaining_games = sorted(
         remaining_games,
         key=lambda row: (
@@ -2522,6 +2609,41 @@ def _refresh_realignment_slate_summary(slate):
     }
 
 
+def _global_weekly_draft_slots(week):
+    top_saturday_slots = REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS[:8]
+    remaining_slots = REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS[8:]
+    slots = [
+        dict(slot)
+        for slot in top_saturday_slots
+        if _slot_available_in_week(slot, week)
+    ]
+    if int(week or 0) == REALIGNMENT_BLACK_FRIDAY_WEEK:
+        slots.extend(dict(slot) for slot in REALIGNMENT_GLOBAL_BLACK_FRIDAY_DRAFT_SLOTS)
+    slots.extend(
+        dict(slot)
+        for slot in remaining_slots
+        if _slot_available_in_week(slot, week)
+    )
+    return slots
+
+
+def _slot_minimum_projected_viewers(slot):
+    return float(
+        slot.get("min_viewers")
+        or REALIGNMENT_GLOBAL_DRAFT_SLOT_FLOORS.get(
+            slot.get("tv_tier"),
+            REALIGNMENT_GLOBAL_DRAFT_SLOT_FLOORS["cable"],
+        )
+    )
+
+
+def _conference_overrides_for_slate(conference, slate):
+    return {
+        team: conference
+        for team in slate.get("teams", [])
+    }
+
+
 def _apply_global_tv_slots_to_league_slates(conference_slates, transferred_slots_by_conference, removed_slots_by_conference):
     candidates = []
     for conference, slate in conference_slates.items():
@@ -2534,55 +2656,73 @@ def _apply_global_tv_slots_to_league_slates(conference_slates, transferred_slots
                 "conference_teams": slate.get("teams", []),
             })
 
-    used_slots_by_week = defaultdict(set)
-    assigned_row_contexts = []
-    ordered_candidates = sorted(
-        candidates,
-        key=lambda item: (
-            -float(item["row"].get("matchup_score") or 0.0),
-            int(item["row"].get("week") or 1),
-            item["conference"],
-            item["row"].get("team1", ""),
-            item["row"].get("team2", ""),
-        ),
-    )
+    assigned_row_ids = set()
+    weeks = sorted({
+        int(candidate["row"].get("week") or 1)
+        for candidate in candidates
+    })
 
-    for candidate in ordered_candidates:
-        conference = candidate["conference"]
-        row = candidate["row"]
-        if float(row.get("matchup_score") or 0.0) < REALIGNMENT_NATIONAL_TV_SCORE_FLOOR.get(
-            conference,
-            REALIGNMENT_NATIONAL_TV_SCORE_FLOOR["SEC"],
-        ):
-            continue
-        week = int(row.get("week") or 1)
-        weekly_slots = _weekly_tv_slots(
-            conference,
-            week,
-            team_count=candidate["team_count"],
-            transferred_slots=transferred_slots_by_conference.get(conference, []),
-            removed_slots=removed_slots_by_conference.get(conference, []),
-        )
-        for slot in weekly_slots:
-            slot_key = _global_tv_slot_key(slot)
-            if slot_key in used_slots_by_week[week]:
+    for week in weeks:
+        weekly_candidates = [
+            candidate for candidate in candidates
+            if int(candidate["row"].get("week") or 1) == week
+            and id(candidate["row"]) not in assigned_row_ids
+        ]
+        for slot in _global_weekly_draft_slots(week):
+            eligible_conferences = set(slot.get("eligible_conferences") or REALIGNMENT_EDITABLE_CONFERENCES)
+            slot_candidates = [
+                candidate for candidate in weekly_candidates
+                if id(candidate["row"]) not in assigned_row_ids
+                and candidate["conference"] in eligible_conferences
+                and float(candidate["row"].get("matchup_score") or 0.0) >= REALIGNMENT_NATIONAL_TV_SCORE_FLOOR.get(
+                    candidate["conference"],
+                    REALIGNMENT_NATIONAL_TV_SCORE_FLOOR["SEC"],
+                )
+            ]
+            if not slot_candidates:
                 continue
-            used_slots_by_week[week].add(slot_key)
-            row["network"] = slot["network"]
-            row["time_slot"] = slot["time_slot"]
-            row["comp_tier1"] = slot["comp_tier1"]
-            row["tv_tier"] = slot.get("tv_tier")
-            row["nationally_rated"] = True
-            assigned_row_contexts.append({
-                "row": row,
-                "conference_overrides": {
-                    team: conference
-                    for team in candidate["conference_teams"]
-                },
-            })
-            break
 
-    _batch_predict_realignment_rows(assigned_row_contexts)
+            evaluation_contexts = []
+            for candidate in slot_candidates:
+                evaluation_row = {
+                    **candidate["row"],
+                    "network": slot["network"],
+                    "time_slot": slot["time_slot"],
+                    "comp_tier1": slot["comp_tier1"],
+                    "tv_tier": slot.get("tv_tier"),
+                    "nationally_rated": True,
+                }
+                evaluation_contexts.append({
+                    "candidate": candidate,
+                    "row": evaluation_row,
+                    "conference_overrides": {
+                        team: candidate["conference"]
+                        for team in candidate["conference_teams"]
+                    },
+                })
+
+            _batch_predict_realignment_rows(evaluation_contexts)
+            best_context = max(
+                evaluation_contexts,
+                key=lambda context: (
+                    float(context["row"].get("predicted_viewers") or 0.0),
+                    float(context["candidate"]["row"].get("matchup_score") or 0.0),
+                    context["candidate"]["row"].get("matchup", ""),
+                ),
+            )
+            best_prediction = float(best_context["row"].get("predicted_viewers") or 0.0)
+            if best_prediction < _slot_minimum_projected_viewers(slot):
+                continue
+
+            target_row = best_context["candidate"]["row"]
+            target_row["network"] = slot["network"]
+            target_row["time_slot"] = slot["time_slot"]
+            target_row["comp_tier1"] = slot["comp_tier1"]
+            target_row["tv_tier"] = slot.get("tv_tier")
+            target_row["nationally_rated"] = True
+            target_row["predicted_viewers"] = best_prediction
+            target_row["predicted_viewers_formatted"] = best_context["row"]["predicted_viewers_formatted"]
+            assigned_row_ids.add(id(target_row))
 
     for slate in conference_slates.values():
         _refresh_realignment_slate_summary(slate)
@@ -3073,9 +3213,10 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
         "top_games": rated_rows[:40],
         "methodology": (
             "Schedules every edited conference using the selected games-per-team cap, "
-            "locks known rivalry games within each conference, assigns a limited weekly "
-            "national TV inventory from each conference's partner mix, marks the rest as "
-            "not nationally rated, and aggregates rated TV games by projected viewership."
+            "locks known rivalry games within each conference, then lets a national weekly "
+            "TV draft board select games by projected viewership for each network/window. "
+            "Slots are constrained by media-rights eligibility and can remain unused by "
+            "conference games when the available matchups fall below that slot's TV threshold."
         ),
     })
 
