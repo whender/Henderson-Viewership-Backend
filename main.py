@@ -104,20 +104,20 @@ class RealignmentSimulationInput(BaseModel):
     protected_opponents_by_team: dict[str, list[str]] = Field(default_factory=dict)
     games_per_team: int = 9
     network_policy: str = "big_ten_tv_mix"
-    ranking_policy: str = "brand_tiers"
+    ranking_policy: str = "espn_2026_preseason"
 
 
 class SuperleagueSimulationInput(BaseModel):
     teams: list[str] = Field(default_factory=list)
     games_per_team: int = 9
-    ranking_policy: str = "brand_tiers"
+    ranking_policy: str = "espn_2026_preseason"
 
 
 class LeagueRealignmentSimulationInput(BaseModel):
     memberships: dict[str, str] = Field(default_factory=dict)
     protected_matchups_by_team: dict[str, list[str]] = Field(default_factory=dict)
     games_per_team: int = 9
-    ranking_policy: str = "brand_tiers"
+    ranking_policy: str = "espn_2026_preseason"
 
 @app.get("/")
 def root():
@@ -2989,7 +2989,7 @@ def realignment_simulation(sim: RealignmentSimulationInput):
         "available_options": {
             "conferences": sorted(set(team_conferences.values())),
             "network_policies": [],
-            "ranking_policies": ["brand_tiers", "espn_2026_preseason", "final_ap_2021_2025", "unranked"],
+            "ranking_policies": ["espn_2026_preseason", "final_ap_2021_2025", "unranked"],
         },
         "methodology": (
             "Generates a deterministic conference slate by locking known rivalry games, "
@@ -3072,7 +3072,7 @@ def superleague_simulation(sim: SuperleagueSimulationInput):
             for team_1, team_2 in protected_rivalry_pairs
         ],
         "available_options": {
-            "ranking_policies": ["brand_tiers", "espn_2026_preseason", "final_ap_2021_2025", "unranked"],
+            "ranking_policies": ["espn_2026_preseason", "final_ap_2021_2025", "unranked"],
         },
         "methodology": (
             "Builds a custom superleague from the drafted teams, locks known rivalry games, "
