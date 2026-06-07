@@ -11,6 +11,7 @@ import math
 import random
 from datetime import datetime
 from collections import Counter, defaultdict
+from functools import lru_cache
 
 from weekly_predictions_fs import (
     generate_pregame_prediction,
@@ -1648,6 +1649,7 @@ def _rivalry_bonus(team_1, team_2):
     return 0.75 if tuple(sorted([team_1, team_2])) in rivalry_pairs else 0.0
 
 
+@lru_cache(maxsize=1)
 def _rivalry_pair_keys():
     return {
         tuple(sorted([normalize_team(team_1), normalize_team(team_2)]))
@@ -1929,10 +1931,12 @@ def _generate_conference_schedule(teams, games_per_team, rank_map, protected_pai
             return local_selected, local_selected_keys, local_counts
         return None
 
-    for seed in range(250):
-        exact_fill = exact_fill_attempt(seed)
-        if exact_fill:
-            return exact_fill[0], exact_fill[2]
+    remaining_team_games = sum(max_games - count for count in protected_counts.values())
+    if remaining_team_games % 2 == 0:
+        for seed in range(250):
+            exact_fill = exact_fill_attempt(seed)
+            if exact_fill:
+                return exact_fill[0], exact_fill[2]
 
     all_pairs = [
         (team_1, team_2)
@@ -2221,7 +2225,7 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
     dense_primary_slate = int(games_per_team or 9) >= len(primary_weeks)
     use_exact_primary_coloring = (
         not dense_primary_slate
-        and len(remaining_games) <= 72
+        and len(remaining_games) <= 48
         and len(primary_weeks) <= 10
     )
     if use_exact_primary_coloring and schedule_with_primary_week_coloring(remaining_games):
