@@ -2633,6 +2633,65 @@ def _refresh_realignment_slate_summary(slate):
     }
 
 
+REALIGNMENT_DISTRIBUTION_METRICS = [
+    ("p75", "75th Percentile Game", 75),
+    ("p50", "50th Percentile Game", 50),
+    ("p25", "25th Percentile Game", 25),
+]
+
+
+def _rated_viewer_values(rows):
+    return [
+        float(row.get("predicted_viewers") or 0)
+        for row in rows
+        if row.get("nationally_rated", True)
+    ]
+
+
+def _top_n_average(values, count=10):
+    if not values:
+        return 0.0
+    top_values = sorted(values, reverse=True)[:count]
+    return float(sum(top_values) / len(top_values))
+
+
+def _distribution_metric_comparison(current_rows, baseline_rows, membership_pct_delta=None):
+    current_values = _rated_viewer_values(current_rows)
+    baseline_values = _rated_viewer_values(baseline_rows)
+    comparison = []
+
+    for key, label, percentile in REALIGNMENT_DISTRIBUTION_METRICS:
+        current_value = float(np.percentile(current_values, percentile)) if current_values else 0.0
+        baseline_value = float(np.percentile(baseline_values, percentile)) if baseline_values else 0.0
+        delta = current_value - baseline_value
+        pct_delta = None if baseline_value == 0 else (delta / baseline_value) * 100
+        comparison.append({
+            "key": key,
+            "label": label,
+            "current_viewers": current_value,
+            "baseline_viewers": baseline_value,
+            "viewer_delta": delta,
+            "pct_delta": pct_delta,
+            "membership_elasticity": None if membership_pct_delta in (None, 0) or pct_delta is None else pct_delta / membership_pct_delta,
+        })
+
+    current_top_10 = _top_n_average(current_values, 10)
+    baseline_top_10 = _top_n_average(baseline_values, 10)
+    top_10_delta = current_top_10 - baseline_top_10
+    top_10_pct_delta = None if baseline_top_10 == 0 else (top_10_delta / baseline_top_10) * 100
+    comparison.append({
+        "key": "top_10_avg",
+        "label": "Top 10 Avg.",
+        "current_viewers": current_top_10,
+        "baseline_viewers": baseline_top_10,
+        "viewer_delta": top_10_delta,
+        "pct_delta": top_10_pct_delta,
+        "membership_elasticity": None if membership_pct_delta in (None, 0) or top_10_pct_delta is None else top_10_pct_delta / membership_pct_delta,
+    })
+
+    return comparison
+
+
 def _global_weekly_draft_slots(week):
     top_saturday_slots = REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS[:8]
     remaining_slots = REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS[8:]
@@ -3136,56 +3195,72 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
             ):
                 user_protected_pairs.add(tuple(sorted([team, opponent])))
 
-    transferred_tv_slots, removed_tv_slots, tv_slot_transfer_rows = _conference_tv_slot_transfers(normalized_memberships)
-    conference_slates = {}
-    for conference in REALIGNMENT_EDITABLE_CONFERENCES:
-        members = sorted(
-            [
-                team
-                for team, team_conference in normalized_memberships.items()
-                if team_conference == conference
-            ],
-            key=lambda team: (-_football_team_coefficient(team), team),
-        )
-        if len(members) < 2:
-            conference_slates[conference] = {
-                "teams": members,
-                "team_game_counts": {},
-                "rank_map": {},
-                "rows": [],
-                "summary": {
-                    "teams": len(members),
-                    "games": 0,
-                    "total_viewers": 0.0,
-                    "average_viewers": 0.0,
-                },
-            }
-            continue
+    def build_league_slates(memberships, protected_pair_overrides=None):
+        transferred_slots, removed_slots, transfer_rows = _conference_tv_slot_transfers(memberships)
+        slates = {}
+        protected_pair_overrides = protected_pair_overrides or set()
+        for conference in REALIGNMENT_EDITABLE_CONFERENCES:
+            members = sorted(
+                [
+                    team
+                    for team, team_conference in memberships.items()
+                    if team_conference == conference
+                ],
+                key=lambda team: (-_football_team_coefficient(team), team),
+            )
+            if len(members) < 2:
+                slates[conference] = {
+                    "teams": members,
+                    "team_game_counts": {},
+                    "rank_map": {},
+                    "rows": [],
+                    "summary": {
+                        "teams": len(members),
+                        "games": 0,
+                        "scheduled_games": 0,
+                        "nationally_rated_games": 0,
+                        "unrated_games": 0,
+                        "total_viewers": 0.0,
+                        "average_viewers": 0.0,
+                    },
+                }
+                continue
 
-        protected_rivalry_pairs = _protected_rivalry_pairs_for_teams(members)
-        protected_pairs = sorted(
-            set(protected_rivalry_pairs) | {
-                pair for pair in user_protected_pairs
-                if pair[0] in members and pair[1] in members
-            }
-        )
-        slate = _predict_realignment_slate(
-            members,
-            conference,
-            sim,
-            protected_pairs=protected_pairs,
-            realistic_tv_inventory=True,
-            transferred_slots=transferred_tv_slots.get(conference, []),
-            removed_slots=removed_tv_slots.get(conference, []),
-            assign_preliminary_tv=False,
-        )
-        conference_slates[conference] = slate
+            protected_rivalry_pairs = _protected_rivalry_pairs_for_teams(members)
+            protected_pairs = sorted(
+                set(protected_rivalry_pairs) | {
+                    pair for pair in protected_pair_overrides
+                    if pair[0] in members and pair[1] in members
+                }
+            )
+            slates[conference] = _predict_realignment_slate(
+                members,
+                conference,
+                sim,
+                protected_pairs=protected_pairs,
+                realistic_tv_inventory=True,
+                transferred_slots=transferred_slots.get(conference, []),
+                removed_slots=removed_slots.get(conference, []),
+                assign_preliminary_tv=False,
+            )
 
-    _apply_global_tv_slots_to_league_slates(
-        conference_slates,
-        transferred_tv_slots,
-        removed_tv_slots,
+        _apply_global_tv_slots_to_league_slates(
+            slates,
+            transferred_slots,
+            removed_slots,
+        )
+        return slates, transferred_slots, removed_slots, transfer_rows
+
+    conference_slates, transferred_tv_slots, removed_tv_slots, tv_slot_transfer_rows = build_league_slates(
+        normalized_memberships,
+        user_protected_pairs,
     )
+    baseline_memberships = {
+        team: conference
+        for team, conference in team_conferences.items()
+        if conference in REALIGNMENT_EDITABLE_CONFERENCES and team in MODEL_TEAM_NAMES
+    }
+    baseline_conference_slates, *_ = build_league_slates(baseline_memberships)
 
     all_rows = []
     for conference, slate in conference_slates.items():
@@ -3207,6 +3282,32 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
         conference: slate["summary"]
         for conference, slate in conference_slates.items()
     }
+    conference_membership_changes = {
+        conference: {
+            "current_teams": int(conference_slates.get(conference, {}).get("summary", {}).get("teams", 0)),
+            "baseline_teams": int(baseline_conference_slates.get(conference, {}).get("summary", {}).get("teams", 0)),
+            "team_delta": int(conference_slates.get(conference, {}).get("summary", {}).get("teams", 0))
+            - int(baseline_conference_slates.get(conference, {}).get("summary", {}).get("teams", 0)),
+            "pct_delta": None
+            if int(baseline_conference_slates.get(conference, {}).get("summary", {}).get("teams", 0)) == 0
+            else (
+                (
+                    int(conference_slates.get(conference, {}).get("summary", {}).get("teams", 0))
+                    - int(baseline_conference_slates.get(conference, {}).get("summary", {}).get("teams", 0))
+                )
+                / int(baseline_conference_slates.get(conference, {}).get("summary", {}).get("teams", 0))
+            ) * 100,
+        }
+        for conference in REALIGNMENT_EDITABLE_CONFERENCES
+    }
+    conference_distribution_metrics = {
+        conference: _distribution_metric_comparison(
+            conference_slates.get(conference, {}).get("rows", []),
+            baseline_conference_slates.get(conference, {}).get("rows", []),
+            conference_membership_changes[conference]["pct_delta"],
+        )
+        for conference in REALIGNMENT_EDITABLE_CONFERENCES
+    }
     rated_rows = [row for row in all_rows if row.get("nationally_rated", True)]
     total_viewers = _viewer_total(row["predicted_viewers"] for row in rated_rows)
     average_viewers = _viewer_average(row["predicted_viewers"] for row in rated_rows)
@@ -3223,6 +3324,12 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
         "memberships": normalized_memberships,
         "conference_slates": conference_slates,
         "conference_summaries": conference_summaries,
+        "baseline_conference_summaries": {
+            conference: slate["summary"]
+            for conference, slate in baseline_conference_slates.items()
+        },
+        "conference_membership_changes": conference_membership_changes,
+        "conference_distribution_metrics": conference_distribution_metrics,
         "rows": all_rows,
         "summary": {
             "conferences": len(REALIGNMENT_EDITABLE_CONFERENCES),
