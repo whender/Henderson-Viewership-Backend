@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import pandas as pd
@@ -7,9 +7,12 @@ import joblib
 import statsmodels.api as sm
 from sklearn.linear_model import RidgeCV
 import os
+import json
 import math
 import random
-from datetime import datetime
+import re
+import importlib.util
+from datetime import datetime, timedelta
 from collections import Counter, defaultdict
 from functools import lru_cache
 
@@ -95,7 +98,20 @@ class GameInput(BaseModel):
     rank2: int
     network: str
     time_slot: str
+    date: str | None = None
+    conf_champ: bool = False
     comp_tier1: int = 0
+    competing_games_score: float = 0.0
+
+
+class ArticleInput(BaseModel):
+    slug: str
+    title: str
+    date: str = ""
+    description: str = ""
+    tags: list[str] = Field(default_factory=list)
+    published: bool = False
+    body: str = ""
 
 
 class RealignmentSimulationInput(BaseModel):
@@ -106,12 +122,14 @@ class RealignmentSimulationInput(BaseModel):
     games_per_team: int = 9
     network_policy: str = "big_ten_tv_mix"
     ranking_policy: str = "espn_2026_preseason"
+    custom_rankings: dict[str, int] = Field(default_factory=dict)
 
 
 class SuperleagueSimulationInput(BaseModel):
     teams: list[str] = Field(default_factory=list)
     games_per_team: int = 9
     ranking_policy: str = "espn_2026_preseason"
+    custom_rankings: dict[str, int] = Field(default_factory=dict)
 
 
 class LeagueRealignmentSimulationInput(BaseModel):
@@ -119,10 +137,153 @@ class LeagueRealignmentSimulationInput(BaseModel):
     protected_matchups_by_team: dict[str, list[str]] = Field(default_factory=dict)
     games_per_team: int = 9
     ranking_policy: str = "espn_2026_preseason"
+    custom_rankings: dict[str, int] = Field(default_factory=dict)
 
 @app.get("/")
 def root():
     return {"status": "running", "message": "Henderson Viewership Model API"}
+
+
+ARTICLES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "articles"))
+
+
+def _article_slug(value):
+    slug = re.sub(r"[^a-z0-9-]+", "-", str(value or "").strip().lower())
+    slug = re.sub(r"-+", "-", slug).strip("-")
+    return slug[:90] or "untitled"
+
+
+def _article_path(slug):
+    safe_slug = _article_slug(slug)
+    return os.path.join(ARTICLES_DIR, f"{safe_slug}.md")
+
+
+def _parse_article_file(path):
+    with open(path, "r", encoding="utf-8") as article_file:
+        text = article_file.read()
+
+    metadata = {}
+    body = text
+    if text.startswith("---\n"):
+        _, frontmatter, body = text.split("---\n", 2)
+        for line in frontmatter.splitlines():
+            if ":" not in line:
+                continue
+            key, value = line.split(":", 1)
+            key = key.strip()
+            value = value.strip()
+            if key == "tags":
+                metadata[key] = [
+                    item.strip()
+                    for item in value.strip("[]").replace('"', "").split(",")
+                    if item.strip()
+                ]
+            elif key == "published":
+                metadata[key] = value.lower() == "true"
+            else:
+                metadata[key] = value.strip('"')
+
+    slug = os.path.splitext(os.path.basename(path))[0]
+    return {
+        "slug": slug,
+        "title": metadata.get("title") or slug.replace("-", " ").title(),
+        "date": metadata.get("date") or "",
+        "description": metadata.get("description") or "",
+        "tags": metadata.get("tags") or [],
+        "published": bool(metadata.get("published", False)),
+        "body": body.lstrip("\n"),
+    }
+
+
+def _serialize_article(article):
+    slug = _article_slug(article.slug)
+    tags = [str(tag).strip() for tag in (article.tags or []) if str(tag).strip()]
+    frontmatter = [
+        "---",
+        f'title: "{article.title.strip() or slug.replace("-", " ").title()}"',
+        f'date: "{article.date.strip()}"',
+        f'description: "{article.description.strip()}"',
+        f"tags: [{', '.join(tags)}]",
+        f"published: {'true' if article.published else 'false'}",
+        "---",
+        "",
+    ]
+    return "\n".join(frontmatter) + (article.body or "").rstrip() + "\n"
+
+
+def _list_articles(include_drafts=False):
+    if not os.path.isdir(ARTICLES_DIR):
+        return []
+    articles = [
+        _parse_article_file(os.path.join(ARTICLES_DIR, filename))
+        for filename in os.listdir(ARTICLES_DIR)
+        if filename.endswith(".md")
+    ]
+    articles = [
+        article for article in articles
+        if include_drafts or article.get("published")
+    ]
+    return sorted(
+        articles,
+        key=lambda article: (article.get("date") or "", article.get("title") or ""),
+        reverse=True,
+    )
+
+
+def _article_summary(article):
+    return {
+        key: article.get(key)
+        for key in ["slug", "title", "date", "description", "tags", "published"]
+    }
+
+
+def _require_local_admin(request):
+    client_host = request.client.host if request.client else ""
+    if client_host not in {"127.0.0.1", "::1", "localhost"}:
+        raise HTTPException(status_code=403, detail="Article admin is local-only.")
+
+
+@app.get("/articles")
+def list_published_articles():
+    return {"articles": [_article_summary(article) for article in _list_articles(include_drafts=False)]}
+
+
+@app.get("/articles/{slug}")
+def get_published_article(slug: str):
+    path = _article_path(slug)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Article not found.")
+    article = _parse_article_file(path)
+    if not article.get("published"):
+        raise HTTPException(status_code=404, detail="Article not found.")
+    return article
+
+
+@app.get("/admin/articles")
+def list_admin_articles(request: Request):
+    _require_local_admin(request)
+    return {"articles": [_article_summary(article) for article in _list_articles(include_drafts=True)]}
+
+
+@app.get("/admin/articles/{slug}")
+def get_admin_article(slug: str, request: Request):
+    _require_local_admin(request)
+    path = _article_path(slug)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Article not found.")
+    return _parse_article_file(path)
+
+
+@app.post("/admin/articles")
+def save_admin_article(article: ArticleInput, request: Request):
+    _require_local_admin(request)
+    os.makedirs(ARTICLES_DIR, exist_ok=True)
+    slug = _article_slug(article.slug or article.title)
+    normalized_article = article.copy(update={"slug": slug})
+    with open(_article_path(slug), "w", encoding="utf-8") as article_file:
+        article_file.write(_serialize_article(normalized_article))
+    return _parse_article_file(_article_path(slug))
+
 
 @app.get("/teams")
 def get_teams():
@@ -225,11 +386,12 @@ def cbb_profile(team: str):
 # ======================================================
 
 numeric_features_post = [
-    "Competing Tier 1","FOX","ESPN","ESPN2","ESPNU","FS1","FS2","NBC","CBS",
+    "Competing_Games_Score","FOX","ESPN","ESPN2","ESPNU","FS1","FS2","NBC","CBS",
     "ABC","BTN","CW","NFLN","ESPNNEWS",
-    "SEC_ConfChamp","Big10_ConfChamp","Big12_ConfChamp","ACC_ConfChamp","Other_ConfChamp",
+    "SEC_ConfChamp","Big10_ConfChamp","Big12_ConfChamp","ACC_ConfChamp","Pac12_ConfChamp","Other_ConfChamp",
     "Sun","Monday","Weekday","Friday Power","Friday Non-Power","Black Friday","Week 0 Power","Week 1 Power",
     "Sat Early","Sat Mid","Sat Late","Top 10 Rankings","25-11 Rankings",
+    "Avg_WinPct_ToDate","WinPct_Diff_ToDate",
     "SEC_PostseasonImplications","Big10_PostseasonImplications",
     "Big12_PostseasonImplications","ACC_PostseasonImplications",
     "YTTV_ABC","YTTV_ESPN","Score Diff"
@@ -242,7 +404,8 @@ rivalry_features = [
     "Miami_FloridaSt","Texas_TexasA&M","Oregon_OregonSt","USC_UCLA",
     "Louisville_Kentucky","Washington_WashingtonSt","Kansas_KansasSt",
     "Minnesota_Wisconsin","Army_Navy","Army_AirForce","Navy_AirForce",
-    "OhioSt_PennSt","Alabama_LSU"
+    "OhioSt_PennSt","Alabama_LSU","Vanderbilt_Tennessee","Georgia_GeorgiaTech",
+    "Alabama_Georgia","WestVirginia_Pittsburgh"
 ]
 
 team_conferences = {
@@ -311,6 +474,10 @@ team_conferences = {
 }
 
 power4_set = set(team_conferences.keys()) | {"Notre Dame"}
+former_pac12_teams = {
+    "Arizona", "Arizona St.", "California", "Colorado", "Oregon", "Oregon St.",
+    "Stanford", "UCLA", "USC", "Utah", "Washington", "Washington St.",
+}
 excluded_brand_teams = {"North Dakota"}
 excluded_viewership_ranking_teams = {
     "Western Carolina",
@@ -442,6 +609,16 @@ def detect_rank_detail(row):
 
 
 def detect_competing_tier(row):
+    score = pd.to_numeric(row.get("Competing_Games_Score"), errors="coerce")
+    if pd.notna(score):
+        if score <= 0:
+            return "None"
+        if score < 3:
+            return "Light"
+        if score < 7:
+            return "Moderate"
+        return "Heavy"
+
     comp = pd.to_numeric(row.get("Competing Tier 1"), errors="coerce")
     if pd.isna(comp) or comp <= 0:
         return "None"
@@ -598,14 +775,246 @@ def compute_brand_rankings(df):
 
     rows = []
     for i, (team, lift) in enumerate(lift_pct.sort_values(ascending=False).items(), start=1):
-        rows.append({
+        rows.append(attach_football_brand_uncertainty({
             "rank": i,
             "team": team,
             "conference": team_conferences.get(team, "Independent"),
             "viewership_lift_pct": float(round(lift, 1)),
             "games_used": int(counts[team])
-        })
+        }))
+    return attach_football_rank_ranges(rows)
+
+
+def _confidence_label(score):
+    if score is None:
+        return "Insufficient data"
+    if score >= 80:
+        return "High"
+    if score >= 45:
+        return "Medium"
+    return "Low"
+
+
+def _sample_confidence(games, full_sample=60):
+    games = max(float(games or 0), 0.0)
+    if games <= 0:
+        return 0.0
+    return min(math.sqrt(games / full_sample), 1.0)
+
+
+def _error_confidence(median_ape):
+    if median_ape is None or pd.isna(median_ape):
+        return None
+    median_ape = max(float(median_ape), 0.0)
+    if median_ape <= 0.15:
+        return 1.0
+    if median_ape >= 0.55:
+        return 0.0
+    return (0.55 - median_ape) / 0.40
+
+
+def _brand_confidence_from_components(games, median_ape=None, sample_full=60):
+    sample_score = _sample_confidence(games, full_sample=sample_full)
+    error_score = _error_confidence(median_ape)
+    if error_score is None:
+        confidence = sample_score * 100
+    else:
+        confidence = sample_score * error_score * 100
+    confidence = max(0.0, min(100.0, confidence))
+    return {
+        "confidence_score": float(round(confidence, 1)),
+        "confidence_label": _confidence_label(confidence),
+        "confidence_games_component": float(round(sample_score * 100, 1)),
+        "confidence_error_component": float(round(error_score * 100, 1)) if error_score is not None else None,
+        "median_abs_pct_error": float(round(median_ape * 100, 1)) if median_ape is not None and not pd.isna(median_ape) else None,
+    }
+
+
+def _brand_lift_uncertainty_range(lift_pct, games, median_ape=None, sample_full=60):
+    if lift_pct is None or median_ape is None or pd.isna(median_ape):
+        return {
+            "brand_range_low_pct": None,
+            "brand_range_high_pct": None,
+            "brand_range_minus_pct": None,
+            "brand_range_plus_pct": None,
+            "median_abs_pct_error": None,
+        }
+
+    games = max(float(games or 0), 1.0)
+    lift_pct = float(lift_pct)
+    observed_coefficient = math.log(max((lift_pct / 100.0) + 1.0, 0.01))
+    sample_multiplier = math.sqrt(sample_full / games)
+    sample_multiplier = max(0.75, min(sample_multiplier, 2.25))
+    observation_sigma = math.log1p(max(float(median_ape), 0.0)) * sample_multiplier
+    observation_sigma = max(0.08, min(observation_sigma, 1.25))
+
+    # Sparse/noisy estimates should regress toward average, not imply unlimited upside.
+    prior_mean = 0.0
+    prior_sigma = 0.50
+    observation_precision = 1.0 / (observation_sigma ** 2)
+    prior_precision = 1.0 / (prior_sigma ** 2)
+    posterior_variance = 1.0 / (observation_precision + prior_precision)
+    posterior_mean = posterior_variance * (
+        observed_coefficient * observation_precision
+        + prior_mean * prior_precision
+    )
+    posterior_sigma = math.sqrt(posterior_variance)
+
+    low_lift = min((math.exp(posterior_mean - posterior_sigma) - 1.0) * 100.0, lift_pct)
+    high_lift = max((math.exp(posterior_mean + posterior_sigma) - 1.0) * 100.0, lift_pct)
+
+    return {
+        "brand_range_low_pct": float(round(low_lift, 1)),
+        "brand_range_high_pct": float(round(high_lift, 1)),
+        "brand_range_minus_pct": float(round(max(lift_pct - low_lift, 0.0), 1)),
+        "brand_range_plus_pct": float(round(max(high_lift - lift_pct, 0.0), 1)),
+        "median_abs_pct_error": float(round(float(median_ape) * 100, 1)),
+    }
+
+
+def _football_prediction_stability_lookup():
+    rows = []
+    for _, row in df_all.iterrows():
+        actual = pd.to_numeric(row.get("Persons 2+"), errors="coerce")
+        if pd.isna(actual) or actual <= 0:
+            continue
+        for team_column, expected_column in [
+            ("Team 1", "expected_viewers_team1"),
+            ("Team 2", "expected_viewers_team2"),
+        ]:
+            team = row.get(team_column)
+            expected = pd.to_numeric(row.get(expected_column), errors="coerce")
+            if not team or pd.isna(expected) or expected <= 0:
+                continue
+            rows.append({
+                "team": str(team),
+                "ape": abs(float(actual) - float(expected)) / float(actual),
+            })
+    if not rows:
+        return {}
+    stability = pd.DataFrame(rows).groupby("team")["ape"].median()
+    return stability.to_dict()
+
+
+def _football_forward_chain_holdout_stability_lookup(exclude_colorado_deion=False):
+    holdout_path = os.path.abspath(os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "RatingsAndRegression",
+        "holdout_viewership_tests.py",
+    ))
+    if not os.path.exists(holdout_path):
+        return {}
+    try:
+        spec = importlib.util.spec_from_file_location("holdout_viewership_tests_confidence", holdout_path)
+        holdout = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(holdout)
+        df = holdout.load_feature_frame().sort_values("ParsedDate").reset_index(drop=True)
+        rows = []
+        for year in sorted(df["Year"].dropna().unique()):
+            train_index = df.index[df["Year"] < year]
+            test_index = df.index[df["Year"] == year]
+            if len(train_index) < 500:
+                continue
+            x_train, x_test = holdout.build_matrix(df, train_index, test_index)
+            y_train = np.log(df.loc[train_index, "Persons 2+"].astype(float) + 1)
+            actual = df.loc[test_index, "Persons 2+"].astype(float)
+            model = sm.OLS(y_train.astype(float), x_train).fit()
+            smearing_factor = np.mean(np.exp(model.resid))
+            predicted = np.maximum(np.exp(model.predict(x_test)) * smearing_factor - 1, 0)
+            scored = df.loc[test_index, ["Team 1", "Team 2", "Year"]].copy()
+            scored["actual"] = actual.values
+            scored["predicted"] = predicted.values if hasattr(predicted, "values") else predicted
+            scored["ape"] = (scored["predicted"] - scored["actual"]).abs() / scored["actual"]
+            for team_column in ["Team 1", "Team 2"]:
+                team_rows = scored[[team_column, "ape"]].rename(columns={team_column: "team"})
+                if exclude_colorado_deion:
+                    team_rows = team_rows[
+                        ~(
+                            (scored[team_column] == "Colorado")
+                            & scored["Year"].isin([2023, 2024, 2025])
+                        )
+                    ]
+                rows.extend(team_rows.to_dict("records"))
+        if not rows:
+            return {}
+        stability = pd.DataFrame(rows).dropna(subset=["ape"]).groupby("team")["ape"].median()
+        return stability.to_dict()
+    except Exception:
+        return {}
+
+
+def attach_football_brand_uncertainty(row, control_deion=False):
+    team = str(row.get("team") or "")
+    display_team_fn = globals().get("display_brand_team_name")
+    if callable(display_team_fn):
+        team = display_team_fn(team)
+    stability_lookup = globals().get("football_prediction_stability_display", football_prediction_stability)
+    if control_deion and team == "Colorado":
+        stability_lookup = globals().get("football_prediction_stability_deion_controlled_display", stability_lookup)
+    median_ape = stability_lookup.get(team) or football_prediction_stability.get(str(row.get("team") or ""))
+    uncertainty = _brand_lift_uncertainty_range(
+        row.get("viewership_lift_pct"),
+        row.get("games_used", row.get("football_games", 0)),
+        median_ape,
+    )
+    row.update(uncertainty)
+    return row
+
+
+def attach_football_rank_ranges(rows):
+    point_lifts = [
+        float(row.get("viewership_lift_pct") or 0.0)
+        for row in rows
+    ]
+    for idx, row in enumerate(rows):
+        low = pd.to_numeric(row.get("brand_range_low_pct"), errors="coerce")
+        high = pd.to_numeric(row.get("brand_range_high_pct"), errors="coerce")
+        if pd.isna(low) or pd.isna(high):
+            row["brand_rank_ceiling"] = None
+            row["brand_rank_floor"] = None
+            continue
+        other_lifts = [lift for pos, lift in enumerate(point_lifts) if pos != idx]
+        row["brand_rank_ceiling"] = int(1 + sum(lift > float(high) for lift in other_lifts))
+        row["brand_rank_floor"] = int(1 + sum(lift > float(low) for lift in other_lifts))
+        row["brand_tier"], row["brand_tier_label"] = _football_brand_tier(row)
     return rows
+
+
+def _football_brand_tier(row):
+    rank = int(row.get("rank") or 999)
+    ceiling = row.get("brand_rank_ceiling")
+    floor = row.get("brand_rank_floor")
+    team = row.get("team")
+
+    if ceiling == 1 and rank <= 2:
+        return 1, "No. 1 Contender"
+    if team == "Michigan" or (rank == 3 and ceiling is not None and ceiling <= 3):
+        return 2, "Michigan Tier"
+    if rank <= 12 and ceiling is not None and ceiling <= 6 and floor is not None and floor <= 25:
+        return 3, "Elite National"
+    if rank <= 25 and ceiling is not None and ceiling <= 16:
+        return 4, "High National"
+    if rank <= 45:
+        return 5, "Upper Middle"
+    if rank <= 75:
+        return 6, "Middle"
+    if rank <= 110:
+        return 7, "Lower Middle"
+    return 8, "Low / Sparse"
+
+
+football_prediction_stability = (
+    _football_forward_chain_holdout_stability_lookup()
+    or _football_prediction_stability_lookup()
+)
+football_prediction_stability_deion_controlled = (
+    _football_forward_chain_holdout_stability_lookup(exclude_colorado_deion=True)
+    or football_prediction_stability
+)
+football_prediction_stability_display = football_prediction_stability
+football_prediction_stability_deion_controlled_display = football_prediction_stability_deion_controlled
+
 
 def _load_csv_brand_rankings():
     csv_path = os.path.join(os.path.dirname(__file__), "brand_rankings.csv")
@@ -627,16 +1036,16 @@ def _load_csv_brand_rankings():
                 for idx, row in brand_df.iterrows():
                     team_name = str(row["Team"])
                     lift_pct = (math.exp(float(row["Adjusted (Shrinkage)"])) - 1) * 100
-                    rows.append({
+                    rows.append(attach_football_brand_uncertainty({
                         "rank": idx + 1,
                         "team": team_name,
                         "conference": team_conferences.get(team_name, "Independent"),
                         "viewership_lift_pct": float(round(lift_pct, 1)),
                         "games_used": int(pd.to_numeric(row.get("Games Used"), errors="coerce") or 0),
-                    })
+                    }))
 
                 if rows:
-                    return rows
+                    return attach_football_rank_ranges(rows)
         except Exception:
             pass
 
@@ -696,6 +1105,16 @@ FOOTBALL_BRAND_NAME_ALIASES = {
 
 def display_brand_team_name(team):
     return FOOTBALL_BRAND_NAME_ALIASES.get(team, team)
+
+
+football_prediction_stability_display = {
+    display_brand_team_name(team): median_ape
+    for team, median_ape in football_prediction_stability.items()
+}
+football_prediction_stability_deion_controlled_display = {
+    display_brand_team_name(team): median_ape
+    for team, median_ape in football_prediction_stability_deion_controlled.items()
+}
 
 
 def _mean_std(values):
@@ -816,18 +1235,18 @@ def football_brand_rankings_for_main_tab(control_deion=False):
         football_scores = apply_colorado_deion_control(football_scores)
     rows = []
     for row in football_scores.values():
-        rows.append({
+        rows.append(attach_football_brand_uncertainty({
             "team": row["team"],
             "conference": row["football_conference"],
             "viewership_lift_pct": row["football_lift_pct"],
             "games_used": row["football_games"],
             "deion_controlled": bool(row.get("deion_controlled", False)),
             "deion_adjustment": row.get("deion_adjustment"),
-        })
+        }, control_deion=control_deion))
     rows = sorted(rows, key=lambda row: (-row["viewership_lift_pct"], -row["games_used"], row["team"]))
     for idx, row in enumerate(rows, start=1):
         row["rank"] = idx
-    return rows
+    return attach_football_rank_ranges(rows)
 
 
 def combined_media_brand_rankings(control_deion=False):
@@ -1100,7 +1519,7 @@ REALIGNMENT_WEEKLY_TV_INVENTORY = {
 }
 
 REALIGNMENT_REGULAR_SEASON_WEEKS = 13
-REALIGNMENT_PRIMARY_CONFERENCE_WEEKS = list(range(4, 14))
+REALIGNMENT_PRIMARY_CONFERENCE_WEEKS = list(range(4, 15))
 REALIGNMENT_EARLY_CONFERENCE_WEEKS = [1, 2, 3]
 REALIGNMENT_EARLY_CONFERENCE_GAME_SHARE = 0.015
 
@@ -1109,6 +1528,14 @@ REALIGNMENT_NATIONAL_TV_SCORE_FLOOR = {
     "SEC": 1.00,
     "Big 12": 0.75,
     "ACC": 0.55,
+    "Group of 6": 0.0,
+    "American Athletic": 0.0,
+    "Conference USA": 0.0,
+    "FBS Independents": 0.0,
+    "Mid-American": 0.0,
+    "Mountain West": 0.0,
+    "Pac-12": 0.0,
+    "Sun Belt": 0.0,
     "Superleague": 0.0,
 }
 
@@ -1363,50 +1790,46 @@ REALIGNMENT_GLOBAL_DRAFT_SLOT_FLOORS = {
 }
 
 REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS = [
-    # Top Saturday windows draft first.
-    {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC"]},
+    # Fixed Saturday national TV windows. Slot order approximates draft priority,
+    # while eligible_conferences keeps media-rights constraints in place.
+    {"network": "ABC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC"]},
     {"network": "FOX", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"]},
-    {"network": "CBS", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10"]},
     {"network": "ABC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC"]},
     {"network": "FOX", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"]},
+    {"network": "CBS", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10"]},
     {"network": "NBC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10"]},
-    {"network": "ABC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC"]},
-    {"network": "FOX", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 2, "offset": 1},
-
-    # ESPN-family and cable windows are real inventory, but should not force low-value
-    # conference games onto TV when OOC/G5 inventory would realistically fill them.
-    {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["ACC", "Big 12"], "cadence": 4, "offset": 1, "min_viewers": 1_000_000},
-    {"network": "ABC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["ACC", "Big 12"], "cadence": 5, "offset": 2, "min_viewers": 1_000_000},
-    {"network": "ABC", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["ACC", "Big 12"], "cadence": 6, "offset": 3, "min_viewers": 1_000_000},
-    {"network": "ESPN", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["ACC", "Big 12"], "cadence": 2, "offset": 1, "min_viewers": 600_000},
-    {"network": "FOX", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 2, "offset": 0},
-    {"network": "ESPN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["ACC", "Big 12"], "min_viewers": 600_000},
-    {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["SEC", "ACC", "Big 12"]},
+    {"network": "NBC", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10"]},
+    {"network": "FOX", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"], "flex_slot_id": "fox_primetime", "season_count": 7},
+    {"network": "ABC", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC"]},
     {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["SEC", "ACC", "Big 12"]},
-    {"network": "ESPN", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["ACC", "Big 12"], "cadence": 2, "offset": 0, "min_viewers": 600_000},
-    {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["Big 12"], "cadence": 2, "offset": 0, "min_viewers": 600_000},
-    {"network": "ESPN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["Big 12"], "cadence": 2, "offset": 1, "min_viewers": 600_000},
-    {"network": "ESPN2", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 3, "offset": 0},
-    {"network": "ESPN2", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 2, "offset": 0},
+    {"network": "ESPN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["SEC", "ACC", "Big 12"]},
+    {"network": "ESPN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["ACC", "Big 12"]},
+    {"network": "ESPN2", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"]},
     {"network": "ESPN2", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"]},
-    {"network": "ESPN2", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 2, "offset": 1},
-    {"network": "ESPN2", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 4, "offset": 1},
-    {"network": "FS1", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 3, "offset": 1},
-    {"network": "FS1", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 2, "offset": 0},
+    {"network": "ESPN2", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"]},
     {"network": "FS1", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"]},
-    {"network": "FS1", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 3, "offset": 2},
-    {"network": "FS1", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 6, "offset": 0},
-    {"network": "FOX", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 12"], "cadence": 2, "offset": 0, "min_viewers": 600_000},
-    {"network": "BTN", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["Big 10"]},
-    {"network": "BTN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["Big 10"]},
+    {"network": "FS1", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"]},
+    {"network": "FS1", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"]},
+    {"network": "BTN", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["Big 10"], "cadence": 2, "offset": 0},
     {"network": "BTN", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["Big 10"], "cadence": 2, "offset": 1},
-    {"network": "CW", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"], "cadence": 4, "offset": 0, "min_viewers": 650_000},
-    {"network": "CW", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"], "cadence": 2, "offset": 1, "min_viewers": 650_000},
-    {"network": "CW", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"], "cadence": 4, "offset": 2, "min_viewers": 650_000},
-    {"network": "CW", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"], "cadence": 6, "offset": 0, "min_viewers": 650_000},
-    {"network": "ESPNU", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 3, "offset": 0},
-    {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 3, "offset": 1},
-    {"network": "ESPNU", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 3, "offset": 2},
+    {"network": "CW", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"]},
+    {"network": "ESPNU", "time_slot": "Sat Mid (2:30p-6:30p)", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["SEC", "ACC", "Big 12"]},
+    {"network": "ESPNU", "time_slot": "Primetime (7:00p-9:00p)", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["SEC", "ACC", "Big 12"]},
+    {"network": "ESPNU", "time_slot": "Sat Early (11:00a-2:00p)", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["SEC", "ACC", "Big 12"], "cadence": 2, "offset": 0},
+    {"network": "ESPN", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["ACC", "Big 12"]},
+    {"network": "FS1", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"]},
+    {"network": "ESPN2", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"]},
+    {"network": "FOX", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"], "min_viewers": 600_000},
+    {"network": "CW", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"], "min_viewers": 650_000},
+    {"network": "ESPNU", "time_slot": "Sat Late (9:30p-Later)", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["ACC", "Big 12"]},
+    {"network": "ESPN", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "secondary", "eligible_conferences": ["SEC", "ACC", "Big 12"]},
+    {"network": "ESPN2", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"], "cadence": 2, "offset": 0},
+    {"network": "FS1", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 2, "offset": 1},
+    {"network": "FOX", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["Big 10", "Big 12"], "cadence": 3, "offset": 0},
+    {"network": "ABC", "time_slot": "Friday", "comp_tier1": 1, "tv_tier": "premium", "eligible_conferences": ["SEC", "ACC", "Big 12"], "cadence": 4, "offset": 1, "min_viewers": 1_000_000},
+    {"network": "ESPNU", "time_slot": "Friday", "comp_tier1": 2, "tv_tier": "deep_cable", "eligible_conferences": ["SEC", "ACC", "Big 12"], "cadence": 5, "offset": 2},
+    {"network": "BTN", "time_slot": "Friday", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["Big 10"], "cadence": 5, "offset": 0},
+    {"network": "CW", "time_slot": "Friday", "comp_tier1": 2, "tv_tier": "cable", "eligible_conferences": ["ACC"], "cadence": 6, "offset": 2, "min_viewers": 650_000},
 ]
 
 REALIGNMENT_GLOBAL_BLACK_FRIDAY_DRAFT_SLOTS = [
@@ -1421,6 +1844,46 @@ REALIGNMENT_GLOBAL_BLACK_FRIDAY_DRAFT_SLOTS = [
     {"network": "ESPN2", "time_slot": "Black Friday Primetime", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["ACC", "Big 12"]},
     {"network": "FS1", "time_slot": "Black Friday Mid", "comp_tier1": 1, "tv_tier": "cable", "eligible_conferences": ["Big 10", "Big 12"]},
 ]
+
+REALIGNMENT_KNOWN_TV_ASSIGNMENTS = {
+    "401856810": {
+        "network": "FOX",
+        "time_slot": "Sat Mid (2:30p-6:30p)",
+        "comp_tier1": 1,
+        "tv_tier": "premium",
+        "assignment_source": "announced_2026_tv",
+    },
+    "401856795": {
+        "network": "CBS",
+        "time_slot": "Primetime (7:00p-9:00p)",
+        "comp_tier1": 1,
+        "tv_tier": "premium",
+        "assignment_source": "announced_2026_tv",
+    },
+}
+
+REALIGNMENT_CONFERENCE_NETWORK_MINIMUMS = {
+    # 2024-2025 measured Big 12-involved broadcast exposure was driven mainly
+    # by FOX. This keeps the draft from assigning every FOX broadcast window
+    # to the Big Ten when the pure viewer-maximizing answer says it should.
+    ("Big 12", "FOX"): 14,
+}
+
+REALIGNMENT_LATE_INVENTORY_TEAMS = {
+    "Big 10": {"USC", "UCLA", "Oregon", "Washington"},
+    "Big 12": {"Arizona", "Arizona St.", "BYU", "Colorado", "Utah"},
+    "ACC": {"California", "Stanford"},
+}
+
+REALIGNMENT_LATE_SLOT_SEASON_CAPS = {
+    "ESPN": 11,
+    "FS1": 8,
+    "ESPN2": 2,
+    "FOX": 2,
+    "CW": 1,
+    "ESPNU": 1,
+    "BTN": 1,
+}
 
 
 def _realignment_network_plan(conference):
@@ -1456,6 +1919,55 @@ def _slot_available_in_week(slot, week):
     cadence = int(slot.get("cadence") or 1)
     offset = int(slot.get("offset") or 0)
     return ((int(week or 1) - 1 - offset) % cadence) == 0
+
+
+def _is_late_saturday_slot(slot):
+    return "Sat Late" in str(slot.get("time_slot") or "")
+
+
+def _late_slot_season_cap(slot):
+    if not _is_late_saturday_slot(slot):
+        return None
+    explicit_cap = slot.get("season_cap")
+    if explicit_cap is not None:
+        return int(explicit_cap)
+    return REALIGNMENT_LATE_SLOT_SEASON_CAPS.get(slot.get("network"))
+
+
+def _late_slot_usage_key(slot, conference=None):
+    return (
+        conference,
+        slot.get("network"),
+        slot.get("time_slot"),
+    )
+
+
+def _late_inventory_teams_for_slot(slot, conference):
+    teams = slot.get("late_inventory_teams")
+    if teams is not None:
+        return {normalize_team(team) for team in teams if normalize_team(team)}
+    return set(REALIGNMENT_LATE_INVENTORY_TEAMS.get(conference, set()))
+
+
+def _slot_late_inventory_eligible(slot, game, conference):
+    if not _is_late_saturday_slot(slot):
+        return True
+    inventory_teams = _late_inventory_teams_for_slot(slot, conference)
+    if not inventory_teams:
+        return False
+    return normalize_team(game.get("team1")) in inventory_teams or normalize_team(game.get("team2")) in inventory_teams
+
+
+def _late_slot_cap_available(slot, late_slot_usage, conference=None):
+    cap = _late_slot_season_cap(slot)
+    if cap is None:
+        return True
+    return late_slot_usage[_late_slot_usage_key(slot, conference)] < cap
+
+
+def _record_late_slot_usage(slot, late_slot_usage, conference=None):
+    if _late_slot_season_cap(slot) is not None:
+        late_slot_usage[_late_slot_usage_key(slot, conference)] += 1
 
 
 def _slot_identity(slot):
@@ -1519,7 +2031,7 @@ def _weekly_tv_slots(conference, week=None, team_count=None, transferred_slots=N
         return [
             _slot_for_week(slot, week)
             for slot in slots
-            if week is None or _slot_available_in_week(slot, week)
+            if week is None or _slot_available_in_week(slot, week) or _is_late_saturday_slot(slot)
         ]
     plan = _realignment_network_plan(conference)
     inventory = _realignment_weekly_tv_inventory(conference)
@@ -1687,12 +2199,32 @@ def _viewer_average(values):
     return float(series.mean()) if not series.empty else 0.0
 
 
+@lru_cache(maxsize=None)
 def _football_team_coefficient(team):
     normalized_team = normalize_team(team)
     try:
         return float(pregame_model.params.get(normalized_team, 0.0))
     except Exception:
         return 0.0
+
+
+@lru_cache(maxsize=1)
+def _worst_modeled_fbs_team_coefficient():
+    coefficients = [
+        _football_team_coefficient(team)
+        for team in MODEL_TEAM_NAMES
+        if team_conferences.get(team) is not None
+    ]
+    return min(coefficients) if coefficients else 0.0
+
+
+def _realignment_team_coefficient(team, conference=None):
+    normalized_team = normalize_team(team)
+    if conference and conference not in REALIGNMENT_FBS_CONFERENCES:
+        return _worst_modeled_fbs_team_coefficient() - REALIGNMENT_FCS_TEAM_COEFFICIENT_MARGIN
+    if normalized_team in MODEL_TEAM_NAMES:
+        return _football_team_coefficient(normalized_team)
+    return _worst_modeled_fbs_team_coefficient()
 
 
 def _conference_members(conference):
@@ -1713,15 +2245,183 @@ def realignment_conference_members(conference: str = "Big 10"):
 
 
 REALIGNMENT_EDITABLE_CONFERENCES = ["Big 10", "SEC", "Big 12", "ACC"]
+REALIGNMENT_HIDDEN_FBS_SLOT_NETWORKS = {"CBS", "FOX", "ESPN", "ESPN2", "ESPNU", "FS1", "CW"}
+REALIGNMENT_HIDDEN_FBS_CANDIDATES_PER_WEEK = 14
+REALIGNMENT_FBS_CONFERENCES = {
+    "ACC",
+    "Big 10",
+    "Big 12",
+    "SEC",
+    "Pac-12",
+    "AAC",
+    "American Athletic",
+    "Conference USA",
+    "FBS Independents",
+    "Independent",
+    "MAC",
+    "Mid-American",
+    "Mountain West",
+    "Sun Belt",
+}
+REALIGNMENT_FCS_TEAM_COEFFICIENT_MARGIN = 0.15
+REALIGNMENT_ACTUAL_SCHEDULE_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "cfb_2026_power4_conference_schedule.json",
+)
 
 
-@app.get("/realignment/memberships")
-def realignment_memberships():
-    memberships = {
+def _default_league_memberships():
+    return {
         team: conference
         for team, conference in team_conferences.items()
         if conference in REALIGNMENT_EDITABLE_CONFERENCES and team in MODEL_TEAM_NAMES
     }
+
+
+def _memberships_match_default(memberships):
+    return dict(sorted((memberships or {}).items())) == dict(sorted(_default_league_memberships().items()))
+
+
+@lru_cache(maxsize=1)
+def _actual_fbs_schedule_payload():
+    try:
+        with open(REALIGNMENT_ACTUAL_SCHEDULE_PATH, "r", encoding="utf-8") as schedule_file:
+            return json.load(schedule_file)
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+@lru_cache(maxsize=1)
+def _actual_power4_conference_schedule():
+    payload = _actual_fbs_schedule_payload()
+    if not payload:
+        return {}
+
+    schedules = {conference: [] for conference in REALIGNMENT_EDITABLE_CONFERENCES}
+    for raw_game in payload.get("games", []):
+        owner_conference = raw_game.get("owner_conference") or raw_game.get("conference")
+        team_1 = normalize_team(raw_game.get("team1"))
+        team_2 = normalize_team(raw_game.get("team2"))
+        team_1_conference = raw_game.get("team1_conference")
+        team_2_conference = raw_game.get("team2_conference")
+        involved_conferences = {
+            conference
+            for conference in [team_1_conference, team_2_conference]
+            if conference in schedules
+        }
+        if not involved_conferences and owner_conference in schedules:
+            involved_conferences.add(owner_conference)
+        if (
+            not involved_conferences
+            or team_1 == team_2
+        ):
+            continue
+        schedule_row = {
+            "event_id": str(raw_game.get("event_id") or ""),
+            "date": raw_game.get("date"),
+            "week": raw_game.get("week"),
+            "owner_conference": owner_conference,
+            "team1": team_1,
+            "team2": team_2,
+            "team1_conference": team_1_conference,
+            "team2_conference": team_2_conference,
+            "neutral_site": bool(raw_game.get("neutral_site", False)),
+            "conference_game": bool(raw_game.get("conference_game", True)),
+        }
+        for key in [
+            "cfbd_media_type",
+            "cfbd_tv_outlet",
+            "tv_network",
+            "tv_time_slot",
+            "tv_start_time",
+            "tv_start_time_tbd",
+            "tv_comp_tier1",
+            "tv_tier",
+            "tv_assignment_source",
+        ]:
+            if key in raw_game:
+                schedule_row[key] = raw_game[key]
+        for conference in involved_conferences:
+            schedules[conference].append(dict(schedule_row))
+    return schedules
+
+
+@lru_cache(maxsize=1)
+def _actual_fbs_schedule_rows():
+    payload = _actual_fbs_schedule_payload()
+    rows = []
+    for raw_game in payload.get("games", []):
+        team_1 = normalize_team(raw_game.get("team1"))
+        team_2 = normalize_team(raw_game.get("team2"))
+        if not team_1 or not team_2 or team_1 == team_2:
+            continue
+        rows.append({
+            "event_id": str(raw_game.get("event_id") or ""),
+            "date": raw_game.get("date"),
+            "week": raw_game.get("week"),
+            "owner_conference": raw_game.get("owner_conference") or raw_game.get("conference"),
+            "team1": team_1,
+            "team2": team_2,
+            "team1_conference": raw_game.get("team1_conference"),
+            "team2_conference": raw_game.get("team2_conference"),
+            "neutral_site": bool(raw_game.get("neutral_site", False)),
+            "conference_game": bool(raw_game.get("conference_game", True)),
+        })
+        for key in [
+            "cfbd_media_type",
+            "cfbd_tv_outlet",
+            "tv_network",
+            "tv_time_slot",
+            "tv_start_time",
+            "tv_start_time_tbd",
+            "tv_comp_tier1",
+            "tv_tier",
+            "tv_assignment_source",
+        ]:
+            if key in raw_game:
+                rows[-1][key] = raw_game[key]
+    return rows
+
+
+REALIGNMENT_CFBD_TV_KEYS = [
+    "cfbd_media_type",
+    "cfbd_tv_outlet",
+    "tv_network",
+    "tv_time_slot",
+    "tv_start_time",
+    "tv_start_time_tbd",
+    "tv_comp_tier1",
+    "tv_tier",
+    "tv_assignment_source",
+]
+
+
+REALIGNMENT_UNRATED_TV_NETWORKS = {"ACCN", "CBSSN", "SECN", "USA Net"}
+
+
+def _copy_cfbd_tv_fields(source, target):
+    for key in REALIGNMENT_CFBD_TV_KEYS:
+        if key in source:
+            target[key] = source[key]
+    return target
+
+
+def _has_unrated_realignment_tv_assignment(row):
+    return (
+        row.get("tv_network") in REALIGNMENT_UNRATED_TV_NETWORKS
+        or str(row.get("cfbd_tv_outlet") or "").strip() in {
+            "ACC Network",
+            "CBS Sports Network",
+            "SEC Network",
+            "USA Net",
+        }
+        or row.get("tv_assignment_source") == "cfbd_games_media_unrated"
+    )
+
+
+@app.get("/realignment/memberships")
+def realignment_memberships():
+    memberships = _default_league_memberships()
     return {
         "conferences": REALIGNMENT_EDITABLE_CONFERENCES,
         "memberships": memberships,
@@ -1771,6 +2471,8 @@ RIVALRY_WEEK_PRIORITY = {
         68: ("Navy", "Army"),
     }.items()
 }
+
+REALIGNMENT_RANKING_POLICIES = ["espn_2026_preseason", "final_ap_2021_2025", "custom", "unranked"]
 
 
 def _rivalry_week_priority(team_1, team_2):
@@ -1845,7 +2547,29 @@ FINAL_AP_2021_2025_AGGREGATE_RANKINGS = {
 }
 
 
-def _build_rank_map(teams, ranking_policy):
+def _normalized_custom_rankings(custom_rankings):
+    normalized = {}
+    used_ranks = set()
+    for raw_team, raw_rank in (custom_rankings or {}).items():
+        team = normalize_team(raw_team)
+        try:
+            rank = int(raw_rank)
+        except (TypeError, ValueError):
+            continue
+        if not team or rank < 1 or rank > 25 or rank in used_ranks:
+            continue
+        normalized[team] = rank
+        used_ranks.add(rank)
+    return normalized
+
+
+def _build_rank_map(teams, ranking_policy, custom_rankings=None):
+    if ranking_policy == "custom":
+        rankings = _normalized_custom_rankings(custom_rankings)
+        return {
+            team: rankings.get(team, 0)
+            for team in teams
+        }
     if ranking_policy == "unranked":
         return {team: 0 for team in teams}
     if ranking_policy == "espn_2026_preseason":
@@ -1870,7 +2594,7 @@ def _build_rank_map(teams, ranking_policy):
     }
 
 
-def _matchup_score(team_1, team_2, rank_map):
+def _matchup_score(team_1, team_2, rank_map, team_1_conference=None, team_2_conference=None):
     rank_1 = rank_map.get(team_1, 0)
     rank_2 = rank_map.get(team_2, 0)
     ranking_score = 0.0
@@ -1881,8 +2605,8 @@ def _matchup_score(team_1, team_2, rank_map):
             ranking_score += 0.25
 
     return (
-        _football_team_coefficient(team_1)
-        + _football_team_coefficient(team_2)
+        _realignment_team_coefficient(team_1, team_1_conference)
+        + _realignment_team_coefficient(team_2, team_2_conference)
         + ranking_score
         + _rivalry_bonus(team_1, team_2)
     )
@@ -2173,7 +2897,8 @@ def _generate_conference_schedule(teams, games_per_team, rank_map, protected_pai
     return selected, counts
 
 
-def _assign_schedule_weeks(schedule, teams, games_per_team):
+def _assign_schedule_weeks(schedule, teams, games_per_team, unavailable_team_weeks=None):
+    unavailable_team_weeks = set(unavailable_team_weeks or set())
     early_game_limit = min(
         len(REALIGNMENT_EARLY_CONFERENCE_WEEKS),
         int(round(len(schedule) * REALIGNMENT_EARLY_CONFERENCE_GAME_SHARE)),
@@ -2202,6 +2927,12 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
         target_week["teams"].update([game["team1"], game["team2"]])
         target_week["score"] += float(game["score"])
 
+    def teams_available_in_week(game, week_number):
+        return (
+            (game["team1"], int(week_number)) not in unavailable_team_weeks
+            and (game["team2"], int(week_number)) not in unavailable_team_weeks
+        )
+
     remaining_games = []
     for game in schedule:
         pair_key = tuple(sorted([game["team1"], game["team2"]]))
@@ -2211,6 +2942,7 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
                 if week["number"] in early_week_numbers
                 and game["team1"] not in week["teams"]
                 and game["team2"] not in week["teams"]
+                and teams_available_in_week(game, week["number"])
             ]
             if early_candidates:
                 add_game_to_week(
@@ -2222,7 +2954,7 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
 
     primary_weeks = [week for week in weeks if week["number"] in primary_week_numbers]
 
-    def schedule_with_primary_week_coloring(games_to_schedule):
+    def schedule_with_week_coloring(games_to_schedule, assignment_weeks):
         game_items = sorted(
             list(enumerate(games_to_schedule)),
             key=lambda item: (
@@ -2239,16 +2971,17 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
             for scheduled_game in week["games"]
             for team in [scheduled_game["team1"], scheduled_game["team2"]]
         }
-        week_loads = Counter({week["number"]: len(week["games"]) for week in primary_weeks})
-        week_scores = Counter({week["number"]: week["score"] for week in primary_weeks})
+        week_loads = Counter({week["number"]: len(week["games"]) for week in assignment_weeks})
+        week_scores = Counter({week["number"]: week["score"] for week in assignment_weeks})
         assignments = {}
 
         def available_weeks(game):
             return [
                 week["number"]
-                for week in primary_weeks
+                for week in assignment_weeks
                 if (game["team1"], week["number"]) not in used_team_weeks
                 and (game["team2"], week["number"]) not in used_team_weeks
+                and teams_available_in_week(game, week["number"])
             ]
 
         def search(unassigned_items):
@@ -2308,18 +3041,19 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
 
         if not search(game_items):
             return False
-        weeks_by_number = {week["number"]: week for week in primary_weeks}
+        weeks_by_number = {week["number"]: week for week in assignment_weeks}
         for game_index, game in enumerate(games_to_schedule):
             add_game_to_week(game, weeks_by_number[assignments[game_index]])
         return True
 
-    dense_primary_slate = int(games_per_team or 9) >= len(primary_weeks)
-    use_exact_primary_coloring = (
-        not dense_primary_slate
-        and len(remaining_games) <= 48
-        and len(primary_weeks) <= 10
-    )
-    if use_exact_primary_coloring and schedule_with_primary_week_coloring(remaining_games):
+    use_exact_primary_coloring = len(remaining_games) <= 160
+    if use_exact_primary_coloring and schedule_with_week_coloring(remaining_games, primary_weeks):
+        return [
+            game
+            for week in sorted(weeks, key=lambda row: row["number"])
+            for game in week["games"]
+        ]
+    if use_exact_primary_coloring and schedule_with_week_coloring(remaining_games, weeks):
         return [
             game
             for week in sorted(weeks, key=lambda row: row["number"])
@@ -2343,6 +3077,8 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
         ):
             if game["team1"] in rivalry_week_row["teams"] or game["team2"] in rivalry_week_row["teams"]:
                 continue
+            if not teams_available_in_week(game, rivalry_week_row["number"]):
+                continue
             add_game_to_week(game, rivalry_week_row)
             remaining_games.remove(game)
 
@@ -2363,6 +3099,7 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
                 (
                     game for game in remaining_games
                     if game["team1"] not in week["teams"] and game["team2"] not in week["teams"]
+                    and teams_available_in_week(game, week["number"])
                 ),
                 None,
             )
@@ -2378,6 +3115,7 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
         target_week = sorted(
             primary_weeks,
             key=lambda week: (
+                int(not teams_available_in_week(game, week["number"])),
                 int(game["team1"] in week["teams"]) + int(game["team2"] in week["teams"]),
                 len(week["games"]),
                 week["score"],
@@ -2413,6 +3151,7 @@ def _assign_schedule_weeks(schedule, teams, games_per_team):
                         if candidate_week is not week
                         and scheduled_game["team1"] not in candidate_week["teams"]
                         and scheduled_game["team2"] not in candidate_week["teams"]
+                        and teams_available_in_week(scheduled_game, candidate_week["number"])
                     ),
                     None,
                 )
@@ -2453,6 +3192,7 @@ def _realistic_tv_slots_for_schedule(
     )
     selected_slots = {}
     used_weekly_slot_indexes = defaultdict(set)
+    late_slot_usage = Counter()
     ordered_games = sorted(
         schedule,
         key=lambda row: (-row["score"], row.get("week", 1), row["team1"], row["team2"]),
@@ -2474,8 +3214,13 @@ def _realistic_tv_slots_for_schedule(
         for slot_idx, slot in enumerate(weekly_slots):
             if slot_idx in used_weekly_slot_indexes[week]:
                 continue
+            if not _slot_late_inventory_eligible(slot, game, conference):
+                continue
+            if not _late_slot_cap_available(slot, late_slot_usage, conference):
+                continue
             selected_slots[pair_key] = dict(slot)
             used_weekly_slot_indexes[week].add(slot_idx)
+            _record_late_slot_usage(slot, late_slot_usage, conference)
             break
 
     return selected_slots
@@ -2488,106 +3233,230 @@ def _global_tv_slot_key(slot):
     )
 
 
+def _realignment_slot_start_hour(time_slot):
+    value = str(time_slot or "").lower()
+    if "early" in value:
+        return 11.0
+    if "mid" in value:
+        return 14.5
+    if "late" in value:
+        return 21.5
+    if "primetime" in value:
+        return 19.0
+    if "friday" in value:
+        return 19.0
+    return None
+
+
+REALIGNMENT_LOCAL_TIMEZONE = "America/New_York"
+
+
+def _realignment_local_game_date(date_value):
+    if not date_value:
+        return None
+    parsed = pd.to_datetime(date_value, errors="coerce")
+    if pd.isna(parsed):
+        return None
+    if getattr(parsed, "tzinfo", None) is not None:
+        parsed = parsed.tz_convert(REALIGNMENT_LOCAL_TIMEZONE)
+    return parsed.date()
+
+
+def _realignment_effective_game_date(date_value, time_slot=None):
+    game_date = _realignment_local_game_date(date_value)
+    if game_date is None:
+        return None
+    if "Friday" in str(time_slot or ""):
+        return game_date - timedelta(days=1)
+    return game_date
+
+
+def _is_realignment_black_friday_slot(time_slot):
+    return "Black Friday" in str(time_slot or "")
+
+
+def _game_year_from_date(date_value):
+    local_date = _realignment_local_game_date(date_value)
+    return int(local_date.year) if local_date is not None else None
+
+
+def _is_pac12_conf_champ_game(team1, team2, date_value, is_conf_champ):
+    year = _game_year_from_date(date_value)
+    return bool(
+        is_conf_champ
+        and year is not None
+        and year <= 2023
+        and team1 in former_pac12_teams
+        and team2 in former_pac12_teams
+    )
+
+
 def _mark_realignment_row_unrated(row):
     row["network"] = "Not nationally rated"
     row["time_slot"] = "No national TV window"
     row["comp_tier1"] = None
+    row["competing_games_score"] = 0.0
     row["tv_tier"] = "unrated"
     row["nationally_rated"] = False
     row["predicted_viewers"] = 0.0
     row["predicted_viewers_formatted"] = "Not rated"
 
 
-def _batch_predict_realignment_rows(row_contexts):
+def _batch_predict_realignment_rows(row_contexts, compute_competition=True, relative_competition=False):
     if not row_contexts:
         return
 
     model_columns = list(pregame_model.params.index)
     now = datetime.now()
     feud_active = (now >= FEUD_START) and (FEUD_END is None or now <= FEUD_END)
-    feature_rows = []
+    slot_starts = []
+    game_dates = []
+
+    def build_feature_rows(competing_scores=None):
+        feature_rows = []
+        competing_scores = competing_scores or [0.0] * len(row_contexts)
+
+        for context, competing_score in zip(row_contexts, competing_scores):
+            row = context["row"]
+            conference_overrides = context.get("conference_overrides", {}) or {}
+            team1 = normalize_team(row["team1"])
+            team2 = normalize_team(row["team2"])
+            rank1 = int(row.get("rank1") or 0)
+            rank2 = int(row.get("rank2") or 0)
+            network = row.get("network") or ""
+            time_slot = row.get("time_slot") or ""
+            comp_tier1 = row.get("comp_tier1") or 0
+            game_date = _realignment_effective_game_date(row.get("date"), time_slot) or row.get("date")
+            conf1 = conference_overrides.get(team1, team_conferences.get(team1, "Group of 6"))
+            conf2 = conference_overrides.get(team2, team_conferences.get(team2, "Group of 6"))
+            is_black_friday = _is_realignment_black_friday_slot(time_slot)
+            is_conf_champ = bool(row.get("conf_champ", False))
+            is_pac12_conf_champ = _is_pac12_conf_champ_game(team1, team2, game_date, is_conf_champ)
+            is_friday = ("Friday" in str(time_slot)) and not is_black_friday
+            is_power_friday = (
+                is_friday
+                and is_power_football_team(team1, conf1)
+                and is_power_football_team(team2, conf2)
+            )
+            is_non_power_friday = is_friday and not is_power_friday
+            both_ranked = rank1 > 0 and rank2 > 0
+            same_conf = conf1 == conf2 and conf1 in ["SEC", "Big 10", "ACC", "Big 12"]
+            t1_top10, t1_25_11 = rank_to_coefs(rank1)
+            t2_top10, t2_25_11 = rank_to_coefs(rank2)
+            team1_win_pct = float(row.get("team1_win_pct_to_date", row.get("Team1_WinPct_ToDate", 0.5)) or 0.5)
+            team2_win_pct = float(row.get("team2_win_pct_to_date", row.get("Team2_WinPct_ToDate", 0.5)) or 0.5)
+            avg_win_pct = float(row.get("avg_win_pct_to_date", row.get("Avg_WinPct_ToDate", (team1_win_pct + team2_win_pct) / 2)) or 0.5)
+            win_pct_diff = float(row.get("win_pct_diff_to_date", row.get("WinPct_Diff_ToDate", abs(team1_win_pct - team2_win_pct))) or 0.0)
+            auto_rivalry = next(
+                (r for r, (a, b) in rivalries.items() if {team1, team2} == {a, b}),
+                None,
+            )
+
+            features = {
+                "const": 1.0,
+                "Competing Tier 1": comp_tier1,
+                "Competing_Games_Score": float(competing_score or 0.0),
+                "ABC": int(network == "ABC"),
+                "CBS": int(network == "CBS"),
+                "NBC": int(network == "NBC"),
+                "FOX": int(network == "FOX"),
+                "ESPN": int(network == "ESPN"),
+                "ESPN2": int(network == "ESPN2"),
+                "ESPNU": int(network == "ESPNU"),
+                "FS1": int(network == "FS1"),
+                "FS2": int(network == "FS2"),
+                "BTN": int(network == "BTN"),
+                "NFLN": int(network == "NFLN"),
+                "CW": int(network == "CW"),
+                "ESPNNEWS": int(network == "ESPNNEWS"),
+                "Sun": int("Sunday" in time_slot),
+                "Monday": int("Monday" in time_slot),
+                "Weekday": int("Weekday" in time_slot),
+                "Friday": int(is_friday),
+                "Friday Power": int(is_power_friday),
+                "Friday Non-Power": int(is_non_power_friday),
+                "Black Friday": int(is_black_friday),
+                "Week 0 Power": int(is_week_zero_power_game(team1, team2, conf1, conf2, game_date, time_slot)),
+                "Week 1 Power": int(is_week_one_power_game(team1, team2, conf1, conf2, game_date, time_slot)),
+                "Sat Early": int(not is_black_friday and "Early" in time_slot),
+                "Sat Mid": int(not is_black_friday and "Mid" in time_slot),
+                "Sat Late": int(not is_black_friday and "Late" in time_slot),
+                "Team1_WinPct_ToDate": team1_win_pct,
+                "Team2_WinPct_ToDate": team2_win_pct,
+                "Avg_WinPct_ToDate": avg_win_pct,
+                "WinPct_Diff_ToDate": win_pct_diff,
+                "Top 10 Rankings": t1_top10 + t2_top10,
+                "25-11 Rankings": t1_25_11 + t2_25_11,
+                "SEC": int(conf1 == "SEC") + int(conf2 == "SEC"),
+                "Big 10": int(conf1 == "Big 10") + int(conf2 == "Big 10"),
+                "ACC": int(conf1 == "ACC") + int(conf2 == "ACC"),
+                "Big 12": int(conf1 == "Big 12") + int(conf2 == "Big 12"),
+                "SEC_PostseasonImplications": int(both_ranked and same_conf and conf1 == "SEC"),
+                "Big10_PostseasonImplications": int(both_ranked and same_conf and conf1 == "Big 10"),
+                "Big12_PostseasonImplications": int(both_ranked and same_conf and conf1 == "Big 12"),
+                "ACC_PostseasonImplications": int(both_ranked and same_conf and conf1 == "ACC"),
+                "SEC_ConfChamp": int(is_conf_champ and conf1 == "SEC" and conf2 == "SEC"),
+                "Big10_ConfChamp": int(is_conf_champ and conf1 == "Big 10" and conf2 == "Big 10"),
+                "Big12_ConfChamp": int(is_conf_champ and conf1 == "Big 12" and conf2 == "Big 12"),
+                "ACC_ConfChamp": int(is_conf_champ and conf1 == "ACC" and conf2 == "ACC"),
+                "Pac12_ConfChamp": int(is_pac12_conf_champ),
+                "Other_ConfChamp": int(
+                    is_conf_champ
+                    and not is_pac12_conf_champ
+                    and not (
+                        (conf1 == "SEC" and conf2 == "SEC")
+                        or (conf1 == "Big 10" and conf2 == "Big 10")
+                        or (conf1 == "Big 12" and conf2 == "Big 12")
+                        or (conf1 == "ACC" and conf2 == "ACC")
+                    )
+                ),
+                "YTTV_ABC": int(feud_active and network == "ABC"),
+                "YTTV_ESPN": int(feud_active and network == "ESPN"),
+            }
+
+            for rivalry_key in rivalries:
+                features[rivalry_key] = int(rivalry_key == auto_rivalry)
+            for team_column in MODEL_TEAM_NAMES:
+                features[team_column] = int(team_column in [team1, team2])
+            if "OhioSt_BTN" in model_columns:
+                features["OhioSt_BTN"] = int(("Ohio St." in [team1, team2]) and network == "BTN")
+
+            feature_rows.append({column: features.get(column, 0.0) for column in model_columns})
+
+        return pd.DataFrame.from_records(feature_rows, columns=model_columns)
 
     for context in row_contexts:
         row = context["row"]
-        conference_overrides = context.get("conference_overrides", {}) or {}
-        team1 = normalize_team(row["team1"])
-        team2 = normalize_team(row["team2"])
-        rank1 = int(row.get("rank1") or 0)
-        rank2 = int(row.get("rank2") or 0)
-        network = row.get("network") or ""
-        time_slot = row.get("time_slot") or ""
-        comp_tier1 = row.get("comp_tier1") or 0
-        conf1 = conference_overrides.get(team1, team_conferences.get(team1, "Group of 6"))
-        conf2 = conference_overrides.get(team2, team_conferences.get(team2, "Group of 6"))
-        is_black_friday = is_black_friday_slot(time_slot, row.get("date"))
-        is_friday = ("Friday" in str(time_slot)) and not is_black_friday
-        is_power_friday = (
-            is_friday
-            and is_power_football_team(team1, conf1)
-            and is_power_football_team(team2, conf2)
-        )
-        is_non_power_friday = is_friday and not is_power_friday
-        both_ranked = rank1 > 0 and rank2 > 0
-        same_conf = conf1 == conf2 and conf1 in ["SEC", "Big 10", "ACC", "Big 12"]
-        t1_top10, t1_25_11 = rank_to_coefs(rank1)
-        t2_top10, t2_25_11 = rank_to_coefs(rank2)
-        auto_rivalry = next(
-            (r for r, (a, b) in rivalries.items() if {team1, team2} == {a, b}),
-            None,
-        )
+        slot_starts.append(_realignment_slot_start_hour(row.get("time_slot")))
+        game_dates.append(_realignment_effective_game_date(row.get("date"), row.get("time_slot")))
 
-        features = {
-            "const": 1.0,
-            "Competing Tier 1": comp_tier1,
-            "ABC": int(network == "ABC"),
-            "CBS": int(network == "CBS"),
-            "NBC": int(network == "NBC"),
-            "FOX": int(network == "FOX"),
-            "ESPN": int(network == "ESPN"),
-            "ESPN2": int(network == "ESPN2"),
-            "ESPNU": int(network == "ESPNU"),
-            "FS1": int(network == "FS1"),
-            "FS2": int(network == "FS2"),
-            "BTN": int(network == "BTN"),
-            "NFLN": int(network == "NFLN"),
-            "CW": int(network == "CW"),
-            "ESPNNEWS": int(network == "ESPNNEWS"),
-            "Sun": int("Sunday" in time_slot),
-            "Monday": int("Monday" in time_slot),
-            "Weekday": int("Weekday" in time_slot),
-            "Friday": int(is_friday),
-            "Friday Power": int(is_power_friday),
-            "Friday Non-Power": int(is_non_power_friday),
-            "Black Friday": int(is_black_friday),
-            "Week 0 Power": int(is_week_zero_power_game(team1, team2, conf1, conf2, row.get("date"), time_slot)),
-            "Week 1 Power": int(is_week_one_power_game(team1, team2, conf1, conf2, row.get("date"), time_slot)),
-            "Sat Early": int(not is_black_friday and "Early" in time_slot),
-            "Sat Mid": int(not is_black_friday and "Mid" in time_slot),
-            "Sat Late": int(not is_black_friday and "Late" in time_slot),
-            "Top 10 Rankings": t1_top10 + t2_top10,
-            "25-11 Rankings": t1_25_11 + t2_25_11,
-            "SEC": int(conf1 == "SEC") + int(conf2 == "SEC"),
-            "Big 10": int(conf1 == "Big 10") + int(conf2 == "Big 10"),
-            "ACC": int(conf1 == "ACC") + int(conf2 == "ACC"),
-            "Big 12": int(conf1 == "Big 12") + int(conf2 == "Big 12"),
-            "SEC_PostseasonImplications": int(both_ranked and same_conf and conf1 == "SEC"),
-            "Big10_PostseasonImplications": int(both_ranked and same_conf and conf1 == "Big 10"),
-            "Big12_PostseasonImplications": int(both_ranked and same_conf and conf1 == "Big 12"),
-            "ACC_PostseasonImplications": int(both_ranked and same_conf and conf1 == "ACC"),
-            "YTTV_ABC": int(feud_active and network == "ABC"),
-            "YTTV_ESPN": int(feud_active and network == "ESPN"),
-        }
+    X = build_feature_rows()
+    if compute_competition and "Competing_Games_Score" in X.columns:
+        X["Competing_Games_Score"] = 0.0
+        intrinsic_ln_pred = pregame_model.predict(X)
+        smearing = getattr(pregame_model, "smearing_factor", 1.0)
+        intrinsic_predictions_millions = ((np.exp(intrinsic_ln_pred) - 1) * smearing) / 1000.0
+        competing_scores = []
 
-        for rivalry_key in rivalries:
-            features[rivalry_key] = int(rivalry_key == auto_rivalry)
-        for team_column in MODEL_TEAM_NAMES:
-            features[team_column] = int(team_column in [team1, team2])
-        if "OhioSt_BTN" in model_columns:
-            features["OhioSt_BTN"] = int(("Ohio St." in [team1, team2]) and network == "BTN")
+        for idx, (game_date, start_hour) in enumerate(zip(game_dates, slot_starts)):
+            score = 0.0
+            if game_date is not None and start_hour is not None:
+                target_intrinsic = float(intrinsic_predictions_millions.iloc[idx])
+                for other_idx, (other_date, other_start) in enumerate(zip(game_dates, slot_starts)):
+                    if other_idx == idx or other_date != game_date or other_start is None:
+                        continue
+                    if abs(other_start - start_hour) <= 1.5:
+                        other_intrinsic = float(intrinsic_predictions_millions.iloc[other_idx])
+                        if relative_competition and target_intrinsic > 0:
+                            relative_strength = min(1.0, other_intrinsic / target_intrinsic)
+                            other_intrinsic *= relative_strength ** 5
+                        score += other_intrinsic
+            competing_scores.append(score)
 
-        feature_rows.append({column: features.get(column, 0.0) for column in model_columns})
+        X = build_feature_rows(competing_scores)
+        for context, score in zip(row_contexts, competing_scores):
+            context["row"]["competing_games_score"] = float(score)
 
-    X = pd.DataFrame.from_records(feature_rows, columns=model_columns)
     ln_pred = pregame_model.predict(X)
     smearing = getattr(pregame_model, "smearing_factor", 1.0)
     predictions = (np.exp(ln_pred) - 1) * smearing * 1000
@@ -2624,6 +3493,20 @@ def _refresh_realignment_slate_summary(slate):
     rated_rows = [row for row in rows if row.get("nationally_rated", True)]
     slate["summary"] = {
         "teams": len(slate.get("teams", [])),
+        "games": len(rated_rows),
+        "scheduled_games": len(rows),
+        "nationally_rated_games": len(rated_rows),
+        "unrated_games": len(rows) - len(rated_rows),
+        "total_viewers": _viewer_total(row["predicted_viewers"] for row in rated_rows),
+        "average_viewers": _viewer_average(row["predicted_viewers"] for row in rated_rows),
+    }
+
+
+def _realignment_summary_for_rows(rows, team_count=0):
+    rows = list(rows or [])
+    rated_rows = [row for row in rows if row.get("nationally_rated", True)]
+    return {
+        "teams": int(team_count or 0),
         "games": len(rated_rows),
         "scheduled_games": len(rows),
         "nationally_rated_games": len(rated_rows),
@@ -2692,20 +3575,31 @@ def _distribution_metric_comparison(current_rows, baseline_rows, membership_pct_
     return comparison
 
 
-def _global_weekly_draft_slots(week):
-    top_saturday_slots = REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS[:8]
-    remaining_slots = REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS[8:]
+def _is_flexible_global_slot(slot):
+    return bool(slot.get("flex_slot_id"))
+
+
+def _flexible_global_slot_available_in_week(slot, week, flex_slot_weeks=None):
+    if not _is_flexible_global_slot(slot):
+        return _slot_available_in_week(slot, week)
+    selected_weeks = (flex_slot_weeks or {}).get(slot.get("flex_slot_id"), set())
+    return int(week or 1) in selected_weeks
+
+
+def _global_weekly_draft_slots(week, flex_slot_weeks=None):
+    top_saturday_slots = REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS[:9]
+    remaining_slots = REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS[9:]
     slots = [
         dict(slot)
         for slot in top_saturday_slots
-        if _slot_available_in_week(slot, week)
+        if _flexible_global_slot_available_in_week(slot, week, flex_slot_weeks)
     ]
     if int(week or 0) == REALIGNMENT_BLACK_FRIDAY_WEEK:
         slots.extend(dict(slot) for slot in REALIGNMENT_GLOBAL_BLACK_FRIDAY_DRAFT_SLOTS)
     slots.extend(
         dict(slot)
         for slot in remaining_slots
-        if _slot_available_in_week(slot, week)
+        if _flexible_global_slot_available_in_week(slot, week, flex_slot_weeks) or _is_late_saturday_slot(slot)
     )
     return slots
 
@@ -2720,6 +3614,69 @@ def _slot_minimum_projected_viewers(slot):
     )
 
 
+def _known_realignment_tv_assignment(row):
+    if _has_unrated_realignment_tv_assignment(row):
+        return None
+    actual_network = row.get("tv_network")
+    if actual_network:
+        return {
+            "network": actual_network,
+            "time_slot": row.get("tv_time_slot") or "No national TV window",
+            "comp_tier1": row.get("tv_comp_tier1"),
+            "tv_tier": row.get("tv_tier") or "cable",
+            "assignment_source": row.get("tv_assignment_source") or "cfbd_games_media",
+        }
+    event_id = str(row.get("event_id") or "")
+    assignment = REALIGNMENT_KNOWN_TV_ASSIGNMENTS.get(event_id)
+    return dict(assignment) if assignment else None
+
+
+def _row_is_notre_dame_home_nbc_package(row):
+    return (
+        normalize_team(row.get("team2")) == "Notre Dame"
+        and row.get("owner_conference") in {"FBS Independents", "Independent"}
+        and not bool(row.get("neutral_site", False))
+    )
+
+
+def _conference_network_minimum(conference, network):
+    return int(REALIGNMENT_CONFERENCE_NETWORK_MINIMUMS.get((conference, network), 0))
+
+
+def _record_realignment_network_usage(row, conference, network_usage):
+    if row.get("nationally_rated", False):
+        network_usage[(conference, row.get("network"))] += 1
+
+
+def _assign_realignment_tv_slot(candidate, slot):
+    row = candidate["row"]
+    row["network"] = slot["network"]
+    row["time_slot"] = slot["time_slot"]
+    row["comp_tier1"] = slot["comp_tier1"]
+    row["tv_tier"] = slot.get("tv_tier")
+    row["nationally_rated"] = True
+    if slot.get("assignment_source"):
+        row["assignment_source"] = slot["assignment_source"]
+
+
+def _slot_should_prioritize_conference(slot, conference, network_usage, weekly_candidates):
+    target = _conference_network_minimum(conference, slot.get("network"))
+    if target <= 0 or network_usage[(conference, slot.get("network"))] >= target:
+        return False
+    eligible_conferences = set(slot.get("eligible_conferences") or REALIGNMENT_EDITABLE_CONFERENCES)
+    if conference not in eligible_conferences:
+        return False
+    return any(
+        candidate["conference"] == conference
+        and _slot_late_inventory_eligible(slot, candidate["row"], candidate["conference"])
+        and float(candidate["row"].get("matchup_score") or 0.0) >= REALIGNMENT_NATIONAL_TV_SCORE_FLOOR.get(
+            conference,
+            REALIGNMENT_NATIONAL_TV_SCORE_FLOOR["SEC"],
+        )
+        for candidate in weekly_candidates
+    )
+
+
 def _conference_overrides_for_slate(conference, slate):
     return {
         team: conference
@@ -2727,40 +3684,147 @@ def _conference_overrides_for_slate(conference, slate):
     }
 
 
-def _apply_global_tv_slots_to_league_slates(conference_slates, transferred_slots_by_conference, removed_slots_by_conference):
-    candidates = []
-    for conference, slate in conference_slates.items():
+def _realignment_event_key(row):
+    event_id = str(row.get("event_id") or "")
+    if event_id:
+        return ("event", event_id)
+    return (
+        "matchup",
+        int(row.get("week") or 0),
+        tuple(sorted([normalize_team(row.get("team1")), normalize_team(row.get("team2"))])),
+    )
+
+
+def _copy_realignment_tv_assignment(source, target):
+    for key in [
+        "network",
+        "time_slot",
+        "comp_tier1",
+        "tv_tier",
+        "nationally_rated",
+        "predicted_viewers",
+        "predicted_viewers_formatted",
+        "competing_games_score",
+        "assignment_source",
+    ]:
+        if key in source:
+            target[key] = source[key]
+
+
+def _better_realignment_assignment_source(current, candidate):
+    if current is None:
+        return candidate
+    current_viewers = float(current.get("predicted_viewers") or 0.0)
+    candidate_viewers = float(candidate.get("predicted_viewers") or 0.0)
+    if candidate_viewers > current_viewers:
+        return candidate
+    if candidate_viewers < current_viewers:
+        return current
+    if candidate.get("assignment_source") and not current.get("assignment_source"):
+        return candidate
+    return current
+
+
+def _propagate_realignment_duplicate_assignments(conference_slates):
+    assignment_by_event = {}
+    for slate in conference_slates.values():
         for row in slate.get("rows", []):
-            _mark_realignment_row_unrated(row)
-            candidates.append({
-                "conference": conference,
-                "row": row,
-                "team_count": len(slate.get("teams", [])),
-                "conference_teams": slate.get("teams", []),
-            })
-
-    assigned_row_ids = set()
-    weeks = sorted({
-        int(candidate["row"].get("week") or 1)
-        for candidate in candidates
-    })
-
-    for week in weeks:
-        weekly_candidates = [
-            candidate for candidate in candidates
-            if int(candidate["row"].get("week") or 1) == week
-            and id(candidate["row"]) not in assigned_row_ids
-        ]
-        for slot in _global_weekly_draft_slots(week):
-            eligible_conferences = set(slot.get("eligible_conferences") or REALIGNMENT_EDITABLE_CONFERENCES)
-            slot_candidates = [
-                candidate for candidate in weekly_candidates
-                if id(candidate["row"]) not in assigned_row_ids
-                and candidate["conference"] in eligible_conferences
-                and float(candidate["row"].get("matchup_score") or 0.0) >= REALIGNMENT_NATIONAL_TV_SCORE_FLOOR.get(
-                    candidate["conference"],
-                    REALIGNMENT_NATIONAL_TV_SCORE_FLOOR["SEC"],
+            if row.get("nationally_rated", False):
+                event_key = _realignment_event_key(row)
+                assignment_by_event[event_key] = _better_realignment_assignment_source(
+                    assignment_by_event.get(event_key),
+                    row,
                 )
+    for slate in conference_slates.values():
+        for row in slate.get("rows", []):
+            source = assignment_by_event.get(_realignment_event_key(row))
+            if source is not None and source is not row:
+                _copy_realignment_tv_assignment(source, row)
+
+
+def _realignment_row_involves_conference(row, conference):
+    row_conferences = set()
+    for value in [
+        row.get("team1_conference") or team_conferences.get(normalize_team(row.get("team1"))),
+        row.get("team2_conference") or team_conferences.get(normalize_team(row.get("team2"))),
+    ]:
+        if isinstance(value, (list, tuple, set)):
+            row_conferences.update(item for item in value if item)
+        elif value:
+            row_conferences.add(value)
+    return conference in row_conferences
+
+
+def _realignment_row_home_conference(row):
+    return row.get("team2_conference") or row.get("owner_conference")
+
+
+def _realignment_row_owned_by_conference(row, conference):
+    return _realignment_row_home_conference(row) == conference
+
+
+def _public_realignment_slate_for_conference(slate, conference):
+    public_slate = {
+        **slate,
+        "rows": [
+            row
+            for row in slate.get("rows", [])
+            if _realignment_row_owned_by_conference(row, conference)
+        ],
+    }
+    public_slate["summary"] = _realignment_summary_for_rows(
+        public_slate["rows"],
+        team_count=slate.get("summary", {}).get("teams", len(slate.get("teams", []))),
+    )
+    return public_slate
+
+
+def _candidate_eligible_for_realignment_slot(candidate, slot, eligible_conferences):
+    if candidate["conference"] in eligible_conferences:
+        return True
+    if (
+        candidate.get("hidden_fbs_competitor")
+        and slot.get("network") in REALIGNMENT_HIDDEN_FBS_SLOT_NETWORKS
+    ):
+        return True
+    return slot.get("network") == "NBC" and _row_is_notre_dame_home_nbc_package(candidate["row"])
+
+
+def _realignment_candidate_score_floor(candidate):
+    if candidate.get("hidden_fbs_competitor"):
+        return REALIGNMENT_NATIONAL_TV_SCORE_FLOOR["Group of 6"]
+    return REALIGNMENT_NATIONAL_TV_SCORE_FLOOR.get(
+        candidate["conference"],
+        REALIGNMENT_NATIONAL_TV_SCORE_FLOOR["SEC"],
+    )
+
+
+def _select_flexible_global_slot_weeks(candidates, weeks, assigned_row_ids, used_weekly_slot_keys, late_slot_usage):
+    selected_weeks_by_slot = {}
+    flexible_slots = [
+        slot for slot in REALIGNMENT_GLOBAL_WEEKLY_DRAFT_SLOTS
+        if _is_flexible_global_slot(slot)
+    ]
+    for slot in flexible_slots:
+        slot_key = _global_tv_slot_key(slot)
+        season_count = int(slot.get("season_count") or 0)
+        if season_count <= 0:
+            continue
+
+        week_scores = []
+        eligible_conferences = set(slot.get("eligible_conferences") or REALIGNMENT_EDITABLE_CONFERENCES)
+        for week in weeks:
+            if slot_key in used_weekly_slot_keys[week]:
+                continue
+            if not _late_slot_cap_available(slot, late_slot_usage):
+                continue
+            slot_candidates = [
+                candidate for candidate in candidates
+                if int(candidate["row"].get("week") or 1) == week
+                and id(candidate["row"]) not in assigned_row_ids
+                and _candidate_eligible_for_realignment_slot(candidate, slot, eligible_conferences)
+                and _slot_late_inventory_eligible(slot, candidate["row"], candidate["conference"])
+                and float(candidate["row"].get("matchup_score") or 0.0) >= _realignment_candidate_score_floor(candidate)
             ]
             if not slot_candidates:
                 continue
@@ -2778,13 +3842,337 @@ def _apply_global_tv_slots_to_league_slates(conference_slates, transferred_slots
                 evaluation_contexts.append({
                     "candidate": candidate,
                     "row": evaluation_row,
-                    "conference_overrides": {
+                    "conference_overrides": candidate.get("conference_overrides") or {
                         team: candidate["conference"]
                         for team in candidate["conference_teams"]
                     },
                 })
 
-            _batch_predict_realignment_rows(evaluation_contexts)
+            _batch_predict_realignment_rows(evaluation_contexts, compute_competition=False)
+            best_context = max(
+                evaluation_contexts,
+                key=lambda context: (
+                    float(context["row"].get("predicted_viewers") or 0.0),
+                    float(context["candidate"]["row"].get("matchup_score") or 0.0),
+                    context["candidate"]["row"].get("matchup", ""),
+                ),
+            )
+            best_prediction = float(best_context["row"].get("predicted_viewers") or 0.0)
+            if best_prediction < _slot_minimum_projected_viewers(slot):
+                continue
+            week_scores.append((
+                best_prediction,
+                float(best_context["candidate"]["row"].get("matchup_score") or 0.0),
+                -int(week),
+                int(week),
+            ))
+
+        week_scores.sort(reverse=True)
+        selected_weeks_by_slot[slot.get("flex_slot_id")] = {
+            item[-1] for item in week_scores[:season_count]
+        }
+    return selected_weeks_by_slot
+
+
+def _hidden_fbs_conference_overrides(row):
+    overrides = {}
+    for team_key, conference_key in [("team1", "team1_conference"), ("team2", "team2_conference")]:
+        team = normalize_team(row.get(team_key))
+        conference = row.get(conference_key)
+        if team and conference in REALIGNMENT_EDITABLE_CONFERENCES:
+            overrides[team] = conference
+    return overrides
+
+
+def _build_hidden_fbs_tv_candidates(existing_event_keys, ranking_policy, custom_rankings=None, excluded_teams=None):
+    excluded_teams = {normalize_team(team) for team in (excluded_teams or set())}
+    raw_rows = [
+        raw_row for raw_row in _actual_fbs_schedule_rows()
+        if _realignment_event_key(raw_row) not in existing_event_keys
+        and raw_row["team1"] not in excluded_teams
+        and raw_row["team2"] not in excluded_teams
+    ]
+    if not raw_rows:
+        return []
+
+    involved_teams = sorted({
+        team
+        for raw_row in raw_rows
+        for team in [raw_row["team1"], raw_row["team2"]]
+    })
+    rank_map = _build_rank_map(involved_teams, ranking_policy, custom_rankings)
+    candidates = []
+    for idx, raw_row in enumerate(raw_rows):
+        owner_conference = raw_row.get("owner_conference") or "Group of 6"
+        row = {
+            "game_number": idx + 1,
+            "event_id": raw_row.get("event_id"),
+            "date": raw_row.get("date"),
+            "week": raw_row.get("week"),
+            "team1": raw_row["team1"],
+            "team2": raw_row["team2"],
+            "matchup": f"{raw_row['team1']} vs {raw_row['team2']}",
+            "rank1": rank_map.get(raw_row["team1"], 0),
+            "rank2": rank_map.get(raw_row["team2"], 0),
+            "network": "Not nationally rated",
+            "time_slot": "No national TV window",
+            "comp_tier1": None,
+            "tv_tier": "unrated",
+            "nationally_rated": False,
+            "matchup_score": float(round(_matchup_score(
+                raw_row["team1"],
+                raw_row["team2"],
+                rank_map,
+                raw_row.get("team1_conference"),
+                raw_row.get("team2_conference"),
+            ), 4)),
+            "protected": False,
+            "actual_schedule": True,
+            "conference_game": bool(raw_row.get("conference_game", True)),
+            "owner_conference": owner_conference,
+            "team1_conference": raw_row.get("team1_conference"),
+            "team2_conference": raw_row.get("team2_conference"),
+            "neutral_site": bool(raw_row.get("neutral_site", False)),
+            "predicted_viewers": 0.0,
+            "predicted_viewers_formatted": "Not rated",
+        }
+        _copy_cfbd_tv_fields(raw_row, row)
+        candidates.append({
+            "conference": owner_conference if owner_conference in REALIGNMENT_FBS_CONFERENCES else "Group of 6",
+            "row": row,
+            "team_count": 0,
+            "conference_teams": [],
+            "conference_overrides": _hidden_fbs_conference_overrides(row),
+            "hidden_fbs_competitor": True,
+        })
+    candidates_by_week = defaultdict(list)
+    for candidate in candidates:
+        candidates_by_week[int(candidate["row"].get("week") or 1)].append(candidate)
+
+    selected = []
+    for week_candidates in candidates_by_week.values():
+        guaranteed = [
+            candidate for candidate in week_candidates
+            if _row_is_notre_dame_home_nbc_package(candidate["row"])
+        ]
+        remaining = [
+            candidate for candidate in week_candidates
+            if candidate not in guaranteed
+        ]
+        remaining = sorted(
+            remaining,
+            key=lambda candidate: (
+                -float(candidate["row"].get("matchup_score") or 0.0),
+                candidate["row"].get("matchup", ""),
+            ),
+        )[:REALIGNMENT_HIDDEN_FBS_CANDIDATES_PER_WEEK]
+        selected.extend(guaranteed + remaining)
+    return selected
+
+
+def _assign_notre_dame_home_nbc_games(
+    week,
+    weekly_candidates,
+    assigned_row_ids,
+    used_weekly_slot_keys,
+    late_slot_usage,
+    network_usage,
+    flex_slot_weeks=None,
+):
+    available_slots = [
+        slot for slot in _global_weekly_draft_slots(week, flex_slot_weeks)
+        if slot.get("network") == "NBC"
+        and _global_tv_slot_key(slot) not in used_weekly_slot_keys[week]
+        and _late_slot_cap_available(slot, late_slot_usage)
+    ]
+    if not available_slots:
+        return
+
+    nd_candidates = [
+        candidate for candidate in weekly_candidates
+        if id(candidate["row"]) not in assigned_row_ids
+        and _row_is_notre_dame_home_nbc_package(candidate["row"])
+    ]
+    while available_slots and nd_candidates:
+        evaluation_contexts = []
+        for candidate in nd_candidates:
+            for slot in available_slots:
+                evaluation_row = {
+                    **candidate["row"],
+                    "network": slot["network"],
+                    "time_slot": slot["time_slot"],
+                    "comp_tier1": slot["comp_tier1"],
+                    "tv_tier": slot.get("tv_tier"),
+                    "nationally_rated": True,
+                }
+                evaluation_contexts.append({
+                    "candidate": candidate,
+                    "slot": slot,
+                    "row": evaluation_row,
+                    "conference_overrides": candidate.get("conference_overrides") or {
+                        team: candidate["conference"]
+                        for team in candidate["conference_teams"]
+                    },
+                })
+
+        _batch_predict_realignment_rows(evaluation_contexts, compute_competition=False)
+        best_context = max(
+            evaluation_contexts,
+            key=lambda context: (
+                float(context["row"].get("predicted_viewers") or 0.0),
+                float(context["candidate"]["row"].get("matchup_score") or 0.0),
+                context["candidate"]["row"].get("matchup", ""),
+            ),
+        )
+        target_row = best_context["candidate"]["row"]
+        best_slot = best_context["slot"]
+        _assign_realignment_tv_slot(best_context["candidate"], best_slot)
+        target_row["assignment_source"] = "notre_dame_nbc_home_package"
+        target_row["predicted_viewers"] = float(best_context["row"].get("predicted_viewers") or 0.0)
+        target_row["predicted_viewers_formatted"] = best_context["row"]["predicted_viewers_formatted"]
+        assigned_row_ids.add(id(target_row))
+        used_weekly_slot_keys[week].add(_global_tv_slot_key(best_slot))
+        _record_late_slot_usage(best_slot, late_slot_usage)
+        _record_realignment_network_usage(target_row, best_context["candidate"]["conference"], network_usage)
+        available_slots = [
+            slot for slot in available_slots
+            if _global_tv_slot_key(slot) not in used_weekly_slot_keys[week]
+        ]
+        nd_candidates = [
+            candidate for candidate in nd_candidates
+            if id(candidate["row"]) not in assigned_row_ids
+        ]
+
+
+def _apply_global_tv_slots_to_league_slates(
+    conference_slates,
+    transferred_slots_by_conference,
+    removed_slots_by_conference,
+    ranking_policy="espn_2026_preseason",
+    custom_rankings=None,
+):
+    candidates = []
+    visible_teams = set()
+    existing_event_keys = set()
+    for conference, slate in conference_slates.items():
+        visible_teams.update(normalize_team(team) for team in slate.get("teams", []))
+        for row in slate.get("rows", []):
+            existing_event_keys.add(_realignment_event_key(row))
+            _mark_realignment_row_unrated(row)
+            if _has_unrated_realignment_tv_assignment(row):
+                continue
+            if (
+                row.get("owner_conference")
+                and row.get("owner_conference") != conference
+                and row.get("owner_conference") in REALIGNMENT_EDITABLE_CONFERENCES
+                and not _known_realignment_tv_assignment(row)
+                and not _row_is_notre_dame_home_nbc_package(row)
+            ):
+                continue
+            candidates.append({
+                "conference": conference,
+                "row": row,
+                "team_count": len(slate.get("teams", [])),
+                "conference_teams": slate.get("teams", []),
+            })
+
+    hidden_fbs_candidates = _build_hidden_fbs_tv_candidates(
+        existing_event_keys,
+        ranking_policy,
+        custom_rankings=custom_rankings,
+        excluded_teams=visible_teams,
+    )
+    hidden_fbs_candidates = [
+        candidate
+        for candidate in hidden_fbs_candidates
+        if not _has_unrated_realignment_tv_assignment(candidate["row"])
+    ]
+    candidates.extend(hidden_fbs_candidates)
+
+    assigned_row_ids = set()
+    used_weekly_slot_keys = defaultdict(set)
+    late_slot_usage = Counter()
+    network_usage = Counter()
+    weeks = sorted({
+        int(candidate["row"].get("week") or 1)
+        for candidate in candidates
+    })
+
+    for candidate in candidates:
+        slot = _known_realignment_tv_assignment(candidate["row"])
+        if not slot:
+            continue
+        week = int(candidate["row"].get("week") or 1)
+        _assign_realignment_tv_slot(candidate, slot)
+        assigned_row_ids.add(id(candidate["row"]))
+        used_weekly_slot_keys[week].add(_global_tv_slot_key(slot))
+        _record_late_slot_usage(slot, late_slot_usage)
+        _record_realignment_network_usage(candidate["row"], candidate["conference"], network_usage)
+
+    flex_slot_weeks = _select_flexible_global_slot_weeks(
+        candidates,
+        weeks,
+        assigned_row_ids,
+        used_weekly_slot_keys,
+        late_slot_usage,
+    )
+
+    for week in weeks:
+        weekly_candidates = [
+            candidate for candidate in candidates
+            if int(candidate["row"].get("week") or 1) == week
+            and id(candidate["row"]) not in assigned_row_ids
+        ]
+        _assign_notre_dame_home_nbc_games(
+            week,
+            weekly_candidates,
+            assigned_row_ids,
+            used_weekly_slot_keys,
+            late_slot_usage,
+            network_usage,
+            flex_slot_weeks,
+        )
+        for slot in _global_weekly_draft_slots(week, flex_slot_weeks):
+            slot_key = _global_tv_slot_key(slot)
+            if slot_key in used_weekly_slot_keys[week]:
+                continue
+            if not _late_slot_cap_available(slot, late_slot_usage):
+                continue
+            eligible_conferences = set(slot.get("eligible_conferences") or REALIGNMENT_EDITABLE_CONFERENCES)
+            for conference in REALIGNMENT_EDITABLE_CONFERENCES:
+                if _slot_should_prioritize_conference(slot, conference, network_usage, weekly_candidates):
+                    eligible_conferences = {conference}
+                    break
+            slot_candidates = [
+                candidate for candidate in weekly_candidates
+                if id(candidate["row"]) not in assigned_row_ids
+                and _candidate_eligible_for_realignment_slot(candidate, slot, eligible_conferences)
+                and _slot_late_inventory_eligible(slot, candidate["row"], candidate["conference"])
+                and float(candidate["row"].get("matchup_score") or 0.0) >= _realignment_candidate_score_floor(candidate)
+            ]
+            if not slot_candidates:
+                continue
+
+            evaluation_contexts = []
+            for candidate in slot_candidates:
+                evaluation_row = {
+                    **candidate["row"],
+                    "network": slot["network"],
+                    "time_slot": slot["time_slot"],
+                    "comp_tier1": slot["comp_tier1"],
+                    "tv_tier": slot.get("tv_tier"),
+                    "nationally_rated": True,
+                }
+                evaluation_contexts.append({
+                    "candidate": candidate,
+                    "row": evaluation_row,
+                    "conference_overrides": candidate.get("conference_overrides") or {
+                        team: candidate["conference"]
+                        for team in candidate["conference_teams"]
+                    },
+                })
+
+            _batch_predict_realignment_rows(evaluation_contexts, compute_competition=False)
             best_context = max(
                 evaluation_contexts,
                 key=lambda context: (
@@ -2798,14 +4186,63 @@ def _apply_global_tv_slots_to_league_slates(conference_slates, transferred_slots
                 continue
 
             target_row = best_context["candidate"]["row"]
-            target_row["network"] = slot["network"]
-            target_row["time_slot"] = slot["time_slot"]
-            target_row["comp_tier1"] = slot["comp_tier1"]
-            target_row["tv_tier"] = slot.get("tv_tier")
-            target_row["nationally_rated"] = True
+            _assign_realignment_tv_slot(best_context["candidate"], slot)
             target_row["predicted_viewers"] = best_prediction
             target_row["predicted_viewers_formatted"] = best_context["row"]["predicted_viewers_formatted"]
             assigned_row_ids.add(id(target_row))
+            used_weekly_slot_keys[week].add(slot_key)
+            _record_late_slot_usage(slot, late_slot_usage)
+            _record_realignment_network_usage(target_row, best_context["candidate"]["conference"], network_usage)
+
+    _propagate_realignment_duplicate_assignments(conference_slates)
+    hidden_rated_rows = [
+        candidate["row"]
+        for candidate in hidden_fbs_candidates
+        if candidate["row"].get("nationally_rated", False)
+    ]
+
+    rated_contexts = []
+    seen_rated_events = set()
+    for conference, slate in conference_slates.items():
+        for row in slate.get("rows", []):
+            if not row.get("nationally_rated", True):
+                continue
+            event_key = _realignment_event_key(row)
+            if event_key in seen_rated_events:
+                continue
+            seen_rated_events.add(event_key)
+            rated_contexts.append({
+                "row": row,
+                "conference_overrides": _conference_overrides_for_slate(conference, slate),
+            })
+    for candidate in hidden_fbs_candidates:
+        row = candidate["row"]
+        if not row.get("nationally_rated", False):
+            continue
+        event_key = _realignment_event_key(row)
+        if event_key in seen_rated_events:
+            continue
+        seen_rated_events.add(event_key)
+        rated_contexts.append({
+            "row": row,
+            "conference_overrides": candidate.get("conference_overrides") or {},
+        })
+
+    _batch_predict_realignment_rows(
+        rated_contexts,
+        compute_competition=True,
+        relative_competition=True,
+    )
+    hidden_assignment_by_event = {
+        _realignment_event_key(row): row
+        for row in hidden_rated_rows
+    }
+    for slate in conference_slates.values():
+        for row in slate.get("rows", []):
+            source = hidden_assignment_by_event.get(_realignment_event_key(row))
+            if source is not None:
+                _copy_realignment_tv_assignment(source, row)
+    _propagate_realignment_duplicate_assignments(conference_slates)
 
     for slate in conference_slates.values():
         _refresh_realignment_slate_summary(slate)
@@ -2822,7 +4259,7 @@ def _predict_realignment_slate(
     assign_preliminary_tv=True,
 ):
     normalized_teams = [normalize_team(team) for team in teams]
-    rank_map = _build_rank_map(normalized_teams, sim.ranking_policy)
+    rank_map = _build_rank_map(normalized_teams, sim.ranking_policy, sim.custom_rankings)
     schedule, counts = _generate_conference_schedule(
         normalized_teams,
         sim.games_per_team,
@@ -2917,6 +4354,892 @@ def _predict_realignment_slate(
             "average_viewers": _viewer_average(row["predicted_viewers"] for row in rated_rows),
         },
     }
+
+
+def _predict_actual_realignment_slate(conference, teams, sim, protected_pairs=None, memberships=None):
+    normalized_teams = [normalize_team(team) for team in teams]
+    team_set = set(normalized_teams)
+    memberships = memberships or {}
+    raw_schedule = [
+        raw_game
+        for raw_game in _actual_fbs_schedule_rows()
+        if raw_game["team1"] in team_set or raw_game["team2"] in team_set
+    ]
+    involved_teams = sorted({
+        team
+        for raw_game in raw_schedule
+        for team in [raw_game["team1"], raw_game["team2"]]
+    })
+    rank_map = _build_rank_map(
+        sorted(set(normalized_teams) | set(involved_teams)),
+        sim.ranking_policy,
+        sim.custom_rankings,
+    )
+    protected_pair_keys = {
+        tuple(sorted([team_1, team_2]))
+        for team_1, team_2 in (protected_pairs or [])
+        if team_1 in team_set and team_2 in team_set and team_1 != team_2
+    }
+    schedule = []
+    counts = Counter()
+
+    for raw_game in raw_schedule:
+        team_1 = raw_game["team1"]
+        team_2 = raw_game["team2"]
+        team_1_conference = memberships.get(team_1) or raw_game.get("team1_conference")
+        team_2_conference = memberships.get(team_2) or raw_game.get("team2_conference")
+        if team_1 in team_set:
+            counts[team_1] += 1
+        if team_2 in team_set:
+            counts[team_2] += 1
+        pair_key = tuple(sorted([team_1, team_2]))
+        schedule_game = {
+            "event_id": raw_game.get("event_id"),
+            "date": raw_game.get("date"),
+            "week": raw_game.get("week"),
+            "owner_conference": raw_game.get("owner_conference"),
+            "team1": team_1,
+            "team2": team_2,
+            "score": _matchup_score(
+                team_1,
+                team_2,
+                rank_map,
+                team_1_conference,
+                team_2_conference,
+            ),
+            "protected": pair_key in protected_pair_keys,
+            "rivalry_week_priority": _rivalry_week_priority(team_1, team_2),
+            "neutral_site": bool(raw_game.get("neutral_site", False)),
+            "conference_game": bool(raw_game.get("conference_game", True)),
+            "team1_conference": team_1_conference,
+            "team2_conference": team_2_conference,
+        }
+        _copy_cfbd_tv_fields(raw_game, schedule_game)
+        schedule.append(schedule_game)
+
+    for team in normalized_teams:
+        counts.setdefault(team, 0)
+
+    rows = []
+    for idx, game in enumerate(
+        sorted(schedule, key=lambda row: (row.get("week") or 99, row.get("date") or "", row["team1"], row["team2"]))
+    ):
+        row = {
+            "game_number": idx + 1,
+            "event_id": game.get("event_id"),
+            "date": game.get("date"),
+            "week": game.get("week"),
+            "team1": game["team1"],
+            "team2": game["team2"],
+            "matchup": f"{game['team1']} vs {game['team2']}",
+            "rank1": rank_map.get(game["team1"], 0),
+            "rank2": rank_map.get(game["team2"], 0),
+            "network": "Not nationally rated",
+            "time_slot": "No national TV window",
+            "comp_tier1": None,
+            "tv_tier": "unrated",
+            "nationally_rated": False,
+            "matchup_score": float(round(game["score"], 4)),
+            "protected": bool(game.get("protected", False)),
+            "actual_schedule": True,
+            "conference_game": bool(game.get("conference_game", True)),
+            "owner_conference": game.get("owner_conference"),
+            "team1_conference": game.get("team1_conference"),
+            "team2_conference": game.get("team2_conference"),
+            "predicted_viewers": 0.0,
+            "predicted_viewers_formatted": "Not rated",
+        }
+        _copy_cfbd_tv_fields(game, row)
+        rows.append(row)
+
+    slate = {
+        "teams": normalized_teams,
+        "team_game_counts": dict(counts),
+        "rank_map": rank_map,
+        "rows": rows,
+        "schedule_source": "actual_2026_public_schedule",
+    }
+    _refresh_realignment_slate_summary(slate)
+    return slate
+
+
+def _actual_nonconference_games_for_members(
+    members,
+    memberships,
+    rank_map,
+    max_games_per_team=12,
+    used_team_weeks=None,
+):
+    member_set = set(members)
+    counts = Counter()
+    selected = []
+    selected_event_keys = set()
+    used_team_weeks = set(used_team_weeks or set())
+
+    raw_candidates = []
+    for raw_game in _actual_fbs_schedule_rows():
+        team_1 = raw_game["team1"]
+        team_2 = raw_game["team2"]
+        team_1_in = team_1 in member_set
+        team_2_in = team_2 in member_set
+        if not (team_1_in or team_2_in):
+            continue
+        team_1_conference = memberships.get(team_1) or raw_game.get("team1_conference")
+        team_2_conference = memberships.get(team_2) or raw_game.get("team2_conference")
+        if team_1_in and team_2_in and team_1_conference == team_2_conference:
+            continue
+        score = _matchup_score(
+            team_1,
+            team_2,
+            rank_map,
+            team_1_conference,
+            team_2_conference,
+        )
+        candidate_game = {
+            "event_id": raw_game.get("event_id"),
+            "date": raw_game.get("date"),
+            "week": raw_game.get("week"),
+            "owner_conference": raw_game.get("owner_conference"),
+            "team1": team_1,
+            "team2": team_2,
+            "score": score,
+            "protected": False,
+            "rivalry_week_priority": _rivalry_week_priority(team_1, team_2),
+            "neutral_site": bool(raw_game.get("neutral_site", False)),
+            "conference_game": False,
+            "team1_conference": team_1_conference,
+            "team2_conference": team_2_conference,
+        }
+        _copy_cfbd_tv_fields(raw_game, candidate_game)
+        raw_candidates.append(candidate_game)
+
+    for game in sorted(
+        raw_candidates,
+        key=lambda row: (
+            int(row.get("week") or 99),
+            str(row.get("date") or ""),
+            -int(row.get("rivalry_week_priority") or 0),
+            -float(row.get("score") or 0.0),
+            row["team1"],
+            row["team2"],
+        ),
+    ):
+        involved_members = [team for team in [game["team1"], game["team2"]] if team in member_set]
+        if any(counts[team] >= max_games_per_team for team in involved_members):
+            continue
+        game_week = int(game.get("week") or 0)
+        if game_week and any((team, game_week) in used_team_weeks for team in involved_members):
+            continue
+        event_key = _realignment_event_key(game)
+        if event_key in selected_event_keys:
+            continue
+        selected_event_keys.add(event_key)
+        selected.append(game)
+        for team in involved_members:
+            counts[team] += 1
+            if game_week:
+                used_team_weeks.add((team, game_week))
+
+    return selected, counts
+
+
+def _filter_team_week_schedule_conflicts(schedule, member_set):
+    selected = []
+    used_team_weeks = set()
+    for game in sorted(
+        schedule,
+        key=lambda row: (
+            not bool(row.get("event_id")),
+            int(row.get("week") or 99),
+            -float(row.get("score") or 0.0),
+            row.get("team1", ""),
+            row.get("team2", ""),
+        ),
+    ):
+        game_week = int(game.get("week") or 0)
+        involved_members = [
+            team for team in [game.get("team1"), game.get("team2")]
+            if team in member_set
+        ]
+        if game_week and any((team, game_week) in used_team_weeks for team in involved_members):
+            continue
+        selected.append(game)
+        if game_week:
+            for team in involved_members:
+                used_team_weeks.add((team, game_week))
+    return selected
+
+
+def _remove_cross_slate_team_week_conflicts(slates):
+    entries = []
+    team_targets = {}
+    team_counts = Counter()
+    for conference, slate in slates.items():
+        for team in slate.get("teams", []):
+            team_targets[team] = 12
+        for row in slate.get("rows", []):
+            entries.append((conference, row))
+
+    kept_ids = set()
+    used_team_weeks = {}
+    schedule_weeks = [
+        *REALIGNMENT_EARLY_CONFERENCE_WEEKS,
+        *REALIGNMENT_PRIMARY_CONFERENCE_WEEKS,
+    ]
+
+    def row_team_week_keys(row, week=None):
+        week = int(week if week is not None else (row.get("week") or 0))
+        teams = [normalize_team(row.get("team1")), normalize_team(row.get("team2"))]
+        return [(team, week) for team in teams if team and week]
+
+    def row_has_conflict(row, week=None):
+        return any(key in used_team_weeks for key in row_team_week_keys(row, week))
+
+    def reserve_row(row):
+        for key in row_team_week_keys(row):
+            used_team_weeks.setdefault(key, row)
+        for team in [normalize_team(row.get("team1")), normalize_team(row.get("team2"))]:
+            if team in team_targets:
+                team_counts[team] += 1
+
+    def reassign_generated_row(row):
+        if row.get("event_id"):
+            return False
+        original_week = int(row.get("week") or 99)
+        candidate_weeks = sorted(
+            schedule_weeks,
+            key=lambda week: (
+                abs(int(week) - original_week),
+                int(week),
+            ),
+        )
+        for week in candidate_weeks:
+            if row_has_conflict(row, week):
+                continue
+            row["week"] = int(week)
+            row["date"] = None
+            return True
+        return False
+
+    dropped_generated_rows = []
+    for conference, row in sorted(
+        entries,
+        key=lambda item: (
+            not bool(item[1].get("event_id")),
+            int(item[1].get("week") or 99),
+            -float(item[1].get("matchup_score") or 0.0),
+            item[1].get("matchup", ""),
+        ),
+    ):
+        conflicting_rows = [
+            used_team_weeks[key]
+            for key in row_team_week_keys(row)
+            if key in used_team_weeks
+        ]
+        same_actual_duplicate = (
+            row.get("event_id")
+            and conflicting_rows
+            and all(conflict.get("event_id") == row.get("event_id") for conflict in conflicting_rows)
+        )
+        if conflicting_rows and not same_actual_duplicate:
+            if not reassign_generated_row(row):
+                if not row.get("event_id"):
+                    dropped_generated_rows.append(row)
+                continue
+        kept_ids.add(id(row))
+        reserve_row(row)
+
+    def row_schedule_deficit(row):
+        deficits = [
+            team_targets.get(team, 0) - team_counts.get(team, 0)
+            for team in [normalize_team(row.get("team1")), normalize_team(row.get("team2"))]
+            if team in team_targets
+        ]
+        return min(deficits) if deficits else -99
+
+    for _ in range(len(dropped_generated_rows)):
+        made_progress = False
+        dropped_generated_rows = sorted(
+            dropped_generated_rows,
+            key=lambda row: (
+                -row_schedule_deficit(row),
+                -float(row.get("matchup_score") or 0.0),
+                row.get("matchup", ""),
+            ),
+        )
+        still_dropped = []
+        for row in dropped_generated_rows:
+            teams = [
+                team for team in [normalize_team(row.get("team1")), normalize_team(row.get("team2"))]
+                if team in team_targets
+            ]
+            if not teams or any(team_counts.get(team, 0) >= team_targets.get(team, 12) for team in teams):
+                still_dropped.append(row)
+                continue
+            if not reassign_generated_row(row):
+                still_dropped.append(row)
+                continue
+            kept_ids.add(id(row))
+            reserve_row(row)
+            made_progress = True
+        dropped_generated_rows = still_dropped
+        if not made_progress:
+            break
+
+    for slate in slates.values():
+        slate["rows"] = [
+            row for row in slate.get("rows", [])
+            if id(row) in kept_ids
+        ]
+        _refresh_realignment_slate_summary(slate)
+
+
+def _fill_short_generated_conference_games(slates):
+    used_team_weeks = set()
+    for slate in slates.values():
+        for row in slate.get("rows", []):
+            week = int(row.get("week") or 0)
+            if not week:
+                continue
+            for team in [normalize_team(row.get("team1")), normalize_team(row.get("team2"))]:
+                if team:
+                    used_team_weeks.add((team, week))
+
+    schedule_weeks = [
+        *REALIGNMENT_EARLY_CONFERENCE_WEEKS,
+        *REALIGNMENT_PRIMARY_CONFERENCE_WEEKS,
+    ]
+
+    for conference, slate in slates.items():
+        teams = list(slate.get("teams", []))
+        if len(teams) < 2:
+            continue
+        rank_map = slate.get("rank_map", {})
+        counts = Counter({team: 0 for team in teams})
+        existing_pairs = set()
+        for row in slate.get("rows", []):
+            team_1 = normalize_team(row.get("team1"))
+            team_2 = normalize_team(row.get("team2"))
+            if team_1 in counts:
+                counts[team_1] += 1
+            if team_2 in counts:
+                counts[team_2] += 1
+            if team_1 and team_2:
+                existing_pairs.add(tuple(sorted([team_1, team_2])))
+
+        for _ in range(len(teams) * 12):
+            possible_additions = []
+            short_teams = [team for team in teams if counts[team] < 12]
+            for idx, team_1 in enumerate(short_teams):
+                for team_2 in short_teams[idx + 1:]:
+                    pair_key = tuple(sorted([team_1, team_2]))
+                    if pair_key in existing_pairs:
+                        continue
+                    available_weeks = [
+                        week for week in schedule_weeks
+                        if (team_1, week) not in used_team_weeks
+                        and (team_2, week) not in used_team_weeks
+                    ]
+                    if not available_weeks:
+                        continue
+                    week = sorted(
+                        available_weeks,
+                        key=lambda number: (
+                            int(number not in REALIGNMENT_PRIMARY_CONFERENCE_WEEKS),
+                            number,
+                        ),
+                    )[0]
+                    score = _matchup_score(team_1, team_2, rank_map, conference, conference)
+                    possible_additions.append((
+                        min(12 - counts[team_1], 12 - counts[team_2]),
+                        (12 - counts[team_1]) + (12 - counts[team_2]),
+                        score,
+                        team_1,
+                        team_2,
+                        week,
+                    ))
+            if not possible_additions:
+                for team_1 in short_teams:
+                    for team_2 in teams:
+                        if team_2 == team_1 or counts[team_2] >= 13:
+                            continue
+                        pair_key = tuple(sorted([team_1, team_2]))
+                        if pair_key in existing_pairs:
+                            continue
+                        available_weeks = [
+                            week for week in schedule_weeks
+                            if (team_1, week) not in used_team_weeks
+                            and (team_2, week) not in used_team_weeks
+                        ]
+                        if not available_weeks:
+                            continue
+                        week = sorted(
+                            available_weeks,
+                            key=lambda number: (
+                                int(number not in REALIGNMENT_PRIMARY_CONFERENCE_WEEKS),
+                                number,
+                            ),
+                        )[0]
+                        score = _matchup_score(team_1, team_2, rank_map, conference, conference)
+                        possible_additions.append((
+                            12 - counts[team_1],
+                            int(counts[team_2] < 12),
+                            score,
+                            team_1,
+                            team_2,
+                            week,
+                        ))
+            if not possible_additions:
+                break
+            _, _, score, team_1, team_2, week = sorted(
+                possible_additions,
+                key=lambda item: (-item[0], -item[1], -item[2], item[3], item[4], item[5]),
+            )[0]
+            score = _matchup_score(team_1, team_2, rank_map, conference, conference)
+            row = {
+                "game_number": len(slate.get("rows", [])) + 1,
+                "event_id": None,
+                "date": None,
+                "week": int(week),
+                "team1": team_1,
+                "team2": team_2,
+                "matchup": f"{team_1} vs {team_2}",
+                "rank1": rank_map.get(team_1, 0),
+                "rank2": rank_map.get(team_2, 0),
+                "network": "Not nationally rated",
+                "time_slot": "No national TV window",
+                "comp_tier1": None,
+                "tv_tier": "unrated",
+                "nationally_rated": False,
+                "matchup_score": float(round(score, 4)),
+                "protected": False,
+                "actual_schedule": False,
+                "generated_conference_game": True,
+                "conference_game": True,
+                "owner_conference": conference,
+                "team1_conference": conference,
+                "team2_conference": conference,
+                "predicted_viewers": 0.0,
+                "predicted_viewers_formatted": "Not rated",
+            }
+            slate.setdefault("rows", []).append(row)
+            existing_pairs.add(tuple(sorted([team_1, team_2])))
+            used_team_weeks.add((team_1, week))
+            used_team_weeks.add((team_2, week))
+            counts[team_1] += 1
+            counts[team_2] += 1
+
+        slate["rows"] = sorted(
+            slate.get("rows", []),
+            key=lambda row: (row.get("week") or 99, row.get("date") or "", row.get("team1") or "", row.get("team2") or ""),
+        )
+        for idx, row in enumerate(slate["rows"], start=1):
+            row["game_number"] = idx
+        _refresh_realignment_slate_summary(slate)
+
+
+def _generate_conference_games_around_actual(members, conference, rank_map, protected_pairs, actual_games):
+    member_set = set(members)
+    schedule = list(actual_games)
+    counts = Counter({team: 0 for team in members})
+
+    for game in schedule:
+        for team in [game.get("team1"), game.get("team2")]:
+            if team in member_set:
+                counts[team] += 1
+
+    if sum(max(0, 12 - counts[team]) for team in members) % 2:
+        removable_games = []
+        for idx, game in enumerate(schedule):
+            involved_members = [team for team in [game.get("team1"), game.get("team2")] if team in member_set]
+            if not involved_members:
+                continue
+            score = _matchup_score(
+                game.get("team1"),
+                game.get("team2"),
+                rank_map,
+                game.get("team1_conference") or "",
+                game.get("team2_conference") or "",
+            )
+            removable_games.append((score, int(game.get("week") or 99), idx, involved_members))
+        if removable_games:
+            _, _, remove_idx, involved_members = sorted(removable_games)[0]
+            schedule.pop(remove_idx)
+            for team in involved_members:
+                counts[team] -= 1
+
+    schedule_weeks = [
+        *REALIGNMENT_PRIMARY_CONFERENCE_WEEKS,
+        *REALIGNMENT_EARLY_CONFERENCE_WEEKS,
+    ]
+    protected_pair_keys = [
+        tuple(sorted([team_1, team_2]))
+        for team_1, team_2 in (protected_pairs or [])
+        if team_1 in member_set and team_2 in member_set and team_1 != team_2
+    ]
+
+    def base_state():
+        used_team_weeks = set()
+        existing_pairs = set()
+        base_counts = Counter({team: 0 for team in members})
+        for game in schedule:
+            week = int(game.get("week") or 0)
+            team_1 = game.get("team1")
+            team_2 = game.get("team2")
+            for team in [team_1, team_2]:
+                if team in member_set:
+                    base_counts[team] += 1
+                    if week:
+                        used_team_weeks.add((team, week))
+            if team_1 in member_set and team_2 in member_set:
+                existing_pairs.add(tuple(sorted([team_1, team_2])))
+        return list(schedule), base_counts, used_team_weeks, existing_pairs
+
+    def available_week(team_1, team_2, used_team_weeks, preferred_late=False):
+        weeks = sorted(
+            schedule_weeks,
+            key=lambda week: (
+                -week if preferred_late else int(week not in REALIGNMENT_PRIMARY_CONFERENCE_WEEKS),
+                week if not preferred_late else 0,
+            ),
+        )
+        for week in weeks:
+            if (team_1, week) not in used_team_weeks and (team_2, week) not in used_team_weeks:
+                return week
+        return None
+
+    def add_generated_game(local_schedule, local_counts, used_team_weeks, existing_pairs, team_1, team_2, protected=False):
+        pair_key = tuple(sorted([team_1, team_2]))
+        if pair_key in existing_pairs:
+            return False
+        if local_counts[team_1] >= 12 or local_counts[team_2] >= 12:
+            return False
+        score = _matchup_score(team_1, team_2, rank_map, conference, conference)
+        local_schedule.append({
+            "event_id": None,
+            "date": None,
+            "week": None,
+            "owner_conference": conference,
+            "team1": team_1,
+            "team2": team_2,
+            "score": score,
+            "protected": protected,
+            "rivalry_week_priority": _rivalry_week_priority(team_1, team_2),
+            "neutral_site": False,
+            "conference_game": True,
+            "team1_conference": conference,
+            "team2_conference": conference,
+        })
+        existing_pairs.add(pair_key)
+        local_counts[team_1] += 1
+        local_counts[team_2] += 1
+        return True
+
+    def assign_generated_weeks(local_schedule, attempt):
+        unavailable_team_weeks = set()
+        generated_games = []
+        for idx, game in enumerate(local_schedule):
+            team_1 = game.get("team1")
+            team_2 = game.get("team2")
+            if game.get("conference_game") and game.get("event_id") is None:
+                generated_games.append({**game})
+                game["week"] = None
+                continue
+            week = int(game.get("week") or 0)
+            if not week:
+                continue
+            for team in [team_1, team_2]:
+                if team in member_set:
+                    unavailable_team_weeks.add((team, week))
+        if not generated_games:
+            return True
+        assigned_games = _assign_schedule_weeks(
+            generated_games,
+            members,
+            9,
+            unavailable_team_weeks=unavailable_team_weeks,
+        )
+        if len(assigned_games) != len(generated_games) or any(not game.get("week") for game in assigned_games):
+            return False
+        assigned_weeks = {
+            tuple(sorted([game["team1"], game["team2"]])): int(game["week"])
+            for game in assigned_games
+        }
+        used_team_weeks = set(unavailable_team_weeks)
+        for game in local_schedule:
+            if not (game.get("conference_game") and game.get("event_id") is None):
+                continue
+            pair_key = tuple(sorted([game["team1"], game["team2"]]))
+            week = assigned_weeks.get(pair_key)
+            if not week:
+                return False
+            if (game["team1"], week) in used_team_weeks or (game["team2"], week) in used_team_weeks:
+                return False
+            game["week"] = int(week)
+            used_team_weeks.add((game["team1"], week))
+            used_team_weeks.add((game["team2"], week))
+        return True
+
+    def viable_pairs(local_counts, used_team_weeks, existing_pairs):
+        pairs = []
+        short_teams = [team for team in members if local_counts[team] < 12]
+        for idx, team_1 in enumerate(short_teams):
+            for team_2 in short_teams[idx + 1:]:
+                pair_key = tuple(sorted([team_1, team_2]))
+                if pair_key in existing_pairs:
+                    continue
+                pairs.append((team_1, team_2))
+        return pairs
+
+    def add_generated_game_in_week(local_schedule, local_counts, used_team_weeks, existing_pairs, team_1, team_2, week, protected=False):
+        pair_key = tuple(sorted([team_1, team_2]))
+        if pair_key in existing_pairs:
+            return False
+        if local_counts[team_1] >= 12 or local_counts[team_2] >= 12:
+            return False
+        if (team_1, week) in used_team_weeks or (team_2, week) in used_team_weeks:
+            return False
+        score = _matchup_score(team_1, team_2, rank_map, conference, conference)
+        local_schedule.append({
+            "event_id": None,
+            "date": None,
+            "week": int(week),
+            "owner_conference": conference,
+            "team1": team_1,
+            "team2": team_2,
+            "score": score,
+            "protected": protected,
+            "rivalry_week_priority": _rivalry_week_priority(team_1, team_2),
+            "neutral_site": False,
+            "conference_game": True,
+            "team1_conference": conference,
+            "team2_conference": conference,
+        })
+        existing_pairs.add(pair_key)
+        used_team_weeks.add((team_1, week))
+        used_team_weeks.add((team_2, week))
+        local_counts[team_1] += 1
+        local_counts[team_2] += 1
+        return True
+
+    def repair_two_short_teams(local_schedule, local_counts, used_team_weeks, existing_pairs):
+        short_teams = [team for team in members if local_counts[team] == 11]
+        if len(short_teams) != 2:
+            return False
+        team_1, team_2 = short_teams
+        if tuple(sorted([team_1, team_2])) in existing_pairs:
+            return False
+
+        def try_move_and_add(open_team, blocked_team):
+            open_weeks = [
+                week for week in schedule_weeks
+                if (open_team, week) not in used_team_weeks
+            ]
+            blocked_open_weeks = [
+                week for week in schedule_weeks
+                if (blocked_team, week) not in used_team_weeks
+            ]
+            for add_week in open_weeks:
+                blocker_indexes = [
+                    idx for idx, game in enumerate(local_schedule)
+                    if game.get("conference_game")
+                    and game.get("event_id") is None
+                    and int(game.get("week") or 0) == int(add_week)
+                    and blocked_team in [game.get("team1"), game.get("team2")]
+                ]
+                for idx in blocker_indexes:
+                    blocker = local_schedule[idx]
+                    opponent = blocker["team2"] if blocker["team1"] == blocked_team else blocker["team1"]
+                    for move_week in blocked_open_weeks:
+                        if (opponent, move_week) in used_team_weeks:
+                            continue
+                        old_week = int(blocker["week"])
+                        used_team_weeks.remove((blocked_team, old_week))
+                        used_team_weeks.remove((opponent, old_week))
+                        blocker["week"] = int(move_week)
+                        used_team_weeks.add((blocked_team, move_week))
+                        used_team_weeks.add((opponent, move_week))
+                        if add_generated_game_in_week(
+                            local_schedule,
+                            local_counts,
+                            used_team_weeks,
+                            existing_pairs,
+                            open_team,
+                            blocked_team,
+                            add_week,
+                        ):
+                            return True
+                        used_team_weeks.remove((blocked_team, move_week))
+                        used_team_weeks.remove((opponent, move_week))
+                        blocker["week"] = old_week
+                        used_team_weeks.add((blocked_team, old_week))
+                        used_team_weeks.add((opponent, old_week))
+            return False
+
+        return try_move_and_add(team_1, team_2) or try_move_and_add(team_2, team_1)
+
+    best_schedule = schedule
+    best_counts = counts
+    best_shortfall = sum(max(0, 12 - counts[team]) for team in members)
+    for attempt in range(220):
+        local_schedule, local_counts, used_team_weeks, existing_pairs = base_state()
+        rng = random.Random(attempt)
+        protected_order = sorted(
+            protected_pair_keys,
+            key=lambda pair: (-_rivalry_week_priority(pair[0], pair[1]), pair[0], pair[1]),
+        )
+        if attempt % 2:
+            rng.shuffle(protected_order)
+        for team_1, team_2 in protected_order:
+            preferred_weeks = sorted(
+                schedule_weeks,
+                key=lambda week: (
+                    (team_1, week) in used_team_weeks or (team_2, week) in used_team_weeks,
+                    -week,
+                ),
+            )
+            for week in preferred_weeks:
+                if add_generated_game_in_week(local_schedule, local_counts, used_team_weeks, existing_pairs, team_1, team_2, week, protected=True):
+                    break
+
+        week_order = list(schedule_weeks)
+        if attempt % 3 == 1:
+            week_order = sorted(schedule_weeks)
+        elif attempt % 3 == 2:
+            rng.shuffle(week_order)
+
+        for _ in range(3):
+            made_progress = False
+            for week in week_order:
+                while True:
+                    deficits = {team: max(0, 12 - local_counts[team]) for team in members}
+                    if not any(deficits.values()):
+                        return local_schedule, local_counts
+                    available_teams = [
+                        team for team in members
+                        if deficits[team] > 0 and (team, week) not in used_team_weeks
+                    ]
+                    candidates = []
+                    for idx, team_1 in enumerate(available_teams):
+                        for team_2 in available_teams[idx + 1:]:
+                            pair_key = tuple(sorted([team_1, team_2]))
+                            if pair_key in existing_pairs:
+                                continue
+                            score = _matchup_score(team_1, team_2, rank_map, conference, conference)
+                            candidates.append((
+                                -(deficits[team_1] + deficits[team_2]),
+                                -max(deficits[team_1], deficits[team_2]),
+                                -min(deficits[team_1], deficits[team_2]),
+                                -score,
+                                rng.random() if attempt >= 12 else 0,
+                                team_1,
+                                team_2,
+                            ))
+                    if not candidates:
+                        break
+                    candidates.sort()
+                    candidate_pool = candidates[: min(10, len(candidates))]
+                    if attempt < 12:
+                        _, _, _, _, _, team_1, team_2 = candidate_pool[0]
+                    elif attempt >= 80:
+                        _, _, _, _, _, team_1, team_2 = rng.choice(candidates)
+                    else:
+                        _, _, _, _, _, team_1, team_2 = rng.choice(candidate_pool)
+                    if not add_generated_game_in_week(local_schedule, local_counts, used_team_weeks, existing_pairs, team_1, team_2, week):
+                        break
+                    made_progress = True
+            if not made_progress:
+                break
+
+        shortfall = sum(max(0, 12 - local_counts[team]) for team in members)
+        if shortfall == 2 and repair_two_short_teams(local_schedule, local_counts, used_team_weeks, existing_pairs):
+            return local_schedule, local_counts
+        if shortfall == 0:
+            return local_schedule, local_counts
+        if shortfall < best_shortfall:
+            best_shortfall = shortfall
+            best_schedule = local_schedule
+            best_counts = local_counts
+
+    return best_schedule or schedule, best_counts or counts
+
+
+def _predict_custom_realignment_slate(teams, conference, sim, protected_pairs=None, memberships=None):
+    normalized_teams = [normalize_team(team) for team in teams]
+    memberships = memberships or {}
+    member_set = set(normalized_teams)
+    actual_opponents = {
+        team
+        for raw_game in _actual_fbs_schedule_rows()
+        if raw_game["team1"] in member_set or raw_game["team2"] in member_set
+        for team in [raw_game["team1"], raw_game["team2"]]
+    }
+    rank_map = _build_rank_map(
+        sorted(member_set | actual_opponents),
+        sim.ranking_policy,
+        sim.custom_rankings,
+    )
+    protected_pair_keys = {
+        tuple(sorted([team_1, team_2]))
+        for team_1, team_2 in (protected_pairs or [])
+        if team_1 in member_set and team_2 in member_set and team_1 != team_2
+    }
+    ooc_schedule, _ = _actual_nonconference_games_for_members(
+        normalized_teams,
+        memberships,
+        rank_map,
+        max_games_per_team=12,
+    )
+    schedule, counts = _generate_conference_games_around_actual(
+        normalized_teams,
+        conference,
+        rank_map,
+        protected_pair_keys,
+        ooc_schedule,
+    )
+
+    rows = []
+    for idx, game in enumerate(
+        sorted(schedule, key=lambda row: (row.get("week") or 99, row.get("date") or "", row["team1"], row["team2"]))
+    ):
+        row = {
+            "game_number": idx + 1,
+            "event_id": game.get("event_id"),
+            "date": game.get("date"),
+            "week": game.get("week"),
+            "team1": game["team1"],
+            "team2": game["team2"],
+            "matchup": f"{game['team1']} vs {game['team2']}",
+            "rank1": rank_map.get(game["team1"], 0),
+            "rank2": rank_map.get(game["team2"], 0),
+            "network": "Not nationally rated",
+            "time_slot": "No national TV window",
+            "comp_tier1": None,
+            "tv_tier": "unrated",
+            "nationally_rated": False,
+            "matchup_score": float(round(game["score"], 4)),
+            "protected": bool(game.get("protected", False)),
+            "actual_schedule": bool(game.get("event_id")),
+            "generated_conference_game": bool(game.get("conference_game", False) and not game.get("event_id")),
+            "conference_game": bool(game.get("conference_game", True)),
+            "owner_conference": game.get("owner_conference"),
+            "team1_conference": game.get("team1_conference"),
+            "team2_conference": game.get("team2_conference"),
+            "predicted_viewers": 0.0,
+            "predicted_viewers_formatted": "Not rated",
+        }
+        _copy_cfbd_tv_fields(game, row)
+        rows.append(row)
+
+    slate = {
+        "teams": normalized_teams,
+        "team_game_counts": dict(counts),
+        "rank_map": rank_map,
+        "rows": rows,
+        "schedule_source": "actual_nonconference_plus_generated_conference",
+    }
+    _refresh_realignment_slate_summary(slate)
+    return slate
 
 
 @app.post("/realignment/simulate")
@@ -3045,6 +5368,7 @@ def realignment_simulation(sim: RealignmentSimulationInput):
             "network_policy": _realignment_network_plan(conference)["label"],
             "tv_network_plan": _realignment_network_plan(conference)["label"],
             "ranking_policy": sim.ranking_policy,
+            "custom_rankings": _normalized_custom_rankings(sim.custom_rankings) if sim.ranking_policy == "custom" else {},
             "protected_opponents": protected_opponents,
             "protected_opponents_by_team": normalized_protected_opponents_by_team,
         },
@@ -3072,7 +5396,7 @@ def realignment_simulation(sim: RealignmentSimulationInput):
         "available_options": {
             "conferences": sorted(set(team_conferences.values())),
             "network_policies": [],
-            "ranking_policies": ["espn_2026_preseason", "final_ap_2021_2025", "unranked"],
+            "ranking_policies": REALIGNMENT_RANKING_POLICIES,
         },
         "methodology": (
             "Generates a deterministic conference slate by locking known rivalry games, "
@@ -3101,6 +5425,7 @@ def superleague_simulation(sim: SuperleagueSimulationInput):
                 "teams": selected_teams,
                 "games_per_team": sim.games_per_team,
                 "ranking_policy": sim.ranking_policy,
+                "custom_rankings": _normalized_custom_rankings(sim.custom_rankings) if sim.ranking_policy == "custom" else {},
                 "tv_network_plan": _realignment_network_plan("Superleague")["label"],
             },
             "slate": {
@@ -3140,6 +5465,7 @@ def superleague_simulation(sim: SuperleagueSimulationInput):
             "teams": selected_teams,
             "games_per_team": sim.games_per_team,
             "ranking_policy": sim.ranking_policy,
+            "custom_rankings": _normalized_custom_rankings(sim.custom_rankings) if sim.ranking_policy == "custom" else {},
             "tv_network_plan": _realignment_network_plan("Superleague")["label"],
         },
         "slate": slate,
@@ -3155,7 +5481,7 @@ def superleague_simulation(sim: SuperleagueSimulationInput):
             for team_1, team_2 in protected_rivalry_pairs
         ],
         "available_options": {
-            "ranking_policies": ["espn_2026_preseason", "final_ap_2021_2025", "unranked"],
+            "ranking_policies": REALIGNMENT_RANKING_POLICIES,
         },
         "methodology": (
             "Builds a custom superleague from the drafted teams, locks known rivalry games, "
@@ -3175,11 +5501,7 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
             normalized_memberships[team] = conference
 
     if not normalized_memberships:
-        normalized_memberships = {
-            team: conference
-            for team, conference in team_conferences.items()
-            if conference in REALIGNMENT_EDITABLE_CONFERENCES and team in MODEL_TEAM_NAMES
-        }
+        normalized_memberships = _default_league_memberships()
 
     user_protected_pairs = set()
     for raw_team, raw_opponents in (sim.protected_matchups_by_team or {}).items():
@@ -3233,21 +5555,20 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
                     if pair[0] in members and pair[1] in members
                 }
             )
-            slates[conference] = _predict_realignment_slate(
+            slates[conference] = _predict_custom_realignment_slate(
                 members,
                 conference,
                 sim,
                 protected_pairs=protected_pairs,
-                realistic_tv_inventory=True,
-                transferred_slots=transferred_slots.get(conference, []),
-                removed_slots=removed_slots.get(conference, []),
-                assign_preliminary_tv=False,
+                memberships=memberships,
             )
 
         _apply_global_tv_slots_to_league_slates(
             slates,
             transferred_slots,
             removed_slots,
+            ranking_policy=sim.ranking_policy,
+            custom_rankings=sim.custom_rankings,
         )
         return slates, transferred_slots, removed_slots, transfer_rows
 
@@ -3255,12 +5576,18 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
         normalized_memberships,
         user_protected_pairs,
     )
-    baseline_memberships = {
-        team: conference
-        for team, conference in team_conferences.items()
-        if conference in REALIGNMENT_EDITABLE_CONFERENCES and team in MODEL_TEAM_NAMES
+    baseline_memberships = _default_league_memberships()
+    baseline_conference_slates, *_ = build_league_slates(
+        baseline_memberships,
+    )
+    public_conference_slates = {
+        conference: _public_realignment_slate_for_conference(slate, conference)
+        for conference, slate in conference_slates.items()
     }
-    baseline_conference_slates, *_ = build_league_slates(baseline_memberships)
+    public_baseline_conference_slates = {
+        conference: _public_realignment_slate_for_conference(slate, conference)
+        for conference, slate in baseline_conference_slates.items()
+    }
 
     all_rows = []
     for conference, slate in conference_slates.items():
@@ -3279,8 +5606,26 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
         row["global_game_number"] = idx + 1
 
     conference_summaries = {
-        conference: slate["summary"]
-        for conference, slate in conference_slates.items()
+        conference: _realignment_summary_for_rows(
+            public_conference_slates.get(conference, {}).get("rows", []),
+            team_count=public_conference_slates.get(conference, {}).get("summary", {}).get("teams", 0),
+        )
+        for conference in REALIGNMENT_EDITABLE_CONFERENCES
+    }
+    baseline_rows = [
+        {
+            **row,
+            "conference": conference,
+        }
+        for conference, slate in public_baseline_conference_slates.items()
+        for row in slate.get("rows", [])
+    ]
+    baseline_conference_summaries = {
+        conference: _realignment_summary_for_rows(
+            public_baseline_conference_slates.get(conference, {}).get("rows", []),
+            team_count=public_baseline_conference_slates.get(conference, {}).get("summary", {}).get("teams", 0),
+        )
+        for conference in REALIGNMENT_EDITABLE_CONFERENCES
     }
     conference_membership_changes = {
         conference: {
@@ -3302,8 +5647,8 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
     }
     conference_distribution_metrics = {
         conference: _distribution_metric_comparison(
-            conference_slates.get(conference, {}).get("rows", []),
-            baseline_conference_slates.get(conference, {}).get("rows", []),
+            public_conference_slates.get(conference, {}).get("rows", []),
+            public_baseline_conference_slates.get(conference, {}).get("rows", []),
             conference_membership_changes[conference]["pct_delta"],
         )
         for conference in REALIGNMENT_EDITABLE_CONFERENCES
@@ -3318,16 +5663,15 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
         "settings": {
             "games_per_team": sim.games_per_team,
             "ranking_policy": sim.ranking_policy,
+            "custom_rankings": _normalized_custom_rankings(sim.custom_rankings) if sim.ranking_policy == "custom" else {},
             "conferences": REALIGNMENT_EDITABLE_CONFERENCES,
             "tv_slot_transfers": tv_slot_transfer_rows,
+            "schedule_source": "actual_nonconference_plus_generated_conference",
         },
         "memberships": normalized_memberships,
         "conference_slates": conference_slates,
         "conference_summaries": conference_summaries,
-        "baseline_conference_summaries": {
-            conference: slate["summary"]
-            for conference, slate in baseline_conference_slates.items()
-        },
+        "baseline_conference_summaries": baseline_conference_summaries,
         "conference_membership_changes": conference_membership_changes,
         "conference_distribution_metrics": conference_distribution_metrics,
         "rows": all_rows,
@@ -3343,9 +5687,11 @@ def league_realignment_simulation(sim: LeagueRealignmentSimulationInput):
         },
         "top_games": rated_rows[:40],
         "methodology": (
-            "Schedules every edited conference using the selected games-per-team cap, "
-            "locks known rivalry games within each conference, then lets a national weekly "
-            "TV draft board select games by projected viewership for each network/window. "
+            "Generates conference schedules for both the baseline and edited memberships "
+            "by preserving actual non-conference games and generating the remaining "
+            "conference games from the current conference membership. "
+            "The national weekly "
+            "TV draft board then selects games by projected viewership for each network/window. "
             "Slots are constrained by media-rights eligibility and can remain unused by "
             "conference games when the available matchups fall below that slot's TV threshold."
         ),

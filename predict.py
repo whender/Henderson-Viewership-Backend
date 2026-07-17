@@ -138,6 +138,11 @@ team_conferences = {
     "Washington St.": "Pac-12", "Oregon St.": "Pac-12"
 }
 
+former_pac12_teams = {
+    "Arizona", "Arizona St.", "California", "Colorado", "Oregon", "Oregon St.",
+    "Stanford", "UCLA", "USC", "Utah", "Washington", "Washington St.",
+}
+
 rivalries = {
     "Michigan_OhioSt": ("Michigan", "Ohio St."), "Texas_Oklahoma": ("Texas", "Oklahoma"),
     "Alabama_Auburn": ("Alabama", "Auburn"), "Georgia_Florida": ("Georgia", "Florida"),
@@ -152,7 +157,8 @@ rivalries = {
     "Army_Navy": ("Army", "Navy"), "Army_AirForce": ("Army", "Air Force"),
     "Navy_AirForce": ("Navy", "Air Force"), "OhioSt_PennSt": ("Ohio St.", "Penn St."),
     "Alabama_LSU": ("Alabama", "LSU"), "Vanderbilt_Tennessee": ("Vanderbilt", "Tennessee"),
-    "Georgia_GeorgiaTech": ("Georgia", "Georgia Tech"), "Alabama_Georgia": ("Alabama", "Georgia")
+    "Georgia_GeorgiaTech": ("Georgia", "Georgia Tech"), "Alabama_Georgia": ("Alabama", "Georgia"),
+    "WestVirginia_Pittsburgh": ("West Virginia", "Pittsburgh")
 }
 
 FEUD_START = datetime(2025, 10, 30)
@@ -238,6 +244,9 @@ def predict_viewership(p):
     network = p["network"]
     time_slot = p["time_slot"]
     comp_tier1 = p.get("comp_tier1", 0)
+    competing_games_score = float(
+        p.get("competing_games_score", p.get("Competing_Games_Score", 0.0)) or 0.0
+    )
     warnings = []
     if "Monday" in str(time_slot) and network != "ESPN":
         warnings.append(
@@ -245,6 +254,16 @@ def predict_viewership(p):
             "The Monday effect is estimated from ESPN Monday games, so this prediction extrapolates outside observed support."
         )
     is_black_friday = is_black_friday_slot(time_slot, p.get("date"))
+    is_conf_champ = bool(p.get("conf_champ", False))
+    parsed_game_date = pd.to_datetime(p.get("date"), errors="coerce")
+    game_year = int(parsed_game_date.year) if pd.notna(parsed_game_date) else None
+    is_pac12_conf_champ = (
+        is_conf_champ
+        and game_year is not None
+        and game_year <= 2023
+        and team1 in former_pac12_teams
+        and team2 in former_pac12_teams
+    )
     is_friday = ("Friday" in str(time_slot)) and not is_black_friday
 
     conference_overrides = p.get("conference_overrides", {}) or {}
@@ -263,6 +282,10 @@ def predict_viewership(p):
 
     top10 = t1_top10 + t2_top10
     rank_25_11 = t1_25_11 + t2_25_11
+    team1_win_pct = float(p.get("team1_win_pct_to_date", p.get("Team1_WinPct_ToDate", 0.5)) or 0.5)
+    team2_win_pct = float(p.get("team2_win_pct_to_date", p.get("Team2_WinPct_ToDate", 0.5)) or 0.5)
+    avg_win_pct = float(p.get("avg_win_pct_to_date", p.get("Avg_WinPct_ToDate", (team1_win_pct + team2_win_pct) / 2)) or 0.5)
+    win_pct_diff = float(p.get("win_pct_diff_to_date", p.get("WinPct_Diff_ToDate", abs(team1_win_pct - team2_win_pct))) or 0.0)
 
     # ✔️ auto rivalry match
     auto_rivalry = next(
@@ -273,6 +296,7 @@ def predict_viewership(p):
     # Build feature vector
     features = {
         "Competing Tier 1": comp_tier1,
+        "Competing_Games_Score": competing_games_score,
 
         "ABC": int(network == "ABC"), "CBS": int(network == "CBS"),
         "NBC": int(network == "NBC"), "FOX": int(network == "FOX"),
@@ -294,7 +318,10 @@ def predict_viewership(p):
         "Sat Early": int(not is_black_friday and "Early" in time_slot),
         "Sat Mid": int(not is_black_friday and "Mid" in time_slot),
         "Sat Late": int(not is_black_friday and "Late" in time_slot),
-
+        "Team1_WinPct_ToDate": team1_win_pct,
+        "Team2_WinPct_ToDate": team2_win_pct,
+        "Avg_WinPct_ToDate": avg_win_pct,
+        "WinPct_Diff_ToDate": win_pct_diff,
         "Top 10 Rankings": top10,
         "25-11 Rankings": rank_25_11,
 
@@ -302,6 +329,21 @@ def predict_viewership(p):
         "Big 10": (conf1 == "Big 10") + (conf2 == "Big 10"),
         "ACC": (conf1 == "ACC") + (conf2 == "ACC"),
         "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
+        "SEC_ConfChamp": int(is_conf_champ and conf1 == "SEC" and conf2 == "SEC"),
+        "Big10_ConfChamp": int(is_conf_champ and conf1 == "Big 10" and conf2 == "Big 10"),
+        "Big12_ConfChamp": int(is_conf_champ and conf1 == "Big 12" and conf2 == "Big 12"),
+        "ACC_ConfChamp": int(is_conf_champ and conf1 == "ACC" and conf2 == "ACC"),
+        "Pac12_ConfChamp": int(is_pac12_conf_champ),
+        "Other_ConfChamp": int(
+            is_conf_champ
+            and not is_pac12_conf_champ
+            and not (
+                (conf1 == "SEC" and conf2 == "SEC")
+                or (conf1 == "Big 10" and conf2 == "Big 10")
+                or (conf1 == "Big 12" and conf2 == "Big 12")
+                or (conf1 == "ACC" and conf2 == "ACC")
+            )
+        ),
     }
 
     # postseason implication flags

@@ -21,6 +21,11 @@ from predict import (
 import joblib
 import os
 
+former_pac12_teams = {
+    "Arizona", "Arizona St.", "California", "Colorado", "Oregon", "Oregon St.",
+    "Stanford", "UCLA", "USC", "Utah", "Washington", "Washington St.",
+}
+
 # ======================================================
 # 🔥 LOAD POSTGAME MODEL
 # ======================================================
@@ -92,6 +97,9 @@ def build_features(row):
     network = row["network"]
     time_slot = str(row["time_slot"])
     comp_tier1 = int(row.get("comp_tier1", 0))
+    competing_games_score = float(
+        row.get("competing_games_score", row.get("Competing_Games_Score", 0.0)) or 0.0
+    )
     day = row.get("day", "")
 
     # ---------- YEAR ----------
@@ -158,10 +166,15 @@ def build_features(row):
     sat_early = (not is_friday and not is_black_friday and any(t in time_slot for t in early_keywords))
     sat_mid   = (not is_friday and not is_black_friday and any(t in time_slot for t in mid_keywords))
     sat_late  = (not is_friday and not is_black_friday and any(t in time_slot for t in late_keywords))
+    team1_win_pct = float(row.get("team1_win_pct_to_date", row.get("Team1_WinPct_ToDate", 0.5)) or 0.5)
+    team2_win_pct = float(row.get("team2_win_pct_to_date", row.get("Team2_WinPct_ToDate", 0.5)) or 0.5)
+    avg_win_pct = float(row.get("avg_win_pct_to_date", row.get("Avg_WinPct_ToDate", (team1_win_pct + team2_win_pct) / 2)) or 0.5)
+    win_pct_diff = float(row.get("win_pct_diff_to_date", row.get("WinPct_Diff_ToDate", abs(team1_win_pct - team2_win_pct))) or 0.0)
 
     # ---------- BASE FEATURES ----------
     features = {
         "Competing Tier 1": comp_tier1,
+        "Competing_Games_Score": competing_games_score,
         "DeionEra": deion_era,
         "DeionEra25": deion_era25,
 
@@ -193,7 +206,10 @@ def build_features(row):
         "Sat Early": int(sat_early),
         "Sat Mid": int(sat_mid),
         "Sat Late": int(sat_late),
-
+        "Team1_WinPct_ToDate": team1_win_pct,
+        "Team2_WinPct_ToDate": team2_win_pct,
+        "Avg_WinPct_ToDate": avg_win_pct,
+        "WinPct_Diff_ToDate": win_pct_diff,
         "Top 10 Rankings": top10,
         "25-11 Rankings": rank_25_11,
 
@@ -205,16 +221,26 @@ def build_features(row):
 
     # ---------- SPLIT CONF CHAMP BY CONFERENCE ----------
     is_cc = bool(row.get("conf_champ", False))
+    parsed_game_date = pd.to_datetime(row.get("date"), errors="coerce")
+    game_year = int(parsed_game_date.year) if pd.notna(parsed_game_date) else None
+    is_pac12_cc = (
+        is_cc
+        and game_year is not None
+        and game_year <= 2023
+        and team1 in former_pac12_teams
+        and team2 in former_pac12_teams
+    )
 
     # Both teams must be from same conference for the game to count
     features["SEC_ConfChamp"] = int(is_cc and conf1 == "SEC" and conf2 == "SEC")
     features["Big10_ConfChamp"] = int(is_cc and conf1 == "Big 10" and conf2 == "Big 10")
     features["Big12_ConfChamp"] = int(is_cc and conf1 == "Big 12" and conf2 == "Big 12")
     features["ACC_ConfChamp"] = int(is_cc and conf1 == "ACC" and conf2 == "ACC")
+    features["Pac12_ConfChamp"] = int(is_pac12_cc)
 
     # If it's a conf champ but NOT SEC/Big10/Big12/ACC
     features["Other_ConfChamp"] = int(
-        is_cc and not (
+        is_cc and not is_pac12_cc and not (
             (conf1 == "SEC" and conf2 == "SEC") or
             (conf1 == "Big 10" and conf2 == "Big 10") or
             (conf1 == "Big 12" and conf2 == "Big 12") or
