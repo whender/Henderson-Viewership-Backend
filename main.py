@@ -144,7 +144,7 @@ def root():
     return {"status": "running", "message": "Henderson Viewership Model API"}
 
 
-ARTICLES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "articles"))
+ARTICLES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "articles"))
 
 
 def _article_slug(value):
