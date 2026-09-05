@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "weight": 0.5,
+  "event_mean_000s": 4613.4,
+  "training_max_year": 2025,
+  "prediction_year": 2026,
+  "sample_count": 5,
+  "networks": [
+    "ESPN",
+    "FOX"
+  ],
+  "model_sha256": "4fa7ac6542bed7a3cb992bbf65711d1b9884b84ec54e00a0b36d5ff2346512cf",
+  "validation": {
+    "holdout_games": 4,
+    "improved_games": 4,
+    "baseline_mae_000s": 1398.3710025233456,
+    "revised_mae_000s": 1082.0251612763957,
+    "all_games": 1821,
+    "other_games_unchanged": true
+  },
+  "description": "50/50 blend with prior-season opening P4 event mean. Explicit Week 0 only; no 2026 actuals used."
+}

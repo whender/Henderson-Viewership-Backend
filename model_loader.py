@@ -1,5 +1,7 @@
 import joblib
 import os
+import hashlib
+import json
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -43,7 +45,17 @@ def load_viewership_model():
     data = joblib.load(path)
 
     if isinstance(data, dict):
-        return _attach_pregame_artifact_metadata(data["model"], data)
+        model = _attach_pregame_artifact_metadata(data["model"], data)
+        calibration_path = os.path.join(BASE_DIR, "opening_week_calibration.json")
+        if os.path.exists(calibration_path):
+            with open(calibration_path) as source:
+                calibration = json.load(source)
+            with open(path, "rb") as artifact:
+                digest = hashlib.file_digest(artifact, "sha256").hexdigest()
+            if calibration.get("model_sha256") != digest:
+                raise ValueError("Opening-week calibration must be revalidated for this model artifact")
+            model.opening_week_calibration = calibration
+        return model
 
     # fallback if saved as plain model
     return _attach_pregame_artifact_metadata(data)

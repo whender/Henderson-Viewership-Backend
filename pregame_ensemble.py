@@ -294,4 +294,29 @@ def predict_pregame_points_000s(
         _finite_number(adjustments.get(scope)) or 0.0
         for scope in scopes
     ], dtype=float)
-    return np.maximum(blended + additive, 0.0)
+    points = np.maximum(blended + additive, 0.0)
+    return apply_opening_week_calibration(primary_model, primary_matrix, context_rows, points)
+
+
+def apply_opening_week_calibration(model, matrix, contexts, points):
+    """Use a historical event prior only for explicit, supported Week 0 P4 games."""
+    config = getattr(model, "opening_week_calibration", None)
+    if config is None:
+        return points
+    weight = _finite_number(config.get("weight"))
+    event_mean = _finite_number(config.get("event_mean_000s"))
+    training_year = _finite_number(config.get("training_max_year"))
+    prediction_year = _finite_number(config.get("prediction_year"))
+    if (config.get("version") != 1 or weight is None or not 0 <= weight <= 1
+            or event_mean is None or event_mean <= 0 or training_year is None
+            or prediction_year != training_year + 1):
+        raise ValueError("Invalid opening-week calibration configuration")
+    result = np.asarray(points, dtype=float).copy()
+    for i, context in enumerate(contexts):
+        game_date = _coerce_date(_context_value(context, "date", "Date", "ParsedDate"))
+        if (game_date is not None and game_date.year == prediction_year
+                and _finite_number(context.get("week")) == 0
+                and context.get("network") in config.get("networks", [])
+                and matrix.iloc[i].get("Week 0 Power", 0) == 1):
+            result[i] = (1 - weight) * result[i] + weight * event_mean
+    return result
