@@ -24,6 +24,30 @@ def _competition_model(mapping=None):
 
 
 class PredictionInputParityTests(unittest.TestCase):
+    def test_opening_week_boost_uses_assigned_week_not_calendar_or_cfbd_week(self):
+        row = dict(team1="North Carolina", team2="TCU", rank1=0, rank2=0,
+                   network="ESPN", time_slot="12:00p", date="08/29/26",
+                   competing_games_score=0, week=0, season_week=1)
+        for date in ["08/24/24", "08/29/26", "09/05/26"]:
+            with self.subTest(date=date):
+                features = build_features(dict(row, date=date))
+                self.assertEqual(features["Week 0 Power"], 1)
+                self.assertEqual(features["Week 1 Power"], 0)
+        features = build_features(dict(row, week=1, date="08/23/25"))
+        self.assertEqual(features["Week 0 Power"], 0)
+        self.assertEqual(features["Week 1 Power"], 1)
+        features = build_features(dict(row, week=2))
+        self.assertEqual(features["Week 0 Power"], 0)
+        self.assertEqual(features["Week 1 Power"], 0)
+
+    def test_week_zero_boost_still_requires_two_power_teams(self):
+        row = dict(team1="San Jose St.", team2="USC", rank1=0, rank2=14,
+                   network="NBC", time_slot="3:00p", date="08/29/26",
+                   competing_games_score=0, week=0, season_week=1)
+        features = build_features(row)
+        self.assertEqual(features["Week 0 Power"], 0)
+        self.assertEqual(features["Week 1 Power"], 0)
+
     def test_weekly_ohio_state_btn_adjustment(self):
         row = dict(team1="Ohio St.", team2="Ball St.", rank1=1, rank2=0,
                    network="BTN", time_slot="12:30p", date="09/05/26",

@@ -104,6 +104,7 @@ class GameInput(BaseModel):
     network: str
     time_slot: str
     date: str | None = None
+    week: int | None = Field(default=None, ge=0)
     season_week: int | None = None
     team1_games_before: float | None = None
     team2_games_before: float | None = None
@@ -3404,8 +3405,8 @@ def _batch_predict_realignment_rows(row_contexts, compute_competition=True, rela
                 "Friday Power": int(is_power_friday),
                 "Friday Non-Power": int(is_non_power_friday),
                 "Black Friday": int(is_black_friday),
-                "Week 0 Power": int(is_week_zero_power_game(team1, team2, conf1, conf2, game_date, time_slot)),
-                "Week 1 Power": int(is_week_one_power_game(team1, team2, conf1, conf2, game_date, time_slot)),
+                "Week 0 Power": int(is_week_zero_power_game(team1, team2, conf1, conf2, game_date, time_slot, week=row.get("week"))),
+                "Week 1 Power": int(is_week_one_power_game(team1, team2, conf1, conf2, game_date, time_slot, week=row.get("week"))),
                 "Sat Early": int(not is_black_friday and "Early" in time_slot),
                 "Sat Mid": int(not is_black_friday and "Mid" in time_slot),
                 "Sat Late": int(not is_black_friday and "Late" in time_slot),

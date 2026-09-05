@@ -335,11 +335,15 @@ def is_power_football_team(team, conference=None):
     return resolved_conference in POWER_FOOTBALL_CONFERENCES or team == "Notre Dame"
 
 
-def is_week_zero_power_game(team1, team2, conf1, conf2, date_value=None, time_slot=None):
+def is_week_zero_power_game(team1, team2, conf1, conf2, date_value=None, time_slot=None, week=None):
     if not (is_power_football_team(team1, conf1) and is_power_football_team(team2, conf2)):
         return False
+    if week is not None:
+        return int(week) == 0
     if "Week 0" in str(time_slot):
         return True
+    if "Week 1" in str(time_slot):
+        return False
     if not date_value:
         return False
     parsed_date = pd.to_datetime(date_value, errors="coerce")
@@ -350,8 +354,12 @@ def is_week_zero_power_game(team1, team2, conf1, conf2, date_value=None, time_sl
     )
 
 
-def is_week_one_power_game(team1, team2, conf1, conf2, date_value=None, time_slot=None):
+def is_week_one_power_game(team1, team2, conf1, conf2, date_value=None, time_slot=None, week=None):
     if not (is_power_football_team(team1, conf1) and is_power_football_team(team2, conf2)):
+        return False
+    if week is not None:
+        return int(week) == 1
+    if "Week 0" in str(time_slot):
         return False
     if "Week 1" in str(time_slot):
         return True
@@ -388,8 +396,8 @@ def predict_viewership(p):
     conf2 = conference_overrides.get(team2, team_conferences.get(team2, "Group of 6"))
     is_power_friday = is_friday and is_power_football_team(team1, conf1) and is_power_football_team(team2, conf2)
     is_non_power_friday = is_friday and not is_power_friday
-    is_week_zero_power = is_week_zero_power_game(team1, team2, conf1, conf2, p.get("date"), time_slot)
-    is_week_one_power = is_week_one_power_game(team1, team2, conf1, conf2, p.get("date"), time_slot)
+    is_week_zero_power = is_week_zero_power_game(team1, team2, conf1, conf2, p.get("date"), time_slot, week=p.get("week"))
+    is_week_one_power = is_week_one_power_game(team1, team2, conf1, conf2, p.get("date"), time_slot, week=p.get("week"))
 
     both_ranked = rank1 > 0 and rank2 > 0
     same_conf = (conf1 == conf2 and conf1 in ["SEC", "Big 10", "ACC", "Big 12"])

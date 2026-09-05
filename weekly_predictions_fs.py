@@ -146,8 +146,8 @@ def build_features(row):
     )
     is_power_friday = is_friday and is_power_football_team(team1, conf1) and is_power_football_team(team2, conf2)
     is_non_power_friday = is_friday and not is_power_friday
-    is_week_zero_power = is_week_zero_power_game(team1, team2, conf1, conf2, date_str, time_slot)
-    is_week_one_power = is_week_one_power_game(team1, team2, conf1, conf2, date_str, time_slot)
+    is_week_zero_power = is_week_zero_power_game(team1, team2, conf1, conf2, date_str, time_slot, week=row.get("week"))
+    is_week_one_power = is_week_one_power_game(team1, team2, conf1, conf2, date_str, time_slot, week=row.get("week"))
 
     # ---------- RIVALRY ----------
     auto_rivalry = next(
