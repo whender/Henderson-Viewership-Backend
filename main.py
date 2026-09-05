@@ -21,8 +21,11 @@ from weekly_predictions_fs import (
     generate_postgame_prediction,
     calc_error,
     build_features,
-    parse_viewership
+    parse_viewership,
+    pregame_prediction_warnings,
 )
+from pregame_context_features import build_pregame_context_features
+from pregame_ensemble import predict_pregame_points_000s
 
 from firestore_client import db
 from cbb_viewership import (
@@ -88,6 +91,8 @@ from predict import (
     is_week_one_power_game,
     is_week_zero_power_game,
     rank_to_coefs,
+    resolve_competing_games_score,
+    resolve_game_record_features,
     team_conferences,
 )
 
@@ -99,9 +104,17 @@ class GameInput(BaseModel):
     network: str
     time_slot: str
     date: str | None = None
+    season_week: int | None = None
+    team1_games_before: float | None = None
+    team2_games_before: float | None = None
+    team1_win_pct_to_date: float | None = Field(default=None, ge=0.0, le=1.0)
+    team2_win_pct_to_date: float | None = Field(default=None, ge=0.0, le=1.0)
+    cfp_rank1: int | None = None
+    cfp_rank2: int | None = None
+    ranking_source: str = "auto"
     conf_champ: bool = False
     comp_tier1: int = 0
-    competing_games_score: float = 0.0
+    competing_games_score: float | None = Field(default=None, ge=0.0)
 
 
 class ArticleInput(BaseModel):
@@ -388,9 +401,10 @@ def cbb_profile(team: str):
 numeric_features_post = [
     "Competing_Games_Score","FOX","ESPN","ESPN2","ESPNU","FS1","FS2","NBC","CBS",
     "ABC","BTN","CW","NFLN","ESPNNEWS",
-    "SEC_ConfChamp","Big10_ConfChamp","Big12_ConfChamp","ACC_ConfChamp","Pac12_ConfChamp","Other_ConfChamp",
     "Sun","Monday","Weekday","Friday Power","Friday Non-Power","Black Friday","Week 0 Power","Week 1 Power",
     "Sat Early","Sat Mid","Sat Late","Top 10 Rankings","25-11 Rankings",
+    "AnyDayKickoff9pmOrLater","EarlyRecordNeutralized","MinGamesBefore",
+    "LateBothRanked","CFP_RankStrengthSum","CFP_RankDifference",
     "Avg_WinPct_ToDate","WinPct_Diff_ToDate",
     "SEC_PostseasonImplications","Big10_PostseasonImplications",
     "Big12_PostseasonImplications","ACC_PostseasonImplications",
@@ -474,10 +488,6 @@ team_conferences = {
 }
 
 power4_set = set(team_conferences.keys()) | {"Notre Dame"}
-former_pac12_teams = {
-    "Arizona", "Arizona St.", "California", "Colorado", "Oregon", "Oregon St.",
-    "Stanford", "UCLA", "USC", "Utah", "Washington", "Washington St.",
-}
 excluded_brand_teams = {"North Dakota"}
 excluded_viewership_ranking_teams = {
     "Western Carolina",
@@ -503,7 +513,10 @@ excluded_viewership_ranking_teams = {
     "Alcorn State",
 }
 
-df_all = pd.read_csv("viewership_cleaned.csv", low_memory=False)
+df_all = pd.read_csv(
+    os.path.join(os.path.dirname(__file__), "viewership_cleaned.csv"),
+    low_memory=False,
+)
 
 parsed_game_dates = pd.to_datetime(df_all.get("ParsedDate"), errors="coerce")
 df_all["Black Friday"] = parsed_game_dates.map(
@@ -3275,22 +3288,6 @@ def _is_realignment_black_friday_slot(time_slot):
     return "Black Friday" in str(time_slot or "")
 
 
-def _game_year_from_date(date_value):
-    local_date = _realignment_local_game_date(date_value)
-    return int(local_date.year) if local_date is not None else None
-
-
-def _is_pac12_conf_champ_game(team1, team2, date_value, is_conf_champ):
-    year = _game_year_from_date(date_value)
-    return bool(
-        is_conf_champ
-        and year is not None
-        and year <= 2023
-        and team1 in former_pac12_teams
-        and team2 in former_pac12_teams
-    )
-
-
 def _mark_realignment_row_unrated(row):
     row["network"] = "Not nationally rated"
     row["time_slot"] = "No national TV window"
@@ -3300,6 +3297,24 @@ def _mark_realignment_row_unrated(row):
     row["nationally_rated"] = False
     row["predicted_viewers"] = 0.0
     row["predicted_viewers_formatted"] = "Not rated"
+
+
+INTRINSIC_COMPETITION_FALLBACK_WARNING = (
+    "The pregame artifact does not include both an intrinsic competition model "
+    "and its smearing factor. Slate competition was estimated with the final "
+    "pregame model as a backward-compatible fallback."
+)
+
+
+def _append_row_warning(row, warning):
+    existing = row.get("warnings", [])
+    if isinstance(existing, str):
+        existing = [existing]
+    elif not isinstance(existing, list):
+        existing = list(existing) if existing else []
+    if warning not in existing:
+        existing.append(warning)
+    row["warnings"] = existing
 
 
 def _batch_predict_realignment_rows(row_contexts, compute_competition=True, relative_competition=False):
@@ -3314,7 +3329,11 @@ def _batch_predict_realignment_rows(row_contexts, compute_competition=True, rela
 
     def build_feature_rows(competing_scores=None):
         feature_rows = []
-        competing_scores = competing_scores or [0.0] * len(row_contexts)
+        if competing_scores is None:
+            competing_scores = [
+                resolve_competing_games_score(context["row"], pregame_model)[0]
+                for context in row_contexts
+            ]
 
         for context, competing_score in zip(row_contexts, competing_scores):
             row = context["row"]
@@ -3330,8 +3349,6 @@ def _batch_predict_realignment_rows(row_contexts, compute_competition=True, rela
             conf1 = conference_overrides.get(team1, team_conferences.get(team1, "Group of 6"))
             conf2 = conference_overrides.get(team2, team_conferences.get(team2, "Group of 6"))
             is_black_friday = _is_realignment_black_friday_slot(time_slot)
-            is_conf_champ = bool(row.get("conf_champ", False))
-            is_pac12_conf_champ = _is_pac12_conf_champ_game(team1, team2, game_date, is_conf_champ)
             is_friday = ("Friday" in str(time_slot)) and not is_black_friday
             is_power_friday = (
                 is_friday
@@ -3343,10 +3360,21 @@ def _batch_predict_realignment_rows(row_contexts, compute_competition=True, rela
             same_conf = conf1 == conf2 and conf1 in ["SEC", "Big 10", "ACC", "Big 12"]
             t1_top10, t1_25_11 = rank_to_coefs(rank1)
             t2_top10, t2_25_11 = rank_to_coefs(rank2)
-            team1_win_pct = float(row.get("team1_win_pct_to_date", row.get("Team1_WinPct_ToDate", 0.5)) or 0.5)
-            team2_win_pct = float(row.get("team2_win_pct_to_date", row.get("Team2_WinPct_ToDate", 0.5)) or 0.5)
-            avg_win_pct = float(row.get("avg_win_pct_to_date", row.get("Avg_WinPct_ToDate", (team1_win_pct + team2_win_pct) / 2)) or 0.5)
-            win_pct_diff = float(row.get("win_pct_diff_to_date", row.get("WinPct_Diff_ToDate", abs(team1_win_pct - team2_win_pct))) or 0.0)
+            team1_win_pct, team2_win_pct, avg_win_pct, win_pct_diff = (
+                resolve_game_record_features(row)
+            )
+            context_features, _ = build_pregame_context_features(
+                time_slot=time_slot,
+                date_value=game_date,
+                season_week=row.get("season_week", row.get("week")),
+                team1_games_before=row.get("team1_games_before"),
+                team2_games_before=row.get("team2_games_before"),
+                rank1=rank1,
+                rank2=rank2,
+                cfp_rank1=row.get("cfp_rank1"),
+                cfp_rank2=row.get("cfp_rank2"),
+                ranking_source=row.get("ranking_source", "preseason"),
+            )
             auto_rivalry = next(
                 (r for r, (a, b) in rivalries.items() if {team1, team2} == {a, b}),
                 None,
@@ -3395,24 +3423,10 @@ def _batch_predict_realignment_rows(row_contexts, compute_competition=True, rela
                 "Big10_PostseasonImplications": int(both_ranked and same_conf and conf1 == "Big 10"),
                 "Big12_PostseasonImplications": int(both_ranked and same_conf and conf1 == "Big 12"),
                 "ACC_PostseasonImplications": int(both_ranked and same_conf and conf1 == "ACC"),
-                "SEC_ConfChamp": int(is_conf_champ and conf1 == "SEC" and conf2 == "SEC"),
-                "Big10_ConfChamp": int(is_conf_champ and conf1 == "Big 10" and conf2 == "Big 10"),
-                "Big12_ConfChamp": int(is_conf_champ and conf1 == "Big 12" and conf2 == "Big 12"),
-                "ACC_ConfChamp": int(is_conf_champ and conf1 == "ACC" and conf2 == "ACC"),
-                "Pac12_ConfChamp": int(is_pac12_conf_champ),
-                "Other_ConfChamp": int(
-                    is_conf_champ
-                    and not is_pac12_conf_champ
-                    and not (
-                        (conf1 == "SEC" and conf2 == "SEC")
-                        or (conf1 == "Big 10" and conf2 == "Big 10")
-                        or (conf1 == "Big 12" and conf2 == "Big 12")
-                        or (conf1 == "ACC" and conf2 == "ACC")
-                    )
-                ),
                 "YTTV_ABC": int(feud_active and network == "ABC"),
                 "YTTV_ESPN": int(feud_active and network == "ESPN"),
             }
+            features.update(context_features)
 
             for rivalry_key in rivalries:
                 features[rivalry_key] = int(rivalry_key == auto_rivalry)
@@ -3428,25 +3442,69 @@ def _batch_predict_realignment_rows(row_contexts, compute_competition=True, rela
     for context in row_contexts:
         row = context["row"]
         slot_starts.append(_realignment_slot_start_hour(row.get("time_slot")))
-        game_dates.append(_realignment_effective_game_date(row.get("date"), row.get("time_slot")))
+        effective_date = _realignment_effective_game_date(
+            row.get("date"),
+            row.get("time_slot"),
+        )
+        season_week = row.get("season_week", row.get("week"))
+        game_dates.append(
+            effective_date
+            if effective_date is not None
+            else (("week", season_week) if season_week is not None else None)
+        )
 
     X = build_feature_rows()
     if compute_competition and "Competing_Games_Score" in X.columns:
         X["Competing_Games_Score"] = 0.0
-        intrinsic_ln_pred = pregame_model.predict(X)
-        smearing = getattr(pregame_model, "smearing_factor", 1.0)
-        intrinsic_predictions_millions = ((np.exp(intrinsic_ln_pred) - 1) * smearing) / 1000.0
+        intrinsic_model = getattr(pregame_model, "intrinsic_model", None)
+        intrinsic_smearing = getattr(
+            pregame_model,
+            "intrinsic_smearing_factor",
+            None,
+        )
+        try:
+            intrinsic_smearing = float(intrinsic_smearing)
+        except (TypeError, ValueError):
+            intrinsic_smearing = None
+        use_persisted_intrinsic = (
+            intrinsic_model is not None
+            and intrinsic_smearing is not None
+            and np.isfinite(intrinsic_smearing)
+            and intrinsic_smearing > 0
+        )
+
+        if use_persisted_intrinsic:
+            intrinsic_columns = list(
+                getattr(getattr(intrinsic_model, "params", None), "index", model_columns)
+            )
+            intrinsic_X = X.reindex(columns=intrinsic_columns, fill_value=0.0)
+            if "Competing_Games_Score" in intrinsic_X.columns:
+                intrinsic_X["Competing_Games_Score"] = 0.0
+            intrinsic_ln_pred = intrinsic_model.predict(intrinsic_X)
+        else:
+            intrinsic_ln_pred = pregame_model.predict(X)
+            intrinsic_smearing = getattr(pregame_model, "smearing_factor", 1.0)
+            for context in row_contexts:
+                _append_row_warning(
+                    context["row"],
+                    INTRINSIC_COMPETITION_FALLBACK_WARNING,
+                )
+
+        intrinsic_predictions_millions = np.asarray(
+            ((np.exp(intrinsic_ln_pred) - 1) * intrinsic_smearing) / 1000.0,
+            dtype=float,
+        ).reshape(-1)
         competing_scores = []
 
         for idx, (game_date, start_hour) in enumerate(zip(game_dates, slot_starts)):
             score = 0.0
             if game_date is not None and start_hour is not None:
-                target_intrinsic = float(intrinsic_predictions_millions.iloc[idx])
+                target_intrinsic = float(intrinsic_predictions_millions[idx])
                 for other_idx, (other_date, other_start) in enumerate(zip(game_dates, slot_starts)):
                     if other_idx == idx or other_date != game_date or other_start is None:
                         continue
                     if abs(other_start - start_hour) <= 1.5:
-                        other_intrinsic = float(intrinsic_predictions_millions.iloc[other_idx])
+                        other_intrinsic = float(intrinsic_predictions_millions[other_idx])
                         if relative_competition and target_intrinsic > 0:
                             relative_strength = min(1.0, other_intrinsic / target_intrinsic)
                             other_intrinsic *= relative_strength ** 5
@@ -3457,9 +3515,11 @@ def _batch_predict_realignment_rows(row_contexts, compute_competition=True, rela
         for context, score in zip(row_contexts, competing_scores):
             context["row"]["competing_games_score"] = float(score)
 
-    ln_pred = pregame_model.predict(X)
-    smearing = getattr(pregame_model, "smearing_factor", 1.0)
-    predictions = (np.exp(ln_pred) - 1) * smearing * 1000
+    predictions = predict_pregame_points_000s(
+        pregame_model,
+        X,
+        [context["row"] for context in row_contexts],
+    ) * 1000
 
     for context, prediction in zip(row_contexts, predictions):
         viewers = float(prediction)
@@ -3476,6 +3536,13 @@ def _apply_tv_slot_to_realignment_row(row, slot, conference, conference_teams):
         "rank2": row.get("rank2", 0),
         "network": slot["network"],
         "time_slot": slot["time_slot"],
+        "date": row.get("date"),
+        "season_week": row.get("season_week", row.get("week")),
+        "team1_games_before": row.get("team1_games_before"),
+        "team2_games_before": row.get("team2_games_before"),
+        "cfp_rank1": row.get("cfp_rank1"),
+        "cfp_rank2": row.get("cfp_rank2"),
+        "ranking_source": "preseason",
         "comp_tier1": slot["comp_tier1"],
         "conference_overrides": {team: conference for team in conference_teams},
     })
@@ -3486,6 +3553,8 @@ def _apply_tv_slot_to_realignment_row(row, slot, conference, conference_teams):
     row["nationally_rated"] = True
     row["predicted_viewers"] = float(prediction["raw"])
     row["predicted_viewers_formatted"] = prediction["formatted"]
+    for warning in prediction.get("warnings", []):
+        _append_row_warning(row, warning)
 
 
 def _refresh_realignment_slate_summary(slate):
@@ -4231,7 +4300,7 @@ def _apply_global_tv_slots_to_league_slates(
     _batch_predict_realignment_rows(
         rated_contexts,
         compute_competition=True,
-        relative_competition=True,
+        relative_competition=False,
     )
     hidden_assignment_by_event = {
         _realignment_event_key(row): row
@@ -4294,18 +4363,8 @@ def _predict_realignment_slate(
             else _select_realignment_tv_slot(idx, total_games, conference)
         )
         if slot:
-            prediction = predict_viewership({
-                "team1": game["team1"],
-                "team2": game["team2"],
-                "rank1": rank_map.get(game["team1"], 0),
-                "rank2": rank_map.get(game["team2"], 0),
-                "network": slot["network"],
-                "time_slot": slot["time_slot"],
-                "comp_tier1": slot["comp_tier1"],
-                "conference_overrides": conference_overrides,
-            })
-            viewers = float(prediction["raw"])
-            predicted_viewers_formatted = prediction["formatted"]
+            viewers = 0.0
+            predicted_viewers_formatted = "Pending slate prediction"
             network = slot["network"]
             time_slot = slot["time_slot"]
             comp_tier1 = slot["comp_tier1"]
@@ -4322,6 +4381,8 @@ def _predict_realignment_slate(
         rows.append({
             "game_number": idx + 1,
             "week": game.get("week"),
+            "season_week": game.get("season_week", game.get("week")),
+            "date": game.get("date"),
             "team1": game["team1"],
             "team2": game["team2"],
             "matchup": f"{game['team1']} vs {game['team2']}",
@@ -4339,6 +4400,13 @@ def _predict_realignment_slate(
         })
 
     rated_rows = [row for row in rows if row.get("nationally_rated", True)]
+    _batch_predict_realignment_rows([
+        {
+            "row": row,
+            "conference_overrides": conference_overrides,
+        }
+        for row in rated_rows
+    ])
     return {
         "teams": normalized_teams,
         "team_game_counts": counts,
@@ -6382,6 +6450,17 @@ def game_viewership_rankings(
 
 # WEEKLY PREDICTIONS
 
+def _weekly_prediction_input(game, document_week, document_season_week=None):
+    """Attach document-level week context to a prediction-only game copy."""
+    prediction_input = dict(game)
+    prediction_input["week"] = document_week
+    prediction_input["season_week"] = (
+        document_season_week
+        if document_season_week is not None
+        else document_week
+    )
+    return prediction_input
+
 @app.get("/weekly-predictions")
 def weekly_predictions():
     if db is None:
@@ -6400,12 +6479,16 @@ def weekly_predictions():
     for doc in docs:
         data = doc.to_dict()
         week = data["week"]
+        season_week = data.get("season_week")
         year = data["year"]
         games = data["games"]
+        response_games = []
 
         updated = False  # If anything changes, we write back
 
         for g in games:
+            prediction_input = _weekly_prediction_input(g, week, season_week)
+            prediction_warnings = pregame_prediction_warnings(prediction_input)
 
             # =====================================================
             # 🔵 SAVE OLD VALUES FOR CHANGE DETECTION
@@ -6427,7 +6510,7 @@ def weekly_predictions():
             )
 
             if missing_pred:
-                g["predicted"] = generate_pregame_prediction(g)
+                g["predicted"] = generate_pregame_prediction(prediction_input)
 
             if g.get("predicted") != pre_old:
                 updated = True
@@ -6489,7 +6572,7 @@ def weekly_predictions():
 
             if scores_exist and not has_post:
                 try:
-                    post_pred_str = generate_postgame_prediction(g)
+                    post_pred_str = generate_postgame_prediction(prediction_input)
                     if post_pred_str:
                         g["post_predicted"] = post_pred_str
                         updated = True
@@ -6535,6 +6618,21 @@ def weekly_predictions():
             if g.get("post_accuracy") != post_acc_old:
                 updated = True
 
+            response_game = dict(g)
+            if prediction_warnings:
+                existing_warnings = response_game.get("warnings", [])
+                if isinstance(existing_warnings, str):
+                    existing_warnings = [existing_warnings]
+                elif not isinstance(existing_warnings, list):
+                    existing_warnings = (
+                        list(existing_warnings) if existing_warnings else []
+                    )
+                response_game["warnings"] = list(dict.fromkeys([
+                    *existing_warnings,
+                    *prediction_warnings,
+                ]))
+            response_games.append(response_game)
+
         # =====================================================
         # 🔥 WRITE BACK TO FIRESTORE IF ANY FIELD CHANGED
         # =====================================================
@@ -6544,7 +6642,7 @@ def weekly_predictions():
         weeks_output.append({
             "week": week,
             "year": year,
-            "games": games
+            "games": response_games
         })
 
     # =====================================================
@@ -6578,7 +6676,11 @@ def weekly_predictions():
         },
     }
 
-    weeks_output = sorted(weeks_output, key=lambda w: w["week"], reverse=True)
+    weeks_output = sorted(
+        weeks_output,
+        key=lambda w: (int(w.get("year") or 0), int(w["week"])),
+        reverse=True,
+    )
 
     return clean_nan({
         "weeks": weeks_output,

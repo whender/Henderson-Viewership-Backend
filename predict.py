@@ -3,6 +3,11 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 from model_loader import load_viewership_model
+from pregame_context_features import (
+    build_pregame_context_features,
+    resolve_season_week,
+)
+from pregame_ensemble import predict_pregame_points_000s
 
 # Load once
 model = load_viewership_model()
@@ -138,11 +143,6 @@ team_conferences = {
     "Washington St.": "Pac-12", "Oregon St.": "Pac-12"
 }
 
-former_pac12_teams = {
-    "Arizona", "Arizona St.", "California", "Colorado", "Oregon", "Oregon St.",
-    "Stanford", "UCLA", "USC", "Utah", "Washington", "Washington St.",
-}
-
 rivalries = {
     "Michigan_OhioSt": ("Michigan", "Ohio St."), "Texas_Oklahoma": ("Texas", "Oklahoma"),
     "Alabama_Auburn": ("Alabama", "Auburn"), "Georgia_Florida": ("Georgia", "Florida"),
@@ -199,6 +199,136 @@ def format_viewers(val):
 MODEL_TEAM_NAMES = set(teams_list.values())
 POWER_FOOTBALL_CONFERENCES = {"SEC", "Big 10", "ACC", "Big 12"}
 
+MISSING_COMPETITION_SCORE_WARNING = (
+    "No competing-games score was supplied. This single-game forecast uses a "
+    "zero fallback because slate context is unavailable, so it may overstate "
+    "viewership when overlapping games are strong."
+)
+MISSING_COMPETITION_TIER_MAPPING_WARNING = (
+    "A major-competing-games tier was supplied, but this pregame artifact does "
+    "not include a matching competition_score_by_tier training median. This "
+    "single-game forecast uses the legacy zero fallback and may overstate "
+    "viewership when overlapping games are strong."
+)
+
+
+def _first_finite_number(values, *keys):
+    for key in keys:
+        if key not in values:
+            continue
+        value = values.get(key)
+        if value is None or (isinstance(value, str) and not value.strip()):
+            continue
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            continue
+        if np.isfinite(number):
+            return number
+    return None
+
+
+def resolve_game_record_features(values):
+    """Resolve team records consistently across direct, weekly, and slate paths."""
+    team1_games = _first_finite_number(values, "team1_games_before")
+    team2_games = _first_finite_number(values, "team2_games_before")
+    if team1_games is not None and team1_games < 0:
+        team1_games = None
+    if team2_games is not None and team2_games < 0:
+        team2_games = None
+
+    week = resolve_season_week(
+        values.get("season_week", values.get("week")),
+        values.get("date", values.get("Date")),
+    )
+    if week is not None:
+        inferred_games = float(max(week - 1, 0))
+        if team1_games is None:
+            team1_games = inferred_games
+        if team2_games is None:
+            team2_games = inferred_games
+    else:
+        if team1_games is None:
+            team1_games = 6.0
+        if team2_games is None:
+            team2_games = 6.0
+
+    team1 = _first_finite_number(
+        values,
+        "team1_win_pct_to_date",
+        "Team1_WinPct_ToDate",
+    )
+    team2 = _first_finite_number(
+        values,
+        "team2_win_pct_to_date",
+        "Team2_WinPct_ToDate",
+    )
+    if team1 is None or not 0.0 <= team1 <= 1.0:
+        team1 = 0.5
+    if team2 is None or not 0.0 <= team2 <= 1.0:
+        team2 = 0.5
+
+    # Match historical_pregame_features exactly: a side's raw record is not
+    # allowed into the model until that team has played five prior games.
+    if team1_games < 5:
+        team1 = 0.5
+    if team2_games < 5:
+        team2 = 0.5
+
+    average = (team1 + team2) / 2.0
+    difference = abs(team1 - team2)
+
+    return team1, team2, average, difference
+
+
+def resolve_competing_games_score(values, model_obj=None):
+    """Resolve explicit or artifact-imputed competition for a single game."""
+    score = _first_finite_number(
+        values,
+        "competing_games_score",
+        "Competing_Games_Score",
+    )
+    if score is not None and score >= 0:
+        return score, []
+
+    resolved_model = model_obj or model
+    tier = _first_finite_number(values, "comp_tier1", "Competing Tier 1")
+    tier_mapping = getattr(resolved_model, "competition_score_by_tier", {}) or {}
+    if tier is not None and isinstance(tier_mapping, dict):
+        tier_candidates = [tier, str(tier)]
+        if tier.is_integer():
+            tier_candidates.extend([int(tier), str(int(tier))])
+        for tier_key in tier_candidates:
+            if tier_key not in tier_mapping:
+                continue
+            mapped_score = _first_finite_number(
+                {"mapped_score": tier_mapping[tier_key]},
+                "mapped_score",
+            )
+            if mapped_score is not None and mapped_score >= 0:
+                return mapped_score, []
+
+        # New artifacts persist an overall training median so an unseen tier
+        # does not silently become the legacy zero-competition assumption.
+        overall_score = _first_finite_number(
+            {"mapped_score": tier_mapping.get("overall")},
+            "mapped_score",
+        )
+        if overall_score is not None and overall_score >= 0:
+            return overall_score, []
+
+    params = getattr(getattr(resolved_model, "params", None), "index", ())
+    warnings = (
+        [
+            MISSING_COMPETITION_TIER_MAPPING_WARNING
+            if tier is not None
+            else MISSING_COMPETITION_SCORE_WARNING
+        ]
+        if "Competing_Games_Score" in params
+        else []
+    )
+    return 0.0, warnings
+
 
 def is_power_football_team(team, conference=None):
     resolved_conference = conference if conference is not None else team_conferences.get(team, "Group of 6")
@@ -244,26 +374,13 @@ def predict_viewership(p):
     network = p["network"]
     time_slot = p["time_slot"]
     comp_tier1 = p.get("comp_tier1", 0)
-    competing_games_score = float(
-        p.get("competing_games_score", p.get("Competing_Games_Score", 0.0)) or 0.0
-    )
-    warnings = []
+    competing_games_score, warnings = resolve_competing_games_score(p, model)
     if "Monday" in str(time_slot) and network != "ESPN":
         warnings.append(
             "No Monday games in the training data aired on this network. "
             "The Monday effect is estimated from ESPN Monday games, so this prediction extrapolates outside observed support."
         )
     is_black_friday = is_black_friday_slot(time_slot, p.get("date"))
-    is_conf_champ = bool(p.get("conf_champ", False))
-    parsed_game_date = pd.to_datetime(p.get("date"), errors="coerce")
-    game_year = int(parsed_game_date.year) if pd.notna(parsed_game_date) else None
-    is_pac12_conf_champ = (
-        is_conf_champ
-        and game_year is not None
-        and game_year <= 2023
-        and team1 in former_pac12_teams
-        and team2 in former_pac12_teams
-    )
     is_friday = ("Friday" in str(time_slot)) and not is_black_friday
 
     conference_overrides = p.get("conference_overrides", {}) or {}
@@ -282,10 +399,22 @@ def predict_viewership(p):
 
     top10 = t1_top10 + t2_top10
     rank_25_11 = t1_25_11 + t2_25_11
-    team1_win_pct = float(p.get("team1_win_pct_to_date", p.get("Team1_WinPct_ToDate", 0.5)) or 0.5)
-    team2_win_pct = float(p.get("team2_win_pct_to_date", p.get("Team2_WinPct_ToDate", 0.5)) or 0.5)
-    avg_win_pct = float(p.get("avg_win_pct_to_date", p.get("Avg_WinPct_ToDate", (team1_win_pct + team2_win_pct) / 2)) or 0.5)
-    win_pct_diff = float(p.get("win_pct_diff_to_date", p.get("WinPct_Diff_ToDate", abs(team1_win_pct - team2_win_pct))) or 0.0)
+    team1_win_pct, team2_win_pct, avg_win_pct, win_pct_diff = (
+        resolve_game_record_features(p)
+    )
+    context_features, context_warnings = build_pregame_context_features(
+        time_slot=time_slot,
+        date_value=p.get("date"),
+        season_week=p.get("season_week", p.get("week")),
+        team1_games_before=p.get("team1_games_before"),
+        team2_games_before=p.get("team2_games_before"),
+        rank1=rank1,
+        rank2=rank2,
+        cfp_rank1=p.get("cfp_rank1"),
+        cfp_rank2=p.get("cfp_rank2"),
+        ranking_source=p.get("ranking_source", "auto"),
+    )
+    warnings.extend(context_warnings)
 
     # ✔️ auto rivalry match
     auto_rivalry = next(
@@ -329,22 +458,8 @@ def predict_viewership(p):
         "Big 10": (conf1 == "Big 10") + (conf2 == "Big 10"),
         "ACC": (conf1 == "ACC") + (conf2 == "ACC"),
         "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
-        "SEC_ConfChamp": int(is_conf_champ and conf1 == "SEC" and conf2 == "SEC"),
-        "Big10_ConfChamp": int(is_conf_champ and conf1 == "Big 10" and conf2 == "Big 10"),
-        "Big12_ConfChamp": int(is_conf_champ and conf1 == "Big 12" and conf2 == "Big 12"),
-        "ACC_ConfChamp": int(is_conf_champ and conf1 == "ACC" and conf2 == "ACC"),
-        "Pac12_ConfChamp": int(is_pac12_conf_champ),
-        "Other_ConfChamp": int(
-            is_conf_champ
-            and not is_pac12_conf_champ
-            and not (
-                (conf1 == "SEC" and conf2 == "SEC")
-                or (conf1 == "Big 10" and conf2 == "Big 10")
-                or (conf1 == "Big 12" and conf2 == "Big 12")
-                or (conf1 == "ACC" and conf2 == "ACC")
-            )
-        ),
     }
+    features.update(context_features)
 
     # postseason implication flags
     for conf_tag, flag_name in {
@@ -385,11 +500,9 @@ def predict_viewership(p):
 
     X = pd.DataFrame([[features[c] for c in model.params.index]], columns=model.params.index)
 
-    ln_pred = float(model.predict(X)[0])
-    smearing = getattr(model, "smearing_factor", 1.0)
+    pred_raw = float(predict_pregame_points_000s(model, X, [p])[0])
 
     # Model output is in THOUSANDS → convert to REAL VIEWERS
-    pred_raw = (np.exp(ln_pred) - 1) * smearing
     pred = pred_raw * 1000
 
     return {

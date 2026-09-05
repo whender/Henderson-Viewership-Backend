@@ -3,7 +3,7 @@ uvicorn
 numpy
 pandas==3.0.1
 scipy
-statsmodels
+statsmodels==0.14.6
 scikit-learn
 joblib
 python-dateutil
