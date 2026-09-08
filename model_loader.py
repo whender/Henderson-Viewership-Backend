@@ -55,6 +55,15 @@ def load_viewership_model():
             if calibration.get("model_sha256") != digest:
                 raise ValueError("Opening-week calibration must be revalidated for this model artifact")
             model.opening_week_calibration = calibration
+        monday_path = os.path.join(BASE_DIR, "monday_calibration.json")
+        if os.path.exists(monday_path):
+            with open(monday_path) as source:
+                monday = json.load(source)
+            with open(path, "rb") as artifact:
+                digest = hashlib.file_digest(artifact, "sha256").hexdigest()
+            if monday.get("model_sha256") != digest:
+                raise ValueError("Monday calibration must be revalidated for this model artifact")
+            model.monday_calibration = monday
         return model
 
     # fallback if saved as plain model

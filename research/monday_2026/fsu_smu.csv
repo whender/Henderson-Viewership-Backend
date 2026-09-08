@@ -1,0 +1,10 @@
+variant,prediction_millions
+baseline,3.86176224800223
+early_monday,3.8617622480022233
+holiday_sun_mon,3.8556855140516237
+pooled_holiday_nights,3.079025887360587
+monday_rank_interaction,4.086973925999377
+monday_mean25,4.111107400287387
+monday_mean50,4.360452552572544
+monday_median50,4.360881124001114
+holiday_mean50,4.928988266858258

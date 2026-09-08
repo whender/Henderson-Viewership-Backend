@@ -1,0 +1,50 @@
+{
+  "week": 1,
+  "year": 2026,
+  "games": [
+    {
+      "cfbd_game_id": 401858212,
+      "date": "09/07/26",
+      "day": "Mon",
+      "time_slot": "Monday 7:30p",
+      "kickoff_utc": "2026-09-07T23:30:00.000Z",
+      "week": 1,
+      "season_week": 1,
+      "network": "ESPN",
+      "broadcast_outlets": [
+        "ESPN"
+      ],
+      "ranking_source": "ap",
+      "comp_tier1": 0,
+      "conf_champ": false,
+      "actual": "",
+      "generated_at": "2026-09-05T17:58:29.435409+00:00",
+      "forecast_timing": "retrospective",
+      "source": "CFBD /games, /games/media, /rankings, /lines",
+      "warnings": [
+        "Prediction revised after kickoff using pregame features; original forecast preserved."
+      ],
+      "team1": "SMU",
+      "rank1": 19,
+      "team1_games_before": 0,
+      "team1_win_pct_to_date": 0.5,
+      "team1_pregame_elo": 1734,
+      "team2": "Florida St.",
+      "rank2": 0,
+      "team2_games_before": 1,
+      "team2_win_pct_to_date": 1.0,
+      "team2_pregame_elo": 1559,
+      "matchup": "#19 SMU vs Florida St.",
+      "spread": "SMU -3",
+      "spread_home": 3,
+      "spread_provider": "DraftKings",
+      "competing_games_score": 0.0,
+      "prediction_status": "ready",
+      "predicted": "4.11M (2.94-5.80M) [retrospective]",
+      "predicted_before_monday_calibration": "3.86M (2.69-5.55M)",
+      "forecast_timing_before_monday_calibration": "pregame",
+      "prediction_revised_at": "2026-09-08T13:54:55.675412+00:00",
+      "prediction_revision": "25% historical Monday-night mean calibration; no 2026 actuals used."
+    }
+  ]
+}

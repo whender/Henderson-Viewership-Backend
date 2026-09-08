@@ -295,7 +295,33 @@ def predict_pregame_points_000s(
         for scope in scopes
     ], dtype=float)
     points = np.maximum(blended + additive, 0.0)
-    return apply_opening_week_calibration(primary_model, primary_matrix, context_rows, points)
+    points = apply_opening_week_calibration(primary_model, primary_matrix, context_rows, points)
+    return apply_monday_calibration(primary_model, primary_matrix, context_rows, points)
+
+
+def apply_monday_calibration(model, matrix, contexts, points):
+    """Pool early September Monday nights toward the prior-season event mean."""
+    config = getattr(model, "monday_calibration", None)
+    if config is None:
+        return points
+    weight = _finite_number(config.get("weight"))
+    mean = _finite_number(config.get("event_mean_000s"))
+    train_year = _finite_number(config.get("training_max_year"))
+    year = _finite_number(config.get("prediction_year"))
+    if (config.get("version") != 1 or weight is None or not 0 <= weight <= 1
+            or mean is None or mean <= 0 or train_year is None
+            or year != train_year + 1):
+        raise ValueError("Invalid Monday calibration configuration")
+    result = np.asarray(points, dtype=float).copy()
+    for i, context in enumerate(contexts):
+        day = _coerce_date(_context_value(context, "date", "Date", "ParsedDate"))
+        hour = parse_kickoff_hour(_context_value(context, "time_slot", "Time Slot"))
+        if (day is not None and day.year == year and day.month == 9
+                and day.day <= 14 and day.weekday() == 0
+                and hour is not None and hour >= 19
+                and matrix.iloc[i].get("Monday", 0) == 1):
+            result[i] = (1-weight)*result[i] + weight*mean
+    return result
 
 
 def apply_opening_week_calibration(model, matrix, contexts, points):
