@@ -19,7 +19,7 @@ from predict import (
     resolve_competing_games_score,
     resolve_game_record_features,
 )
-from pregame_context_features import build_pregame_context_features
+from pregame_context_features import build_pregame_context_features,saturday_kickoff_features
 from pregame_ensemble import predict_pregame_points_000s
 
 import os
@@ -227,6 +227,7 @@ def build_features(row):
         "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
     }
     features.update(context_features)
+    features.update(saturday_kickoff_features(time_slot,date_str))
     if "OhioSt_BTN" in pregame_model.params.index:
         features["OhioSt_BTN"] = int("Ohio St." in [team1, team2] and network == "BTN")
 

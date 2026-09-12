@@ -373,6 +373,7 @@ def is_week_one_power_game(team1, team2, conf1, conf2, date_value=None, time_slo
     )
 
 def predict_viewership(p):
+    from pregame_context_features import saturday_kickoff_features
     # Normalize the incoming names
     team1 = normalize_team(p["team1"])
     team2 = normalize_team(p["team2"])
@@ -468,6 +469,7 @@ def predict_viewership(p):
         "Big 12": (conf1 == "Big 12") + (conf2 == "Big 12"),
     }
     features.update(context_features)
+    features.update(saturday_kickoff_features(time_slot,p.get('date')))
 
     # postseason implication flags
     for conf_tag, flag_name in {

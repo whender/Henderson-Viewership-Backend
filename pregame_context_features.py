@@ -22,6 +22,26 @@ CONTEXT_FEATURE_NAMES = (
     "CFP_RankDifference",
 )
 
+
+def saturday_kickoff_features(time_slot, date_value=None):
+    """Match historical Saturday windows for both clock and named-bucket inputs."""
+    text=str(time_slot or '').lower()
+    if re.search(r'\b(sun\w*|mon\w*|tue\w*|wed\w*|thu\w*|fri\w*|weekday)\b',text):
+        saturday=False
+    elif re.search(r'\bsat\w*\b',text):
+        saturday=True
+    else:
+        d=_coerce_date(date_value)
+        saturday=d is None or d.weekday()==5
+    hour=parse_kickoff_hour(time_slot)
+    if hour is None:
+        return {'Sat Early':int(saturday and 'early' in text),
+                'Sat Mid':int(saturday and 'mid' in text),
+                'Sat Late':int(saturday and 'late' in text)}
+    return {'Sat Early':int(saturday and 11<=hour<14),
+            'Sat Mid':int(saturday and 14.5<=hour<18.5),
+            'Sat Late':int(saturday and 21.5<=hour<23.5)}
+
 MISSING_RECORD_CONTEXT_WARNING = (
     "No season week, game date, or games-before records were supplied. "
     "Record-timing features use neutral deployment values "
