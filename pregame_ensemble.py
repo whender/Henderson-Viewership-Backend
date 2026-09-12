@@ -295,6 +295,8 @@ def predict_pregame_points_000s(
         for scope in scopes
     ], dtype=float)
     points = np.maximum(blended + additive, 0.0)
+    from nonlinear_pregame import apply_nonlinear
+    points = apply_nonlinear(primary_model, primary_matrix, context_rows, blended, points, scopes)
     points = apply_opening_week_calibration(primary_model, primary_matrix, context_rows, points)
     return apply_monday_calibration(primary_model, primary_matrix, context_rows, points)
 

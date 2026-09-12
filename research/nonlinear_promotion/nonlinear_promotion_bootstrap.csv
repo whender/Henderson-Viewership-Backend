@@ -1,0 +1,4 @@
+model,bootstrap_reps,date_blocks,mae_delta_ci05_000s,mae_delta_ci95_000s,mae_improvement_probability,mape_delta_ci05_pct_points,mape_delta_ci95_pct_points,mape_improvement_probability
+nonlinear_blend25_predicted_1m_plus,2000,281,-34.61304260594212,-16.036636836171752,1.0,-0.8641459703256713,-0.36478229884873836,1.0
+nonlinear_missing_context_predicted_1m_plus,2000,281,-15.291041085521694,6.717735201989398,0.7475,-0.8353263293789245,-0.32884762663172384,1.0
+nonlinear_complete_context_only,2000,281,-25.51667791755543,-10.92438850361037,0.9995,-0.5886965419396033,-0.19094641087226766,0.998

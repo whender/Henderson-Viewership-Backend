@@ -64,6 +64,15 @@ def load_viewership_model():
             if monday.get("model_sha256") != digest:
                 raise ValueError("Monday calibration must be revalidated for this model artifact")
             model.monday_calibration = monday
+        nonlinear_path = os.path.join(BASE_DIR, "nonlinear_pregame.joblib")
+        if os.path.exists(nonlinear_path):
+            nonlinear = joblib.load(nonlinear_path)
+            with open(path, "rb") as artifact:
+                digest = hashlib.file_digest(artifact, "sha256").hexdigest()
+            if (nonlinear.get('version') != 1 or nonlinear.get('primary_sha256') != digest
+                    or nonlinear.get('promotion_passed') is not True):
+                raise ValueError('Nonlinear model must be revalidated for this primary artifact')
+            model.nonlinear_pregame = nonlinear
         return model
 
     # fallback if saved as plain model

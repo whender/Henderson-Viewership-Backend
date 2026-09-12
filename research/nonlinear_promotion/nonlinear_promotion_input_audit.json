@@ -1,0 +1,12 @@
+{
+  "api_fields_missing": [],
+  "weekly_games": 25,
+  "weekly_nonmissing_counts": {
+    "neutral_site": 0,
+    "spread_home": 25,
+    "team1_pregame_elo": 25,
+    "team2_pregame_elo": 25
+  },
+  "deployment_decision": "conditional_rollout",
+  "reason": "Require complete pregame inputs for nonlinear predictions; preserve current model exactly otherwise. Existing weekly rows without neutral_site keep their current forecast."
+}

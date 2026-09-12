@@ -4,7 +4,7 @@ numpy
 pandas==3.0.1
 scipy
 statsmodels==0.14.6
-scikit-learn
+scikit-learn==1.8.0
 joblib
 python-dateutil
 pydantic

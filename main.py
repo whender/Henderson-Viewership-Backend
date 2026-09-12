@@ -116,6 +116,10 @@ class GameInput(BaseModel):
     conf_champ: bool = False
     comp_tier1: int = 0
     competing_games_score: float | None = Field(default=None, ge=0.0)
+    team1_pregame_elo: float | None = Field(default=None, gt=0)
+    team2_pregame_elo: float | None = Field(default=None, gt=0)
+    spread_home: float | None = None
+    neutral_site: bool | None = None
 
 
 class ArticleInput(BaseModel):
