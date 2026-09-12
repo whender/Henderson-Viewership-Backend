@@ -296,7 +296,10 @@ def predict_pregame_points_000s(
     ], dtype=float)
     points = np.maximum(blended + additive, 0.0)
     from nonlinear_pregame import apply_nonlinear
+    baseline = points.copy()
     points = apply_nonlinear(primary_model, primary_matrix, context_rows, blended, points, scopes)
+    from week1_major_days import apply_week1_major_days
+    points = apply_week1_major_days(primary_model, primary_matrix, context_rows, baseline, points, scopes)
     points = apply_opening_week_calibration(primary_model, primary_matrix, context_rows, points)
     return apply_monday_calibration(primary_model, primary_matrix, context_rows, points)
 

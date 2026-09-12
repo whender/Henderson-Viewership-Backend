@@ -35,6 +35,15 @@ def _attach_pregame_artifact_metadata(model, artifact=None):
         {},
     )
     model.pregame_ensemble = artifact.get("pregame_ensemble")
+    week1_path = os.path.join(BASE_DIR, 'week1_major_days.joblib')
+    if os.path.exists(week1_path):
+        week1 = joblib.load(week1_path)
+        with open(os.path.join(BASE_DIR, 'viewership_model_log.joblib'), 'rb') as source:
+            digest = hashlib.file_digest(source, 'sha256').hexdigest()
+        if (week1.get('version') != 1 or week1.get('primary_sha256') != digest
+                or week1.get('prediction_year') != week1.get('training_max_year', 0) + 1):
+            raise ValueError('Week 1 model must be revalidated for this primary artifact')
+        model.week1_major_days = week1
     return model
 
 def load_viewership_model():
