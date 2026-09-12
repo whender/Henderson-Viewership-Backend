@@ -22,18 +22,14 @@ from predict import (
 from pregame_context_features import build_pregame_context_features
 from pregame_ensemble import predict_pregame_points_000s
 
-import joblib
 import os
 
 # ======================================================
 # 🔥 LOAD POSTGAME MODEL
 # ======================================================
 
-POSTGAME_PATH = os.path.join(os.path.dirname(__file__), "viewership_postgame_model.joblib")
-
-post_data = joblib.load(POSTGAME_PATH)
-post_model = post_data["model"]
-post_smearing = post_data["smearing_factor"]
+from aligned_postgame import load_aligned_postgame,predict_postgame_points_000s,score_difference
+aligned_postgame = load_aligned_postgame(os.path.dirname(__file__))
 
 # ======================================================
 # 🔢 VIEWERSHIP PARSING
@@ -111,6 +107,11 @@ def build_features(row):
     is_colorado_game = ("Colorado" in [team1, team2])
     deion_era = int(is_colorado_game and year in [2023, 2024])
     deion_era25 = int(is_colorado_game and year == 2025)
+    # Apply the explicitly saved one-game feature override in both model pipelines.
+    override = row.get('prediction_feature_override') or {}
+    if (is_colorado_game and year == 2026 and isinstance(override, dict)
+            and override.get('DeionEra25') == 1):
+        deion_era25 = 1
 
     # ---------- CONFERENCES ----------
     conf1 = team_conferences.get(team1, "Group of 6")
@@ -337,30 +338,11 @@ def generate_postgame_prediction(row):
     Returns None if no scores available.
     """
     try:
-        s1 = row.get("score1")
-        s2 = row.get("score2")
-
-        # If either score missing → no postgame prediction
-        if s1 is None or s2 is None:
+        if score_difference(row) is None:
             return None
-
-        # REAL SCORE DIFF
-        score_diff = abs(int(s1) - int(s2))
-
         feats = build_features(row)
-        feats["Score Diff"] = score_diff
-
-        # Fill missing features
-        for c in post_model.params.index:
-            if c not in feats:
-                feats[c] = 0.0
-
-        X = pd.DataFrame([[feats[c] for c in post_model.params.index]],
-                          columns=post_model.params.index)
-
-        pred_ln = float(post_model.predict(X)[0])
-        pred = (np.exp(pred_ln) - 1) * post_smearing
-
+        X = pd.DataFrame([feats]).reindex(columns=pregame_model.params.index,fill_value=0.)
+        pred = float(predict_postgame_points_000s(pregame_model,aligned_postgame,X,[row])[0])
         return f"{pred/1_000:.2f}M"
 
     except Exception:

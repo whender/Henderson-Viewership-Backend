@@ -23,6 +23,7 @@ from weekly_predictions_fs import (
     build_features,
     parse_viewership,
     pregame_prediction_warnings,
+    aligned_postgame,
 )
 from pregame_context_features import build_pregame_context_features
 from pregame_ensemble import predict_pregame_points_000s
@@ -6689,5 +6690,6 @@ def weekly_predictions():
 
     return clean_nan({
         "weeks": weeks_output,
-        "metrics": metrics
+        "metrics": metrics,
+        "postgame_model": {key: aligned_postgame[key] for key in ('version','training_max_year','artifact_sha256')},
     })
