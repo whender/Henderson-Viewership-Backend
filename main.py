@@ -6490,7 +6490,10 @@ def weekly_predictions():
         games = data["games"]
         response_games = []
 
-        updated = False  # If anything changes, we write back
+        from weekly_forecast_state import refresh_latest_forecast
+        updated = False
+        for saved_game in [*games, *data.get("full_slate_games", [])]:
+            updated = refresh_latest_forecast(saved_game) or updated
 
         for g in games:
             prediction_input = _weekly_prediction_input(g, week, season_week)
@@ -6508,7 +6511,7 @@ def weekly_predictions():
             post_acc_old = g.get("post_accuracy")
 
             # =====================================================
-            # 🔵 PRE-GAME PREDICTION (NEVER OVERWRITE)
+            # 🔵 GENERATE ONLY WHEN NO SAVED FORECAST EXISTS
             # =====================================================
             missing_pred = (
                 not g.get("predicted")
@@ -6522,31 +6525,12 @@ def weekly_predictions():
                 updated = True
 
             # =====================================================
-            # 🔵 PREGAME ERROR — ONLY UPDATE WHEN NEEDED
+            # 🔵 PREGAME ERROR — USE THE CURRENT CANONICAL FORECAST
             # =====================================================
-            has_actual = g.get("actual") not in [None, "", "nan", "NaN"]
-            has_pred = bool(g.get("predicted"))
-
-            # sanitize old error
-            old_err = pre_err_old if isinstance(pre_err_old, (int, float)) else None
-
-            # compute possible new error
-            new_err = calc_error(g.get("predicted"), g.get("actual")) if (has_actual and has_pred) else None
-
-            # CASE 1: error is missing, but now we CAN compute → compute it
-            if old_err is None and new_err is not None:
-                g["percent_error"] = new_err
+            new_err = calc_error(g.get("predicted"), g.get("actual"))
+            g["percent_error"] = new_err
+            if new_err != pre_err_old:
                 updated = True
-
-            # CASE 2: prediction or actual changed → recompute
-            elif (g.get("predicted") != pre_old or g.get("actual") != actual_old) and new_err is not None:
-                g["percent_error"] = new_err
-                updated = True
-
-            # CASE 3: keep the old error
-            else:
-                g["percent_error"] = old_err
-                new_err = old_err
 
             # Accuracy emoji
             if new_err is None:
@@ -6691,6 +6675,7 @@ def weekly_predictions():
     return clean_nan({
         "weeks": weeks_output,
         "metrics": metrics,
+        "accuracy_basis": "latest_predictions",
         "postgame_model": {key: aligned_postgame[key] for key in ('version','training_max_year','artifact_sha256')},
     })
 
