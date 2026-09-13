@@ -266,6 +266,10 @@ def build_features(row):
 def pregame_prediction_warnings(row):
     """Warnings that accompany a weekly single-game pregame forecast."""
     _, warnings = resolve_competing_games_score(row, pregame_model)
+    from audience_interest import interest_warning
+    warning = interest_warning(pregame_model, row)
+    if warning:
+        warnings.append(warning)
     return warnings
 
 

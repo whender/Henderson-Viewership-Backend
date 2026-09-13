@@ -300,6 +300,8 @@ def predict_pregame_points_000s(
     points = apply_nonlinear(primary_model, primary_matrix, context_rows, blended, points, scopes)
     from week1_major_days import apply_week1_major_days
     points = apply_week1_major_days(primary_model, primary_matrix, context_rows, baseline, points, scopes)
+    from audience_interest import apply_audience_interest
+    points = apply_audience_interest(primary_model, primary_matrix, context_rows, baseline, points, scopes)
     points = apply_opening_week_calibration(primary_model, primary_matrix, context_rows, points)
     return apply_monday_calibration(primary_model, primary_matrix, context_rows, points)
 

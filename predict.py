@@ -511,6 +511,10 @@ def predict_viewership(p):
     X = pd.DataFrame([[features[c] for c in model.params.index]], columns=model.params.index)
 
     pred_raw = float(predict_pregame_points_000s(model, X, [p])[0])
+    from audience_interest import interest_warning
+    attention_warning = interest_warning(model, p)
+    if attention_warning:
+        warnings.append(attention_warning)
 
     # Model output is in THOUSANDS → convert to REAL VIEWERS
     pred = pred_raw * 1000

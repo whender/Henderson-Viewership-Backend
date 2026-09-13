@@ -82,6 +82,8 @@ def load_viewership_model():
                     or nonlinear.get('promotion_passed') is not True):
                 raise ValueError('Nonlinear model must be revalidated for this primary artifact')
             model.nonlinear_pregame = nonlinear
+        from audience_interest import load_audience_interest
+        model.audience_interest = load_audience_interest(BASE_DIR)
         return model
 
     # fallback if saved as plain model

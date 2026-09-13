@@ -55,5 +55,7 @@ def predict_postgame_points_000s(model,artifact,matrix,contexts):
     eligible=[original[i]>=proxy.nonlinear_pregame['threshold_000s'] and context_values(row) is not None for i,row in enumerate(contexts)]
     points=np.where(eligible,nonlinear,points)
     points=apply_week1_major_days(proxy,x,contexts,original,points,scopes)
+    from audience_interest import apply_audience_interest
+    points=apply_audience_interest(model,matrix,contexts,original,points,scopes,postgame=True)
     points=apply_opening_week_calibration(proxy,matrix,contexts,points)
     return apply_monday_calibration(proxy,matrix,contexts,points)

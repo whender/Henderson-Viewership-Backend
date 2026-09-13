@@ -6693,3 +6693,19 @@ def weekly_predictions():
         "metrics": metrics,
         "postgame_model": {key: aligned_postgame[key] for key in ('version','training_max_year','artifact_sha256')},
     })
+
+
+@app.get("/model-status")
+def model_status():
+    from weekly_predictions_fs import pregame_model
+    artifact = getattr(pregame_model, 'audience_interest', None)
+    return {
+        "revision": os.environ.get("RENDER_GIT_COMMIT"),
+        "audience_interest": None if artifact is None else {
+            "version": artifact["version"],
+            "policy": artifact["policy"],
+            "training_max_year": artifact["training_max_year"],
+            "artifact_sha256": artifact["artifact_sha256"],
+            "postgame_aligned": True,
+        },
+    }
