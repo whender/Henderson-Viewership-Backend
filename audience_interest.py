@@ -103,6 +103,9 @@ def apply_audience_interest(model, matrix, contexts, baseline, points, scopes, p
         branch = 'week1' if opening else 'regular'
         for label, days in [('Weekday', {1, 2, 3}), ('Friday', {4}), ('Saturday', {5}), ('Sunday', {6}), ('Monday', {0})]:
             x['Week1Major_' + label] = float(opening and d.weekday() in days)
+        from fox_friday import FEATURE, fox_friday_night
+        if FEATURE in artifact.get('additional_features', []):
+            x[FEATURE] = fox_friday_night(row)
         raw = 0.
         for component in config['components'][branch]:
             logpred = float((x[component['columns']].to_numpy(dtype=float) @ component['coefficients'])[0])

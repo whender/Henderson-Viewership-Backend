@@ -1,0 +1,2390 @@
+source_index,Year,Date,Team 1,Team 2,Station,DoW,Time_float,Black Friday,Conf Champ,FOXFridayNight
+0,2023,8/26/23,Navy,Notre Dame,NBC,Sat,14.5,0,0.0,0.0
+1,2023,9/2/23,Colorado,TCU,FOX,Sat,12.0,0,0.0,0.0
+2,2023,9/4/23,Clemson,Duke,ESPN,Mon,20.0,0,0.0,0.0
+3,2023,8/31/23,Nebraska,Minnesota,FOX,Thu,20.0,0,0.0,0.0
+4,2023,9/2/23,North Carolina,South Carolina,ABC,Sat,19.5,0,0.0,0.0
+5,2023,8/31/23,Florida,Utah,ESPN,Thu,20.0,0,0.0,0.0
+6,2023,9/3/23,Northwestern,Rutgers,CBS,Sun,12.0,0,0.0,0.0
+7,2023,9/2/23,Virginia,Tennessee,ABC,Sat,12.0,0,0.0,0.0
+8,2023,9/1/23,Louisville,Georgia Tech,ESPN,Fri,19.5,0,0.0,0.0
+9,2023,9/2/23,Texas Tech,Wyoming,CBS,Sat,20.5,0,0.0,0.0
+10,2023,9/2/23,Massachusetts,Auburn,ESPN,Sat,15.5,0,0.0,0.0
+11,2023,9/2/23,Buffalo,Wisconsin,FS1,Sat,15.5,0,0.0,0.0
+12,2023,9/2/23,Toledo,Illinois,BTN,Sat,19.5,0,0.0,0.0
+13,2023,9/2/23,California,North Texas,ESPNU,Sat,16.0,0,0.0,0.0
+14,2019,8/24/19,Miami,Florida,ESPN,Sat,19.0,0,0.0,0.0
+15,2019,8/31/19,Oregon,Auburn,ABC,Sat,19.5,0,0.0,0.0
+16,2019,9/2/19,Notre Dame,Louisville,ESPN,Mon,20.0,0,0.0,0.0
+17,2019,9/1/19,Houston,Oklahoma,ABC,Sun,19.5,0,0.0,0.0
+18,2019,8/31/19,Duke,Alabama,ABC,Sat,15.5,0,0.0,0.0
+19,2019,8/31/19,Northwestern,Stanford,FOX,Sat,16.0,0,0.0,0.0
+20,2019,8/31/19,Georgia,Vanderbilt,ESPN,Sat,19.5,0,0.0,0.0
+21,2019,8/30/19,Wisconsin,South Florida,ESPN,Fri,20.0,0,0.0,0.0
+22,2019,8/31/19,South Alabama,Nebraska,ESPN,Sat,12.0,0,0.0,0.0
+23,2019,8/31/19,South Carolina,North Carolina,ESPN,Sat,15.5,0,0.0,0.0
+24,2019,8/29/19,Utah,BYU,ESPN,Thu,22.5,0,0.0,0.0
+25,2019,8/29/19,UCLA,Cincinnati,ESPN,Thu,19.0,0,0.0,0.0
+26,2019,9/7/19,LSU,Texas,ABC,Sat,19.5,0,0.0,0.0
+27,2019,9/7/19,Texas A&M,Clemson,ABC,Sat,15.5,0,0.0,0.0
+28,2019,9/7/19,Army,Michigan,FOX,Sat,12.0,0,0.0,0.0
+29,2019,9/7/19,Nebraska,Colorado,FOX,Sat,15.5,0,0.0,0.0
+30,2019,9/7/19,Stanford,USC,ESPN,Sat,22.5,0,0.0,0.0
+31,2019,9/7/19,BYU,Tennessee,ESPN,Sat,19.0,0,0.0,0.0
+32,2019,9/7/19,Syracuse,Maryland,ESPN,Sat,12.0,0,0.0,0.0
+33,2019,9/7/19,West Virginia,Missouri,ESPN2,Sat,12.0,0,0.0,0.0
+34,2019,9/7/19,Tulane,Auburn,ESPN2,Sat,19.5,0,0.0,0.0
+35,2019,9/7/19,Rutgers,Iowa,FS1,Sat,12.0,0,0.0,0.0
+36,2019,9/7/19,California,Washington,FS1,Sat,22.5,0,0.0,0.0
+37,2019,9/7/19,UT Martin,Florida,ESPNU,Sat,19.5,0,0.0,0.0
+38,2019,9/7/19,Old Dominion,Virginia Tech,ESPNU,Sat,12.0,0,0.0,0.0
+39,2019,9/14/19,Alabama,South Carolina,CBS,Sat,15.5,0,0.0,0.0
+40,2019,9/14/19,Clemson,Syracuse,ABC,Sat,19.5,0,0.0,0.0
+41,2019,9/14/19,Florida,Kentucky,ESPN,Sat,19.0,0,0.0,0.0
+42,2019,9/14/19,Oklahoma,UCLA,FOX,Sat,20.0,0,0.0,0.0
+43,2019,9/14/19,BYU,USC,ABC,Sat,15.5,0,0.0,0.0
+44,2019,9/14/19,Texas Tech,Arizona,ESPN,Sat,22.5,0,0.0,0.0
+45,2019,9/14/19,New Mexico,Notre Dame,NBC,Sat,14.5,0,0.0,0.0
+46,2019,9/13/19,North Carolina,Wake Forest,ESPN,Fri,18.0,0,0.0,0.0
+47,2019,9/14/19,Stanford,UCF,ESPN,Sat,15.5,0,0.0,0.0
+48,2019,9/14/19,Northern Illinois,Nebraska,FS1,Sat,20.0,0,0.0,0.0
+49,2019,9/14/19,Army,UTSA,NFLN,Sat,15.5,0,0.0,0.0
+50,2019,9/14/19,Lamar,Texas A&M,ESPNU,Sat,19.0,0,0.0,0.0
+51,2019,9/21/19,Notre Dame,Georgia,CBS,Sat,20.0,0,0.0,0.0
+52,2019,9/21/19,Michigan,Wisconsin,FOX,Sat,12.0,0,0.0,0.0
+53,2019,9/21/19,Auburn,Texas A&M,CBS,Sat,15.5,0,0.0,0.0
+54,2019,9/21/19,Washington,BYU,ABC,Sat,15.5,0,0.0,0.0
+55,2019,9/21/19,Tennessee,Florida,ESPN,Sat,12.0,0,0.0,0.0
+56,2019,9/20/19,Utah,USC,FS1,Fri,21.0,0,0.0,0.0
+57,2019,9/21/19,Oregon,Stanford,ESPN,Sat,19.0,0,0.0,0.0
+58,2019,9/21/19,Southern Miss,Alabama,ESPN,Sat,12.0,0,0.0,0.0
+59,2019,9/19/19,Houston,Tulane,ESPN,Thu,20.0,0,0.0,0.0
+60,2019,9/21/19,Nebraska,Illinois,BTN,Sat,20.0,0,0.0,0.0
+61,2019,9/21/19,UCF,Pittsburgh,ESPN2,Sat,15.5,0,0.0,0.0
+62,2019,9/21/19,Old Dominion,Virginia,ESPN2,Sat,19.0,0,0.0,0.0
+63,2019,9/21/19,SMU,TCU,FS1,Sat,15.5,0,0.0,0.0
+64,2019,9/28/19,Clemson,North Carolina,ABC,Sat,15.5,0,0.0,0.0
+65,2019,9/28/19,Virginia,Notre Dame,NBC,Sat,15.5,0,0.0,0.0
+66,2019,9/28/19,Texas Tech,Oklahoma,FOX,Sat,12.0,0,0.0,0.0
+67,2019,9/28/19,Texas A&M,Arkansas,ESPN,Sat,12.0,0,0.0,0.0
+68,2019,9/28/19,USC,Washington,FOX,Sat,15.5,0,0.0,0.0
+69,2019,9/28/19,UCLA,Arizona,ESPN,Sat,22.5,0,0.0,0.0
+70,2019,9/27/19,Duke,Virginia Tech,ESPN,Fri,19.0,0,0.0,0.0
+71,2019,9/26/19,Navy,Memphis,ESPN,Thu,20.0,0,0.0,0.0
+72,2019,9/28/19,Minnesota,Purdue,ESPN2,Sat,15.5,0,0.0,0.0
+73,2019,9/28/19,UNLV,Wyoming,ESPNU,Sat,20.0,0,0.0,0.0
+74,2019,9/28/19,Kansas,TCU,FS1,Sat,12.0,0,0.0,0.0
+75,2019,10/5/19,Auburn,Florida,CBS,Sat,15.5,0,0.0,0.0
+76,2019,10/5/19,Iowa,Michigan,FOX,Sat,12.0,0,0.0,0.0
+77,2019,10/5/19,Georgia,Tennessee,ESPN,Sat,19.0,0,0.0,0.0
+78,2019,10/5/19,Texas,West Virginia,ABC,Sat,15.5,0,0.0,0.0
+79,2019,10/5/19,Oklahoma,Kansas,ABC,Sat,12.5,0,0.0,0.0
+80,2019,10/5/19,Northwestern,Nebraska,FOX,Sat,16.0,0,0.0,0.0
+81,2019,10/5/19,California,Oregon,FOX,Sat,20.0,0,0.0,0.0
+82,2019,10/5/19,Washington,Stanford,ESPN,Sat,22.5,0,0.0,0.0
+83,2019,10/4/19,UCF,Cincinnati,ESPN,Fri,20.0,0,0.0,0.0
+84,2019,10/5/19,Bowling Green,Notre Dame,NBC,Sat,15.5,0,0.0,0.0
+85,2019,10/5/19,Virginia Tech,Miami,ESPN,Sat,15.5,0,0.0,0.0
+86,2019,10/3/19,Temple,East Carolina,ESPN,Thu,20.0,0,0.0,0.0
+87,2019,10/5/19,Tulsa,SMU,ESPNU,Sat,19.5,0,0.0,0.0
+88,2019,10/12/19,Oklahoma,Texas,FOX,Sat,12.0,0,0.0,0.0
+89,2019,10/12/19,Florida,LSU,ESPN,Sat,20.0,0,0.0,0.0
+90,2019,10/12/19,Alabama,Texas A&M,CBS,Sat,15.5,0,0.0,0.0
+91,2019,10/12/19,South Carolina,Georgia,ESPN,Sat,12.0,0,0.0,0.0
+92,2019,10/12/19,USC,Notre Dame,NBC,Sat,19.5,0,0.0,0.0
+93,2019,10/12/19,Michigan,Illinois,ABC,Sat,12.0,0,0.0,0.0
+94,2019,10/11/19,Virginia,Miami,ESPN,Fri,20.0,0,0.0,0.0
+95,2019,10/12/19,Nebraska,Minnesota,FS1,Sat,19.5,0,0.0,0.0
+96,2019,10/12/19,Texas Tech,Baylor,FS1,Sat,16.0,0,0.0,0.0
+97,2019,10/12/19,Washington,Arizona,FS1,Sat,22.5,0,0.0,0.0
+98,2019,10/11/19,Colorado,Oregon,FS1,Fri,22.0,0,0.0,0.0
+99,2019,10/12/19,Cincinnati,Houston,ESPN2,Sat,15.5,0,0.0,0.0
+100,2019,10/12/19,Memphis,Temple,ESPN2,Sat,12.0,0,0.0,0.0
+101,2019,10/19/19,Tennessee,Alabama,ESPN,Sat,21.0,0,0.0,0.0
+102,2019,10/19/19,Oregon,Washington,ABC,Sat,15.5,0,0.0,0.0
+103,2019,10/19/19,Florida,South Carolina,ESPN,Sat,12.0,0,0.0,0.0
+104,2019,10/19/19,Kentucky,Georgia,ESPN,Sat,18.0,0,0.0,0.0
+105,2019,10/19/19,Clemson,Louisville,ABC,Sat,12.0,0,0.0,0.0
+106,2019,10/19/19,West Virginia,Oklahoma,FOX,Sat,12.0,0,0.0,0.0
+107,2019,10/19/19,Wisconsin,Illinois,BTN,Sat,12.0,0,0.0,0.0
+108,2019,10/18/19,Pittsburgh,Syracuse,ESPN,Fri,19.0,0,0.0,0.0
+109,2019,10/19/19,Purdue,Iowa,ESPN2,Sat,12.0,0,0.0,0.0
+110,2019,10/19/19,Minnesota,Rutgers,BTN,Sat,15.5,0,0.0,0.0
+111,2019,10/16/19,South Alabama,Troy,ESPN2,Wed,20.0,0,0.0,0.0
+112,2019,10/17/19,UCLA,Stanford,ESPN,Thu,21.0,0,0.0,0.0
+113,2019,10/19/19,Tulane,Memphis,ESPN2,Sat,19.0,0,0.0,0.0
+114,2019,10/26/19,Auburn,LSU,CBS,Sat,15.5,0,0.0,0.0
+115,2019,10/26/19,Notre Dame,Michigan,ABC,Sat,19.5,0,0.0,0.0
+116,2019,10/26/19,Texas,TCU,FOX,Sat,15.5,0,0.0,0.0
+117,2019,10/26/19,Arkansas,Alabama,ESPN,Sat,15.5,0,0.0,0.0
+118,2019,10/26/19,Miami,Pittsburgh,ESPN,Sat,12.0,0,0.0,0.0
+119,2019,10/25/19,USC,Colorado,ESPN2,Fri,21.0,0,0.0,0.0
+120,2019,10/24/19,SMU,Houston,ESPN,Thu,19.5,0,0.0,0.0
+121,2019,10/26/19,Maryland,Minnesota,ESPN,Sat,15.5,0,0.0,0.0
+122,2019,10/26/19,Iowa,Northwestern,ESPN2,Sat,12.0,0,0.0,0.0
+123,2019,10/26/19,Texas Tech,Kansas,FS1,Sat,19.0,0,0.0,0.0
+124,2019,10/26/19,UCF,Temple,ESPN2,Sat,19.0,0,0.0,0.0
+125,2019,10/26/19,California,Utah,FS1,Sat,22.0,0,0.0,0.0
+126,2019,11/2/19,Georgia,Florida,CBS,Sat,15.5,0,0.0,0.0
+127,2019,11/2/19,Oregon,USC,FOX,Sat,20.0,0,0.0,0.0
+128,2019,11/2/19,Michigan,Maryland,ABC,Sat,12.0,0,0.0,0.0
+129,2019,11/2/19,Virginia Tech,Notre Dame,NBC,Sat,14.5,0,0.0,0.0
+130,2019,11/2/19,SMU,Memphis,ABC,Sat,19.5,0,0.0,0.0
+131,2019,11/2/19,Nebraska,Purdue,FOX,Sat,12.0,0,0.0,0.0
+132,2019,11/2/19,Utah,Washington,FOX,Sat,16.0,0,0.0,0.0
+133,2019,10/31/19,West Virginia,Baylor,ESPN,Thu,20.0,0,0.0,0.0
+134,2019,11/2/19,Houston,UCF,ESPN2,Sat,12.0,0,0.0,0.0
+135,2019,11/2/19,UAB,Tennessee,ESPNU,Sat,19.0,0,0.0,0.0
+136,2019,11/2/19,Northwestern,Indiana,FS1,Sat,19.5,0,0.0,0.0
+137,2019,11/9/19,LSU,Alabama,CBS,Sat,15.5,0,0.0,0.0
+138,2019,11/9/19,Iowa,Wisconsin,FOX,Sat,16.0,0,0.0,0.0
+139,2019,11/9/19,Missouri,Georgia,ESPN,Sat,19.0,0,0.0,0.0
+140,2019,11/9/19,Vanderbilt,Florida,ESPN,Sat,12.0,0,0.0,0.0
+141,2019,11/8/19,UCF,Tulsa,ESPN2,Fri,19.0,0,0.0,0.0
+142,2019,11/9/19,Baylor,TCU,FS1,Sat,12.0,0,0.0,0.0
+143,2019,11/7/19,Temple,South Florida,ESPN,Thu,20.0,0,0.0,0.0
+144,2019,11/9/19,Texas Tech,West Virginia,ESPN2,Sat,12.0,0,0.0,0.0
+145,2019,11/9/19,Louisville,Miami,ESPN2,Sat,15.5,0,0.0,0.0
+146,2019,11/9/19,Liberty,BYU,ESPNU,Sat,19.5,0,0.0,0.0
+147,2019,11/16/19,Oklahoma,Baylor,ABC,Sat,19.5,0,0.0,0.0
+148,2019,11/16/19,Georgia,Auburn,CBS,Sat,15.5,0,0.0,0.0
+149,2019,11/16/19,Minnesota,Iowa,FOX,Sat,16.0,0,0.0,0.0
+150,2019,11/16/19,Florida,Missouri,CBS,Sat,12.0,0,0.0,0.0
+151,2019,11/16/19,Wake Forest,Clemson,ABC,Sat,15.5,0,0.0,0.0
+152,2019,11/16/19,Arizona,Oregon,ESPN,Sat,22.5,0,0.0,0.0
+153,2019,11/16/19,Navy,Notre Dame,NBC,Sat,14.5,0,0.0,0.0
+154,2019,11/16/19,UCLA,Utah,FOX,Sat,20.0,0,0.0,0.0
+155,2019,11/14/19,North Carolina,Pittsburgh,ESPN,Thu,20.0,0,0.0,0.0
+156,2019,11/16/19,TCU,Texas Tech,ESPN2,Sat,12.0,0,0.0,0.0
+157,2019,11/16/19,USC,California,FS1,Sat,23.0,0,0.0,0.0
+158,2019,11/13/19,Northern Illinois,Toledo,ESPN2,Wed,20.0,0,0.0,0.0
+159,2019,11/12/19,Western Michigan,Ohio,ESPN2,Tue,18.0,0,0.0,0.0
+160,2019,11/16/19,Memphis,Houston,ESPN2,Sat,15.5,0,0.0,0.0
+161,2019,11/23/19,Texas A&M,Georgia,CBS,Sat,15.5,0,0.0,0.0
+162,2019,11/23/19,Arkansas,LSU,ESPN,Sat,19.0,0,0.0,0.0
+163,2019,11/23/19,TCU,Oklahoma,FOX,Sat,20.0,0,0.0,0.0
+164,2019,11/23/19,Purdue,Wisconsin,FOX,Sat,16.0,0,0.0,0.0
+165,2019,11/23/19,Michigan,Indiana,ESPN,Sat,15.5,0,0.0,0.0
+166,2019,11/23/19,UCLA,USC,ABC,Sat,15.5,0,0.0,0.0
+167,2019,11/23/19,Boston College,Notre Dame,NBC,Sat,14.5,0,0.0,0.0
+168,2019,11/23/19,Western Carolina,Alabama,ESPN,Sat,12.0,0,0.0,0.0
+169,2019,11/23/19,Minnesota,Northwestern,ABC,Sat,12.0,0,0.0,0.0
+170,2019,11/23/19,Washington,Colorado,ESPN,Sat,22.0,0,0.0,0.0
+171,2019,11/23/19,Texas,Baylor,FS1,Sat,15.5,0,0.0,0.0
+172,2019,11/23/19,Pittsburgh,Virginia Tech,ESPN2,Sat,15.5,0,0.0,0.0
+173,2019,11/23/19,Utah,Arizona,FS1,Sat,22.0,0,0.0,0.0
+174,2019,11/20/19,Toledo,Buffalo,ESPN2,Wed,19.5,0,0.0,0.0
+175,2019,11/23/19,Temple,Cincinnati,ESPN2,Sat,19.0,0,0.0,0.0
+176,2019,11/19/19,Eastern Michigan,Northern Illinois,ESPN2,Tue,19.5,0,0.0,0.0
+177,2019,11/30/19,Alabama,Auburn,CBS,Sat,15.5,0,0.0,0.0
+178,2019,11/30/19,Wisconsin,Minnesota,ABC,Sat,15.5,0,0.0,0.0
+179,2019,11/30/19,Notre Dame,Stanford,FOX,Sat,16.0,0,0.0,0.0
+180,2019,11/30/19,Texas A&M,LSU,ESPN,Sat,19.0,0,0.0,0.0
+181,2019,11/29/19,Texas Tech,Texas,FOX,Fri,12.0,1,0.0,0.0
+182,2019,11/29/19,Virginia Tech,Virginia,ABC,Fri,12.0,1,0.0,0.0
+183,2019,11/29/19,Cincinnati,Memphis,ABC,Fri,15.5,1,0.0,0.0
+184,2019,11/30/19,Colorado,Utah,ABC,Sat,19.5,0,0.0,0.0
+185,2019,11/30/19,Georgia,Georgia Tech,ABC,Sat,12.0,0,0.0,0.0
+186,2019,11/29/19,Missouri,Arkansas,CBS,Fri,14.5,1,0.0,0.0
+187,2019,11/30/19,Clemson,South Carolina,ESPN,Sat,12.0,0,0.0,0.0
+188,2019,11/29/19,South Florida,UCF,ESPN,Fri,20.0,1,0.0,0.0
+189,2019,11/29/19,Iowa,Nebraska,BTN,Fri,14.5,1,0.0,0.0
+190,2019,11/29/19,West Virginia,TCU,ESPN,Fri,16.5,1,0.0,0.0
+191,2019,11/30/19,Indiana,Purdue,ESPN2,Sat,12.0,0,0.0,0.0
+192,2019,11/30/19,Baylor,Kansas,ESPN,Sat,15.5,0,0.0,0.0
+193,2019,11/30/19,California,UCLA,FS1,Sat,22.5,0,0.0,0.0
+194,2019,11/30/19,Miami,Duke,ESPN2,Sat,15.5,0,0.0,0.0
+195,2019,11/30/19,Navy,Houston,ESPN2,Sat,19.0,0,0.0,0.0
+196,2019,11/26/19,Western Michigan,Northern Illinois,ESPNU,Tue,19.0,0,0.0,0.0
+197,2018,9/1/18,Michigan,Notre Dame,NBC,Sat,19.5,0,0.0,0.0
+198,2018,9/2/18,Miami,LSU,ABC,Sun,19.5,0,0.0,0.0
+199,2018,9/1/18,Washington,Auburn,ABC,Sat,15.5,0,0.0,0.0
+200,2018,9/1/18,Louisville,Alabama,ABC,Sat,20.0,0,0.0,0.0
+201,2018,9/1/18,West Virginia,Tennessee,CBS,Sat,15.5,0,0.0,0.0
+202,2018,8/30/18,Northwestern,Purdue,ESPN,Thu,20.0,0,0.0,0.0
+203,2018,8/31/18,Western Kentucky,Wisconsin,ESPN,Fri,21.0,0,0.0,0.0
+204,2018,9/1/18,BYU,Arizona,ESPN,Sat,23.0,0,0.0,0.0
+205,2018,9/1/18,Texas,Maryland,FS1,Sat,12.0,0,0.0,0.0
+206,2018,9/1/18,Austin Peay,Georgia,ESPN,Sat,15.5,0,0.0,0.0
+207,2018,9/1/18,North Carolina,California,FOX,Sat,16.0,0,0.0,0.0
+208,2018,8/31/18,Army,Duke,ESPNU,Fri,19.0,0,0.0,0.0
+209,2018,9/8/18,Clemson,Texas A&M,ESPN,Sat,19.0,0,0.0,0.0
+210,2018,9/8/18,Georgia,South Carolina,CBS,Sat,15.5,0,0.0,0.0
+211,2018,9/8/18,Colorado,Nebraska,ABC,Sat,15.5,0,0.0,0.0
+212,2018,9/8/18,UCLA,Oklahoma,FOX,Sat,13.0,0,0.0,0.0
+213,2018,9/8/18,Arizona,Houston,ABC,Sat,12.0,0,0.0,0.0
+214,2018,9/8/18,USC,Stanford,FOX,Sat,21.0,0,0.0,0.0
+215,2018,9/7/18,TCU,SMU,ESPN2,Fri,22.0,0,0.0,0.0
+216,2018,9/8/18,Western Michigan,Michigan,FS1,Sat,12.0,0,0.0,0.0
+217,2018,9/8/18,California,BYU,ESPN2,Sat,22.5,0,0.0,0.0
+218,2018,9/8/18,Georgia Tech,South Florida,ESPN2,Sat,12.0,0,0.0,0.0
+219,2018,9/8/18,Duke,Northwestern,ESPNU,Sat,12.0,0,0.0,0.0
+220,2018,9/8/18,North Carolina,East Carolina,ESPNU,Sat,15.5,0,0.0,0.0
+221,2018,9/8/18,Wyoming,Missouri,ESPNU,Sat,19.0,0,0.0,0.0
+222,2018,9/15/18,LSU,Auburn,CBS,Sat,15.5,0,0.0,0.0
+223,2018,9/15/18,USC,Texas,FOX,Sat,20.5,0,0.0,0.0
+224,2018,9/15/18,BYU,Wisconsin,ABC,Sat,15.5,0,0.0,0.0
+225,2018,9/15/18,Vanderbilt,Notre Dame,NBC,Sat,14.5,0,0.0,0.0
+226,2018,9/15/18,Washington,Utah,ESPN,Sat,22.0,0,0.0,0.0
+227,2018,9/15/18,Houston,Texas Tech,FOX,Sat,17.0,0,0.0,0.0
+228,2018,9/13/18,Boston College,Wake Forest,ESPN,Thu,17.5,0,0.0,0.0
+229,2018,9/15/18,Georgia Southern,Clemson,ESPNU,Sat,12.0,0,0.0,0.0
+230,2018,9/15/18,Miami,Toledo,ESPN2,Sat,12.0,0,0.0,0.0
+231,2018,9/15/18,Duke,Baylor,FS1,Sat,15.5,0,0.0,0.0
+232,2018,9/22/18,Texas A&M,Alabama,CBS,Sat,15.5,0,0.0,0.0
+233,2018,9/22/18,Stanford,Oregon,ABC,Sat,20.0,0,0.0,0.0
+234,2018,9/22/18,Georgia,Missouri,ESPN,Sat,12.0,0,0.0,0.0
+235,2018,9/22/18,Wisconsin,Iowa,FOX,Sat,20.5,0,0.0,0.0
+236,2018,9/22/18,TCU,Texas,FOX,Sat,16.5,0,0.0,0.0
+237,2018,9/22/18,Notre Dame,Wake Forest,ABC,Sat,12.0,0,0.0,0.0
+238,2018,9/22/18,Florida,Tennessee,ESPN,Sat,19.0,0,0.0,0.0
+239,2018,9/22/18,Clemson,Georgia Tech,ABC,Sat,15.5,0,0.0,0.0
+240,2018,9/22/18,Nebraska,Michigan,FS1,Sat,12.0,0,0.0,0.0
+241,2018,9/20/18,Tulsa,Temple,ESPN,Thu,19.5,0,0.0,0.0
+242,2018,9/22/18,Louisiana Tech,LSU,ESPNU,Sat,19.0,0,0.0,0.0
+243,2018,9/22/18,Boston College,Purdue,ESPN2,Sat,12.0,0,0.0,0.0
+244,2018,9/22/18,Kansas,Baylor,FS1,Sat,15.5,0,0.0,0.0
+245,2018,9/29/18,Syracuse,Clemson,ABC,Sat,12.0,0,0.0,0.0
+246,2018,9/29/18,Tennessee,Georgia,CBS,Sat,15.5,0,0.0,0.0
+247,2018,9/29/18,Michigan,Northwestern,FOX,Sat,17.0,0,0.0,0.0
+248,2018,9/29/18,Stanford,Notre Dame,NBC,Sat,19.5,0,0.0,0.0
+249,2018,9/29/18,Baylor,Oklahoma,ABC,Sat,15.5,0,0.0,0.0
+250,2018,9/29/18,Arkansas,Texas A&M,ESPN,Sat,12.0,0,0.0,0.0
+251,2018,9/29/18,BYU,Washington,FOX,Sat,20.5,0,0.0,0.0
+252,2018,9/29/18,West Virginia,Texas Tech,ESPN2,Sat,12.0,0,0.0,0.0
+253,2018,9/27/18,North Carolina,Miami,ESPN,Thu,20.0,0,0.0,0.0
+254,2018,9/28/18,UCLA,Colorado,FS1,Fri,21.0,0,0.0,0.0
+255,2018,9/29/18,USC,Arizona,ESPN2,Sat,22.5,0,0.0,0.0
+256,2018,9/29/18,Oregon,California,FS1,Sat,22.5,0,0.0,0.0
+257,2018,9/28/18,Memphis,Tulane,ESPN2,Fri,20.0,0,0.0,0.0
+258,2018,9/29/18,Virginia Tech,Duke,ESPN2,Sat,19.0,0,0.0,0.0
+259,2018,10/6/18,Texas,Oklahoma,FOX,Sat,12.0,0,0.0,0.0
+260,2018,10/6/18,LSU,Florida,CBS,Sat,15.5,0,0.0,0.0
+261,2018,10/6/18,Notre Dame,Virginia Tech,ABC,Sat,20.0,0,0.0,0.0
+262,2018,10/6/18,Kentucky,Texas A&M,ESPN,Sat,19.0,0,0.0,0.0
+263,2018,10/6/18,Alabama,Arkansas,ESPN,Sat,12.0,0,0.0,0.0
+264,2018,10/6/18,Maryland,Michigan,ABC,Sat,12.0,0,0.0,0.0
+265,2018,10/6/18,Washington,UCLA,FOX,Sat,20.0,0,0.0,0.0
+266,2018,10/6/18,Utah,Stanford,ESPN,Sat,22.5,0,0.0,0.0
+267,2018,10/5/18,Georgia Tech,Louisville,ESPN,Fri,19.0,0,0.0,0.0
+268,2018,10/6/18,Clemson,Wake Forest,ESPN,Sat,15.5,0,0.0,0.0
+269,2018,10/6/18,Kansas,West Virginia,ESPN2,Sat,12.0,0,0.0,0.0
+270,2018,10/4/18,Tulsa,Houston,ESPN,Thu,20.0,0,0.0,0.0
+271,2018,10/6/18,California,Arizona,FS1,Sat,22.0,0,0.0,0.0
+272,2018,10/13/18,Wisconsin,Michigan,ABC,Sat,19.5,0,0.0,0.0
+273,2018,10/13/18,Georgia,LSU,CBS,Sat,15.5,0,0.0,0.0
+274,2018,10/13/18,Missouri,Alabama,ESPN,Sat,19.0,0,0.0,0.0
+275,2018,10/13/18,Washington,Oregon,ABC,Sat,15.5,0,0.0,0.0
+276,2018,10/13/18,Pittsburgh,Notre Dame,NBC,Sat,14.5,0,0.0,0.0
+277,2018,10/13/18,Florida,Vanderbilt,ESPN,Sat,12.0,0,0.0,0.0
+278,2018,10/13/18,Nebraska,Northwestern,ABC,Sat,12.0,0,0.0,0.0
+279,2018,10/13/18,Baylor,Texas,ESPN,Sat,15.5,0,0.0,0.0
+280,2018,10/11/18,Texas Tech,TCU,ESPN,Thu,19.5,0,0.0,0.0
+281,2018,10/13/18,Colorado,USC,FS1,Sat,22.5,0,0.0,0.0
+282,2018,10/12/18,South Florida,Tulsa,ESPN,Fri,19.0,0,0.0,0.0
+283,2018,10/12/18,Arizona,Utah,ESPN,Fri,22.5,0,0.0,0.0
+284,2018,10/13/18,Miami,Virginia,ESPN2,Sat,19.0,0,0.0,0.0
+285,2018,10/13/18,Iowa,Indiana,ESPN2,Sat,12.0,0,0.0,0.0
+286,2018,10/13/18,Purdue,Illinois,FS1,Sat,15.5,0,0.0,0.0
+287,2018,10/13/18,Virginia Tech,North Carolina,ESPNU,Sat,19.0,0,0.0,0.0
+288,2018,10/20/18,Alabama,Tennessee,CBS,Sat,15.5,0,0.0,0.0
+289,2018,10/20/18,Colorado,Washington,FOX,Sat,17.0,0,0.0,0.0
+290,2018,10/20/18,Oklahoma,TCU,ABC,Sat,12.0,0,0.0,0.0
+291,2018,10/20/18,Illinois,Wisconsin,FS1,Sat,12.0,0,0.0,0.0
+292,2018,10/20/18,Maryland,Iowa,ESPN2,Sat,12.0,0,0.0,0.0
+293,2018,10/20/18,Arizona,UCLA,ESPN2,Sat,22.5,0,0.0,0.0
+294,2018,10/20/18,UCF,East Carolina,ESPN2,Sat,19.0,0,0.0,0.0
+295,2018,10/20/18,Kansas,Texas Tech,FS1,Sat,15.5,0,0.0,0.0
+296,2018,10/27/18,Georgia,Florida,CBS,Sat,15.5,0,0.0,0.0
+297,2018,10/27/18,Notre Dame,Navy,CBS,Sat,20.0,0,0.0,0.0
+298,2018,10/27/18,Wisconsin,Northwestern,FOX,Sat,12.0,0,0.0,0.0
+299,2018,10/26/18,Miami,Boston College,ESPN,Fri,19.0,0,0.0,0.0
+300,2018,10/27/18,Oregon,Arizona,ESPN,Sat,22.5,0,0.0,0.0
+301,2018,10/25/18,Georgia Tech,Virginia Tech,ESPN,Thu,19.5,0,0.0,0.0
+302,2018,10/26/18,Utah,UCLA,ESPN,Fri,22.5,0,0.0,0.0
+303,2018,10/25/18,Baylor,West Virginia,FS1,Thu,19.0,0,0.0,0.0
+304,2018,10/27/18,Washington,California,FS1,Sat,18.5,0,0.0,0.0
+305,2018,10/26/18,Indiana,Minnesota,FS1,Fri,20.0,0,0.0,0.0
+306,2018,10/27/18,TCU,Kansas,FS1,Sat,15.0,0,0.0,0.0
+307,2018,10/27/18,South Florida,Houston,ESPN2,Sat,15.5,0,0.0,0.0
+308,2018,11/3/18,Alabama,LSU,CBS,Sat,20.0,0,0.0,0.0
+309,2018,11/3/18,West Virginia,Texas,FOX,Sat,15.5,0,0.0,0.0
+310,2018,11/3/18,Georgia,Kentucky,CBS,Sat,15.5,0,0.0,0.0
+311,2018,11/3/18,Notre Dame,Northwestern,ESPN,Sat,19.5,0,0.0,0.0
+312,2018,11/3/18,Oklahoma,Texas Tech,ABC,Sat,20.0,0,0.0,0.0
+313,2018,11/3/18,Texas A&M,Auburn,ESPN,Sat,12.0,0,0.0,0.0
+314,2018,11/3/18,UCLA,Oregon,FOX,Sat,20.0,0,0.0,0.0
+315,2018,11/3/18,Louisville,Clemson,ABC,Sat,12.0,0,0.0,0.0
+316,2018,11/2/18,Pittsburgh,Virginia,ESPN2,Fri,19.5,0,0.0,0.0
+317,2018,11/1/18,Temple,UCF,ESPN,Thu,19.5,0,0.0,0.0
+318,2018,11/3/18,Iowa,Purdue,ESPN2,Sat,15.5,0,0.0,0.0
+319,2018,11/3/18,Duke,Miami,ESPN2,Sat,19.0,0,0.0,0.0
+320,2018,11/2/18,Colorado,Arizona,FS1,Fri,22.5,0,0.0,0.0
+321,2018,11/10/18,Auburn,Georgia,ESPN,Sat,19.0,0,0.0,0.0
+322,2018,11/10/18,Clemson,Boston College,ABC,Sat,20.0,0,0.0,0.0
+323,2018,11/10/18,Texas,Texas Tech,FOX,Sat,19.5,0,0.0,0.0
+324,2018,11/10/18,Northwestern,Iowa,FOX,Sat,15.5,0,0.0,0.0
+325,2018,11/10/18,South Carolina,Florida,ESPN,Sat,12.0,0,0.0,0.0
+326,2018,11/10/18,California,USC,ESPN,Sat,22.5,0,0.0,0.0
+327,2018,11/9/18,Louisville,Syracuse,ESPN2,Fri,19.0,0,0.0,0.0
+328,2018,11/10/18,TCU,West Virginia,FS1,Sat,12.0,0,0.0,0.0
+329,2018,11/10/18,Miami,Georgia Tech,ESPN2,Sat,19.0,0,0.0,0.0
+330,2018,11/10/18,Purdue,Minnesota,ESPN2,Sat,15.5,0,0.0,0.0
+331,2018,11/7/18,Toledo,Northern Illinois,ESPN2,Wed,20.0,0,0.0,0.0
+332,2018,11/10/18,Navy,UCF,ESPN2,Sat,12.0,0,0.0,0.0
+333,2018,11/10/18,Virginia Tech,Pittsburgh,ESPNU,Sat,15.5,0,0.0,0.0
+334,2018,11/17/18,Syracuse,Notre Dame,NBC,Sat,14.5,0,0.0,0.0
+335,2018,11/17/18,Kansas,Oklahoma,FOX,Sat,19.5,0,0.0,0.0
+336,2018,11/17/18,Duke,Clemson,ESPN,Sat,19.0,0,0.0,0.0
+337,2018,11/17/18,Indiana,Michigan,FS1,Sat,16.0,0,0.0,0.0
+338,2018,11/17/18,Missouri,Tennessee,CBS,Sat,15.5,0,0.0,0.0
+339,2018,11/17/18,USC,UCLA,FOX,Sat,16.0,0,0.0,0.0
+340,2018,11/17/18,Miami,Virginia Tech,ESPN,Sat,15.5,0,0.0,0.0
+341,2018,11/17/18,UAB,Texas A&M,ESPN2,Sat,19.5,0,0.0,0.0
+342,2018,11/16/18,Memphis,SMU,ESPN2,Fri,21.0,0,0.0,0.0
+343,2018,11/17/18,Rice,LSU,ESPNU,Sat,19.5,0,0.0,0.0
+344,2018,11/15/18,Tulane,Houston,ESPN,Thu,20.0,0,0.0,0.0
+345,2018,11/17/18,Idaho,Florida,ESPNU,Sat,12.0,0,0.0,0.0
+346,2018,11/24/18,Auburn,Alabama,CBS,Sat,15.5,0,0.0,0.0
+347,2018,11/24/18,Notre Dame,USC,ABC,Sat,20.0,0,0.0,0.0
+348,2018,11/23/18,Oklahoma,West Virginia,ESPN,Fri,20.0,1,0.0,0.0
+349,2018,11/23/18,Nebraska,Iowa,FOX,Fri,12.0,1,0.0,0.0
+350,2018,11/23/18,Virginia,Virginia Tech,ABC,Fri,15.5,1,0.0,0.0
+351,2018,11/24/18,South Carolina,Clemson,ESPN,Sat,19.0,0,0.0,0.0
+352,2018,11/23/18,Arkansas,Missouri,CBS,Fri,14.5,1,0.0,0.0
+353,2018,11/23/18,Texas,Kansas,FS1,Fri,12.0,1,0.0,0.0
+354,2018,11/24/18,Minnesota,Wisconsin,ESPN2,Sat,15.5,0,0.0,0.0
+355,2018,11/24/18,Pittsburgh,Miami,ESPN,Sat,15.5,0,0.0,0.0
+356,2018,11/24/18,Kentucky,Louisville,ESPN2,Sat,19.0,0,0.0,0.0
+357,2018,11/24/18,Syracuse,Boston College,ESPN,Sat,12.0,0,0.0,0.0
+358,2018,11/24/18,BYU,Utah,FS1,Sat,22.5,0,0.0,0.0
+359,2018,11/24/18,Purdue,Indiana,ESPN2,Sat,12.0,0,0.0,0.0
+360,2018,11/24/18,Baylor,Texas Tech,FS1,Sat,12.0,0,0.0,0.0
+361,2024,9/1/24,USC,LSU,ABC,Sun,19.5,0,0.0,0.0
+362,2024,8/31/24,Notre Dame,Texas A&M,ABC,Sat,19.5,0,0.0,0.0
+363,2024,8/31/24,Clemson,Georgia,ABC,Sat,12.0,0,0.0,0.0
+364,2024,8/31/24,Miami,Florida,ABC,Sat,15.5,0,0.0,0.0
+365,2024,8/24/24,Florida St.,Georgia Tech,ESPN,Sat,12.0,0,0.0,0.0
+366,2024,9/2/24,Boston College,Florida St.,ESPN,Mon,19.5,0,0.0,0.0
+367,2024,8/31/24,Penn St.,West Virginia,FOX,Sat,12.0,0,0.0,0.0
+368,2024,8/31/24,Akron,Ohio St.,CBS,Sat,15.5,0,0.0,0.0
+369,2024,8/31/24,Fresno St.,Michigan,NBC,Sat,19.5,0,0.0,0.0
+370,2024,8/31/24,Western Kentucky,Alabama,ESPN,Sat,19.0,0,0.0,0.0
+371,2024,8/31/24,Colorado St.,Texas,ESPN,Sat,15.5,0,0.0,0.0
+372,2024,8/29/24,North Carolina,Minnesota,FOX,Thu,21.0,0,0.0,0.0
+373,2024,8/31/24,UTEP,Nebraska,FOX,Sat,15.5,0,0.0,0.0
+374,2024,8/30/24,Temple,Oklahoma,ESPN,Fri,19.0,0,0.0,0.0
+375,2024,8/30/24,TCU,Stanford,ESPN,Fri,22.5,0,0.0,0.0
+376,2024,8/31/24,Virginia Tech,Vanderbilt,ESPN,Sat,12.0,0,0.0,0.0
+377,2024,8/31/24,UCLA,Hawaii,CBS,Sat,19.5,0,0.0,0.0
+378,2024,8/30/24,Western Michigan,Wisconsin,FS1,Fri,21.0,0,0.0,0.0
+379,2024,8/31/24,New Mexico,Arizona,ESPN,Sat,22.5,0,0.0,0.0
+380,2024,8/30/24,FAU,Michigan St.,BTN,Fri,19.0,0,0.0,0.0
+381,2024,8/31/24,Idaho,Oregon,BTN,Sat,19.5,0,0.0,0.0
+382,2024,8/31/24,North Dakota,Iowa St.,FS1,Sat,15.5,0,0.0,0.0
+383,2024,8/29/24,Howard,Rutgers,BTN,Thu,18.0,0,0.0,0.0
+384,2024,8/31/24,Wyoming,Arizona St.,FS1,Sat,22.5,0,0.0,0.0
+385,2024,8/31/24,UNLV,Houston,FS1,Sat,19.0,0,0.0,0.0
+386,2024,8/31/24,Boise St.,Georgia Southern,ESPNU,Sat,16.0,0,0.0,0.0
+387,2024,8/31/24,Connecticut,Maryland,FS1,Sat,12.0,0,0.0,0.0
+388,2024,8/29/24,Eastern Illinois,Illinois,BTN,Thu,21.0,0,0.0,0.0
+389,2024,8/31/24,Kent St.,Pittsburgh,ESPNU,Sat,12.0,0,0.0,0.0
+390,2024,9/6/24,SMU,BYU,ESPN2,Fri,19.0,0,0.0,0.0
+391,2024,9/7/24,Northwestern,Duke,FS1,Sat,21.0,0,0.0,0.0
+392,2024,9/7/24,Michigan,Texas,FOX,Sat,12.0,0,0.0,0.0
+393,2024,9/7/24,Oklahoma St.,Arkansas,ABC,Sat,12.0,0,0.0,0.0
+394,2024,9/7/24,Tulane,Kansas St.,ESPN,Sat,12.0,0,0.0,0.0
+395,2024,9/7/24,Memphis,Troy,ESPNU,Sat,12.0,0,0.0,0.0
+396,2024,9/7/24,Cincinnati,Pittsburgh,ESPN2,Sat,12.0,0,0.0,0.0
+397,2024,9/7/24,Notre Dame,Northern Illinois,ABC,Sat,15.5,0,0.0,0.0
+398,2024,9/7/24,Utah,Baylor,FOX,Sat,15.5,0,0.0,0.0
+399,2024,9/7/24,Wisconsin,South Dakota,FS1,Sat,15.5,0,0.0,0.0
+400,2024,9/7/24,Kentucky,South Carolina,ABC,Sat,15.5,0,0.0,0.0
+401,2024,9/7/24,Auburn,California,ESPN2,Sat,15.5,0,0.0,0.0
+402,2024,9/7/24,Iowa,Iowa St.,CBS,Sat,15.5,0,0.0,0.0
+403,2024,9/7/24,Texas St.,UTSA,ESPNU,Sat,16.0,0,0.0,0.0
+404,2024,9/7/24,Virginia Tech,Marshall,CW,Sat,16.5,0,0.0,0.0
+405,2024,9/7/24,Wake Forest,Virginia,ESPN2,Sat,19.0,0,0.0,0.0
+406,2024,9/7/24,Alabama,South Florida,ESPN,Sat,19.0,0,0.0,0.0
+407,2024,9/7/24,Illinois,Kansas,FS1,Sat,19.0,0,0.0,0.0
+408,2024,9/7/24,Ohio St.,Western Michigan,BTN,Sat,19.5,0,0.0,0.0
+409,2024,9/7/24,North Carolina St.,Tennessee,ABC,Sat,19.5,0,0.0,0.0
+410,2024,9/7/24,Vanderbilt,Alcorn State,ESPNU,Sat,19.5,0,0.0,0.0
+411,2024,9/7/24,Nebraska,Colorado,NBC,Sat,19.5,0,0.0,0.0
+412,2024,9/7/24,New Mexico St.,Liberty,ESPN2,Sat,22.25,0,0.0,0.0
+413,2024,9/7/24,Arizona St.,Mississippi St.,ESPN,Sat,22.5,0,0.0,0.0
+414,2024,9/7/24,USC,Utah St.,BTN,Sat,23.0,0,0.0,0.0
+415,2024,9/12/24,Texas St.,Arizona St.,ESPN,Thu,19.5,0,0.0,0.0
+416,2024,9/13/24,Kansas,UNLV,ESPN,Fri,19.0,0,0.0,0.0
+417,2024,9/13/24,Kansas St.,Arizona,FOX,Fri,20.0,0,0.0,1.0
+418,2024,9/14/24,South Carolina,LSU,ABC,Sat,12.0,0,0.0,0.0
+419,2024,9/14/24,Miami Ohio,Cincinnati,ESPNU,Sat,12.0,0,0.0,0.0
+420,2024,9/14/24,Michigan,Arkansas St.,BTN,Sat,12.0,0,0.0,0.0
+421,2024,9/14/24,Texas Tech,North Texas,FS1,Sat,12.0,0,0.0,0.0
+422,2024,9/14/24,Florida St.,Memphis,ESPN,Sat,12.0,0,0.0,0.0
+423,2024,9/14/24,Wisconsin,Alabama,FOX,Sat,12.0,0,0.0,0.0
+424,2024,9/14/24,Tulsa,Oklahoma St.,ESPN2,Sat,12.0,0,0.0,0.0
+425,2024,9/14/24,Pittsburgh,West Virginia,ESPN2,Sat,15.5,0,0.0,0.0
+426,2024,9/14/24,Purdue,Notre Dame,CBS,Sat,15.5,0,0.0,0.0
+427,2024,9/14/24,Oklahoma,Tulane,ESPN,Sat,15.5,0,0.0,0.0
+428,2024,9/14/24,Florida,Texas A&M,ABC,Sat,15.5,0,0.0,0.0
+429,2024,9/14/24,Oregon St.,Oregon,FOX,Sat,15.5,0,0.0,0.0
+430,2024,9/14/24,East Carolina,Appalachian St.,ESPNU,Sat,15.5,0,0.0,0.0
+431,2024,9/14/24,Iowa,Troy,FS1,Sat,15.5,0,0.0,0.0
+432,2024,9/14/24,Wake Forest,Mississippi,CW,Sat,18.5,0,0.0,0.0
+433,2024,9/14/24,Texas,UTSA,ESPN,Sat,19.0,0,0.0,0.0
+434,2024,9/14/24,Mississippi St.,Toledo,ESPNU,Sat,19.5,0,0.0,0.0
+435,2024,9/14/24,Auburn,New Mexico,ESPN2,Sat,19.5,0,0.0,0.0
+436,2024,9/14/24,Baylor,Air Force,FS1,Sat,19.5,0,0.0,0.0
+437,2024,9/14/24,UCLA,Indiana,NBC,Sat,19.5,0,0.0,0.0
+438,2024,9/14/24,Kentucky,Georgia,ABC,Sat,19.5,0,0.0,0.0
+439,2024,9/14/24,Colorado St.,Colorado,CBS,Sat,20.0,0,0.0,0.0
+440,2024,9/14/24,TCU,UCF,FOX,Sat,19.5,0,0.0,0.0
+441,2024,9/14/24,California,San Diego St.,ESPN,Sat,22.5,0,0.0,0.0
+442,2024,9/19/24,Appalachian St.,South Alabama,ESPN,Thu,19.0,0,0.0,0.0
+443,2024,9/20/24,Syracuse,Stanford,ESPN,Fri,19.5,0,0.0,0.0
+444,2024,9/20/24,Nebraska,Illinois,FOX,Fri,20.0,0,0.0,1.0
+445,2024,9/20/24,Washington St.,San Jose St.,CW,Fri,22.0,0,0.0,0.0
+446,2024,9/21/24,Ohio St.,Marshall,FOX,Sat,12.0,0,0.0,0.0
+447,2024,9/21/24,West Virginia,Kansas,ESPN2,Sat,12.0,0,0.0,0.0
+448,2024,9/21/24,Louisiana,Tulane,ESPNU,Sat,12.0,0,0.0,0.0
+449,2024,9/21/24,Mississippi St.,Florida,ESPN,Sat,12.0,0,0.0,0.0
+450,2024,9/21/24,Cincinnati,Houston,FS1,Sat,12.0,0,0.0,0.0
+451,2024,9/21/24,Clemson,North Carolina St.,ABC,Sat,12.0,0,0.0,0.0
+452,2024,9/21/24,Notre Dame,Miami Ohio,NBC,Sat,15.5,0,0.0,0.0
+453,2024,9/21/24,Auburn,Arkansas,ESPN,Sat,15.5,0,0.0,0.0
+454,2024,9/21/24,Louisville,Georgia Tech,ESPN2,Sat,15.5,0,0.0,0.0
+455,2024,9/21/24,Michigan,USC,CBS,Sat,15.5,0,0.0,0.0
+456,2024,9/21/24,Texas Tech,Arizona St.,FS1,Sat,15.5,0,0.0,0.0
+457,2024,9/21/24,Penn St.,Kent St.,BTN,Sat,15.5,0,0.0,0.0
+458,2024,9/21/24,LSU,UCLA,ABC,Sat,15.5,0,0.0,0.0
+459,2024,9/21/24,Oklahoma St.,Utah,FOX,Sat,16.0,0,0.0,0.0
+460,2024,9/21/24,Middle Tennessee St.,Duke,ESPNU,Sat,15.5,0,0.0,0.0
+461,2024,9/21/24,SMU,TCU,CW,Sat,17.0,0,0.0,0.0
+462,2024,9/21/24,Florida St.,California,ESPN2,Sat,19.0,0,0.0,0.0
+463,2024,9/21/24,South Florida,Miami,ESPN,Sat,19.0,0,0.0,0.0
+464,2024,9/21/24,Washington,Northwestern,FS1,Sat,19.0,0,0.0,0.0
+465,2024,9/21/24,Minnesota,Iowa,NBC,Sat,19.5,0,0.0,0.0
+466,2024,9/21/24,Oklahoma,Tennessee,ABC,Sat,19.5,0,0.0,0.0
+467,2024,9/21/24,South Carolina,Akron,ESPNU,Sat,19.5,0,0.0,0.0
+468,2024,9/21/24,Colorado,Baylor,FOX,Sat,20.0,0,0.0,0.0
+469,2024,9/21/24,Oregon St.,Purdue,CW,Sat,20.5,0,0.0,0.0
+470,2024,9/21/24,Boise St.,Portland State,FS1,Sat,21.5,0,0.0,0.0
+471,2024,9/21/24,BYU,Kansas St.,ESPN,Sat,22.5,0,0.0,0.0
+472,2024,9/26/24,Temple,Army,ESPN,Thu,19.5,0,0.0,0.0
+473,2024,9/27/24,Miami,Virginia Tech,ESPN,Fri,19.5,0,0.0,0.0
+474,2024,9/27/24,Rutgers,Washington,FOX,Fri,20.0,0,0.0,1.0
+475,2024,9/28/24,Kansas St.,Oklahoma St.,ESPN,Sat,12.0,0,0.0,0.0
+476,2024,9/28/24,Indiana,Maryland,BTN,Sat,12.0,0,0.0,0.0
+477,2024,9/28/24,Tulane,South Florida,ESPNU,Sat,12.0,0,0.0,0.0
+478,2024,9/28/24,Baylor,BYU,FS1,Sat,12.0,0,0.0,0.0
+479,2024,9/28/24,UAB,Navy,ESPN2,Sat,12.0,0,0.0,0.0
+480,2024,9/28/24,Mississippi,Kentucky,ABC,Sat,12.0,0,0.0,0.0
+481,2024,9/28/24,North Carolina St.,Northern Illinois,CW,Sat,12.0,0,0.0,0.0
+482,2024,9/28/24,Michigan,Minnesota,FOX,Sat,12.0,0,0.0,0.0
+483,2024,9/28/24,UCF,Colorado,FOX,Sat,15.5,0,0.0,0.0
+484,2024,9/28/24,Auburn,Oklahoma,ABC,Sat,15.5,0,0.0,0.0
+485,2024,9/28/24,Georgia St.,Georgia Southern,ESPNU,Sat,15.5,0,0.0,0.0
+486,2024,9/28/24,Texas A&M,Arkansas,ESPN,Sat,15.5,0,0.0,0.0
+487,2024,9/28/24,UNLV,Fresno St.,FS1,Sat,15.5,0,0.0,0.0
+488,2024,9/28/24,Duke,North Carolina,ESPN2,Sat,16.0,0,0.0,0.0
+489,2024,9/28/24,Houston,Iowa St.,FS1,Sat,19.0,0,0.0,0.0
+490,2024,9/28/24,Clemson,Stanford,ESPN,Sat,19.0,0,0.0,0.0
+491,2024,9/28/24,Memphis,Middle Tennessee St.,ESPNU,Sat,19.5,0,0.0,0.0
+492,2024,9/28/24,Alabama,Georgia,ABC,Sat,19.5,0,0.0,0.0
+493,2024,9/28/24,Penn St.,Illinois,NBC,Sat,19.5,0,0.0,0.0
+494,2024,9/28/24,Texas Tech,Cincinnati,ESPN2,Sat,20.0,0,0.0,0.0
+495,2024,9/28/24,Boise St.,Washington St.,FS1,Sat,22.0,0,0.0,0.0
+496,2024,9/28/24,Utah,Arizona,ESPN,Sat,22.5,0,0.0,0.0
+497,2024,9/28/24,UCLA,Oregon,FOX,Sat,23.0,0,0.0,0.0
+498,2024,10/3/24,Troy,Texas St.,ESPN2,Thu,19.0,0,0.0,0.0
+499,2024,10/4/24,TCU,Houston,ESPN,Fri,19.5,0,0.0,0.0
+500,2024,10/4/24,UNLV,Syracuse,FS1,Fri,21.0,0,0.0,0.0
+501,2024,10/4/24,Oregon,Michigan St.,FOX,Fri,21.0,0,0.0,1.0
+502,2024,10/5/24,Texas A&M,Missouri,ABC,Sat,12.0,0,0.0,0.0
+503,2024,10/5/24,Tulsa,Army,ESPNU,Sat,12.0,0,0.0,0.0
+504,2024,10/5/24,Air Force,Navy,CBS,Sat,12.0,0,0.0,0.0
+505,2024,10/5/24,North Carolina St.,Wake Forest,CW,Sat,12.0,0,0.0,0.0
+506,2024,10/5/24,North Carolina,Pittsburgh,ESPN2,Sat,12.0,0,0.0,0.0
+507,2024,10/5/24,Louisville,SMU,ESPN,Sat,12.0,0,0.0,0.0
+508,2024,10/5/24,Penn St.,UCLA,FOX,Sat,12.0,0,0.0,0.0
+509,2024,10/5/24,Wisconsin,Purdue,BTN,Sat,12.0,0,0.0,0.0
+510,2024,10/5/24,Charlotte,East Carolina,ESPNU,Sat,15.5,0,0.0,0.0
+511,2024,10/5/24,Ohio St.,Iowa,CBS,Sat,15.5,0,0.0,0.0
+512,2024,10/5/24,Northwestern,Indiana,BTN,Sat,15.5,0,0.0,0.0
+513,2024,10/5/24,South Carolina,Mississippi,ESPN,Sat,15.5,0,0.0,0.0
+514,2024,10/5/24,Georgia,Auburn,ABC,Sat,15.5,0,0.0,0.0
+515,2024,10/5/24,Nebraska,Rutgers,FS1,Sat,16.0,0,0.0,0.0
+516,2024,10/5/24,Oklahoma St.,West Virginia,ESPN2,Sat,16.0,0,0.0,0.0
+517,2024,10/5/24,Oregon St.,Colorado St.,CW,Sat,18.5,0,0.0,0.0
+518,2024,10/5/24,Florida St.,Clemson,ESPN,Sat,19.0,0,0.0,0.0
+519,2024,10/5/24,Boise St.,Utah St.,FS2,Sat,19.0,0,0.0,0.0
+520,2024,10/5/24,Louisiana Monroe,James Madison,ESPNU,Sat,19.0,0,0.0,0.0
+521,2024,10/5/24,Iowa St.,Baylor,FOX,Sat,19.5,0,0.0,0.0
+522,2024,10/5/24,Minnesota,USC,BTN,Sat,19.5,0,0.0,0.0
+523,2024,10/5/24,Arkansas,Tennessee,ABC,Sat,19.5,0,0.0,0.0
+524,2024,10/5/24,Washington,Michigan,NBC,Sat,19.5,0,0.0,0.0
+525,2024,10/5/24,Arizona St.,Kansas,ESPN2,Sat,20.0,0,0.0,0.0
+526,2024,10/5/24,California,Miami,ESPN,Sat,22.5,0,0.0,0.0
+527,2024,10/5/24,Arizona,Texas Tech,FOX,Sat,23.0,0,0.0,0.0
+528,2024,10/9/24,Jacksonville St.,New Mexico St.,ESPN2,Wed,19.5,0,0.0,0.0
+529,2024,10/10/24,James Madison,Coastal Carolina,ESPN2,Thu,19.5,0,0.0,0.0
+530,2024,10/10/24,Western Kentucky,UTEP,ESPNU,Thu,20.0,0,0.0,0.0
+531,2024,10/11/24,Maryland,Northwestern,FS1,Fri,20.0,0,0.0,0.0
+532,2024,10/11/24,Arizona St.,Utah,ESPN,Fri,22.5,0,0.0,0.0
+533,2024,10/12/24,Rutgers,Wisconsin,BTN,Sat,12.0,0,0.0,0.0
+534,2024,10/12/24,Iowa,Washington,FOX,Sat,12.0,0,0.0,0.0
+535,2024,10/12/24,Alabama,South Carolina,ABC,Sat,12.0,0,0.0,0.0
+536,2024,10/12/24,Buffalo,Toledo,ESPNU,Sat,12.0,0,0.0,0.0
+537,2024,10/12/24,Massachusetts,Missouri,ESPN2,Sat,12.0,0,0.0,0.0
+538,2024,10/12/24,Wake Forest,Clemson,ESPN,Sat,12.0,0,0.0,0.0
+539,2024,10/12/24,North Carolina,Georgia Tech,CW,Sat,12.0,0,0.0,0.0
+540,2024,10/12/24,Illinois,Purdue,FS1,Sat,15.5,0,0.0,0.0
+541,2024,10/12/24,UCF,Cincinnati,ESPN2,Sat,15.5,0,0.0,0.0
+542,2024,10/12/24,Pittsburgh,California,ESPN,Sat,15.5,0,0.0,0.0
+543,2024,10/12/24,USC,Penn St.,CBS,Sat,15.5,0,0.0,0.0
+544,2024,10/12/24,Oklahoma,Texas,ABC,Sat,15.5,0,0.0,0.0
+545,2024,10/12/24,Notre Dame,Stanford,NBC,Sat,15.5,0,0.0,0.0
+546,2024,10/12/24,Central Michigan,Ohio,ESPNU,Sat,16.0,0,0.0,0.0
+547,2024,10/12/24,BYU,Arizona,FOX,Sat,16.0,0,0.0,0.0
+548,2024,10/12/24,FAU,North Texas,ESPN2,Sat,19.0,0,0.0,0.0
+549,2024,10/12/24,Fresno St.,Washington St.,FS1,Sat,19.0,0,0.0,0.0
+550,2024,10/12/24,Tennessee,Florida,ESPN,Sat,19.0,0,0.0,0.0
+551,2024,10/12/24,LSU,Mississippi,ABC,Sat,19.5,0,0.0,0.0
+552,2024,10/12/24,Oregon,Ohio St.,NBC,Sat,19.5,0,0.0,0.0
+553,2024,10/12/24,West Virginia,Iowa St.,FOX,Sat,20.0,0,0.0,0.0
+554,2024,10/12/24,Georgia Southern,Marshall,ESPNU,Sat,20.0,0,0.0,0.0
+555,2024,10/12/24,UCLA,Minnesota,BTN,Sat,21.0,0,0.0,0.0
+556,2024,10/12/24,Colorado,Kansas St.,ESPN,Sat,22.5,0,0.0,0.0
+557,2024,10/15/24,South Alabama,Troy,ESPN2,Tue,19.5,0,0.0,0.0
+558,2024,10/15/24,New Mexico St.,Louisiana Tech,ESPNU,Tue,21.0,0,0.0,0.0
+559,2024,10/16/24,Sam Houston,Western Kentucky,ESPN2,Wed,20.0,0,0.0,0.0
+560,2024,10/17/24,Marshall,Georgia St.,ESPN2,Thu,19.5,0,0.0,0.0
+561,2024,10/17/24,Virginia Tech,Boston College,ESPN,Thu,19.0,0,0.0,0.0
+562,2024,10/18/24,Duke,Florida St.,ESPN,Fri,22.5,0,0.0,0.0
+563,2024,10/18/24,Purdue,Oregon,FOX,Fri,20.0,0,0.0,1.0
+564,2024,10/18/24,BYU,Oklahoma St.,ESPN,Fri,22.5,0,0.0,0.0
+565,2024,10/19/24,Missouri,Auburn,ESPN,Sat,12.0,0,0.0,0.0
+566,2024,10/19/24,Indiana,Nebraska,FOX,Sat,12.0,0,0.0,0.0
+567,2024,10/19/24,Louisville,Miami,ABC,Sat,12.0,0,0.0,0.0
+568,2024,10/19/24,Rutgers,UCLA,FS1,Sat,12.0,0,0.0,0.0
+569,2024,10/19/24,Coastal Carolina,Louisiana,ESPNU,Sat,12.0,0,0.0,0.0
+570,2024,10/19/24,Northwestern,Wisconsin,BTN,Sat,12.0,0,0.0,0.0
+571,2024,10/19/24,Army,East Carolina,ESPN2,Sat,12.0,0,0.0,0.0
+572,2024,10/19/24,Illinois,Michigan,CBS,Sat,15.5,0,0.0,0.0
+573,2024,10/19/24,Tennessee,Alabama,ABC,Sat,15.5,0,0.0,0.0
+574,2024,10/19/24,Georgia Tech,Notre Dame,ESPN,Sat,15.5,0,0.0,0.0
+575,2024,10/19/24,Washington St.,Hawaii,CW,Sat,15.5,0,0.0,0.0
+576,2024,10/19/24,Texas Tech,Baylor,ESPN2,Sat,16.0,0,0.0,0.0
+577,2024,10/19/24,Maryland,USC,FS1,Sat,16.0,0,0.0,0.0
+578,2024,10/19/24,Arizona,Colorado,FOX,Sat,16.0,0,0.0,0.0
+579,2024,10/19/24,Arkansas,LSU,ESPN,Sat,19.0,0,0.0,0.0
+580,2024,10/19/24,Iowa St.,UCF,FS1,Sat,19.5,0,0.0,0.0
+581,2024,10/19/24,Memphis,North Texas,ESPNU,Sat,19.5,0,0.0,0.0
+582,2024,10/19/24,Michigan St.,Iowa,NBC,Sat,19.5,0,0.0,0.0
+583,2024,10/19/24,West Virginia,Kansas St.,FOX,Sat,19.5,0,0.0,0.0
+584,2024,10/19/24,Texas,Georgia,ABC,Sat,19.5,0,0.0,0.0
+585,2024,10/19/24,Oregon St.,UNLV,CW,Sat,22.0,0,0.0,0.0
+586,2024,10/19/24,Utah,TCU,ESPN,Sat,22.5,0,0.0,0.0
+587,2024,10/22/24,FIU,Sam Houston,ESPNU,Tue,19.5,0,0.0,0.0
+588,2024,10/23/24,Jacksonville St.,Middle Tennessee St.,ESPN2,Wed,19.5,0,0.0,0.0
+589,2024,10/24/24,Old Dominion,Georgia Southern,ESPN2,Thu,19.0,0,0.0,0.0
+590,2024,10/24/24,Pittsburgh,Syracuse,ESPN,Thu,19.5,0,0.0,0.0
+591,2024,10/25/24,Boston College,Louisville,ESPN2,Fri,19.5,0,0.0,0.0
+592,2024,10/25/24,USC,Rutgers,FOX,Fri,23.0,0,0.0,1.0
+593,2024,10/26/24,Navy,Notre Dame,ABC,Sat,12.0,0,0.0,0.0
+594,2024,10/26/24,Memphis,Charlotte,ESPNU,Sat,12.0,0,0.0,0.0
+595,2024,10/26/24,Indiana,Washington,BTN,Sat,12.0,0,0.0,0.0
+596,2024,10/26/24,North Texas,Tulane,ESPN2,Sat,12.0,0,0.0,0.0
+597,2024,10/26/24,Ohio St.,Nebraska,FOX,Sat,12.0,0,0.0,0.0
+598,2024,10/26/24,Mississippi,Oklahoma,ESPN,Sat,12.0,0,0.0,0.0
+599,2024,10/26/24,Virginia,North Carolina,CW,Sat,12.0,0,0.0,0.0
+600,2024,10/26/24,Minnesota,Maryland,FS1,Sat,15.5,0,0.0,0.0
+601,2024,10/26/24,Alabama,Missouri,ABC,Sat,15.5,0,0.0,0.0
+602,2024,10/26/24,Iowa,Northwestern,BTN,Sat,15.5,0,0.0,0.0
+603,2024,10/26/24,Oregon,Illinois,CBS,Sat,15.5,0,0.0,0.0
+604,2024,10/26/24,UCF,BYU,ESPN,Sat,15.5,0,0.0,0.0
+605,2024,10/26/24,TCU,Texas Tech,FOX,Sat,15.5,0,0.0,0.0
+606,2024,10/26/24,California,Oregon St.,ESPN2,Sat,16.0,0,0.0,0.0
+607,2024,10/26/24,Arizona,West Virginia,FS1,Sat,19.0,0,0.0,0.0
+608,2024,10/26/24,Miami,Florida St.,ESPN,Sat,19.0,0,0.0,0.0
+609,2024,10/26/24,Wisconsin,Penn St.,NBC,Sat,19.5,0,0.0,0.0
+610,2024,10/26/24,Texas A&M,LSU,ABC,Sat,19.5,0,0.0,0.0
+611,2024,10/26/24,Michigan,Michigan St.,BTN,Sat,19.5,0,0.0,0.0
+612,2024,10/26/24,Kansas St.,Kansas,ESPN2,Sat,20.0,0,0.0,0.0
+613,2024,10/26/24,Colorado,Cincinnati,ESPN,Sat,22.5,0,0.0,0.0
+614,2024,10/29/24,Texas St.,Louisiana,ESPN2,Tue,19.5,0,0.0,0.0
+615,2024,10/29/24,Sam Houston,Louisiana Tech,ESPNU,Tue,20.0,0,0.0,0.0
+616,2024,10/30/24,Western Kentucky,Kennesaw St.,ESPN2,Wed,19.5,0,0.0,0.0
+617,2024,10/31/24,Charlotte,Tulane,ESPN,Thu,19.5,0,0.0,0.0
+618,2024,11/1/24,FAU,South Florida,ESPN2,Fri,19.5,0,0.0,0.0
+619,2024,11/1/24,Boise St.,San Diego St.,FS1,Fri,20.0,0,0.0,0.0
+620,2024,11/2/24,Illinois,Minnesota,FS1,Sat,12.0,0,0.0,0.0
+621,2024,11/2/24,Penn St.,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+622,2024,11/2/24,UTSA,Memphis,ESPN2,Sat,12.0,0,0.0,0.0
+623,2024,11/2/24,Miami,Duke,ABC,Sat,12.0,0,0.0,0.0
+624,2024,11/2/24,Eastern Michigan,Toledo,ESPNU,Sat,12.0,0,0.0,0.0
+625,2024,11/2/24,Arkansas,Mississippi,ESPN,Sat,12.0,0,0.0,0.0
+626,2024,11/2/24,Houston,Kansas St.,FOX,Sat,15.5,0,0.0,0.0
+627,2024,11/2/24,Nebraska,UCLA,BTN,Sat,15.5,0,0.0,0.0
+628,2024,11/2/24,Georgia,Florida,ABC,Sat,15.5,0,0.0,0.0
+629,2024,11/2/24,Iowa St.,Texas Tech,ESPN,Sat,15.5,0,0.0,0.0
+630,2024,11/2/24,UCF,Arizona,FS1,Sat,15.5,0,0.0,0.0
+631,2024,11/2/24,Rice,Navy,ESPN2,Sat,16.0,0,0.0,0.0
+632,2024,11/2/24,South Alabama,Georgia Southern,ESPNU,Sat,19.5,0,0.0,0.0
+633,2024,11/2/24,Washington,USC,BTN,Sat,19.5,0,0.0,0.0
+634,2024,11/2/24,Clemson,Louisville,ESPN,Sat,19.5,0,0.0,0.0
+635,2024,11/2/24,South Carolina,Texas A&M,ABC,Sat,19.5,0,0.0,0.0
+636,2024,11/2/24,Iowa,Wisconsin,NBC,Sat,19.5,0,0.0,0.0
+637,2024,11/2/24,Baylor,TCU,ESPN2,Sat,20.0,0,0.0,0.0
+638,2024,11/5/24,Central Michigan,Bowling Green,ESPN2,Tue,19.5,0,0.0,0.0
+639,2024,11/5/24,Ball St.,Miami Ohio,ESPN,Tue,20.0,0,0.0,0.0
+640,2024,11/6/24,Kent St.,Ohio,ESPNU,Wed,19.0,0,0.0,0.0
+641,2024,11/6/24,Western Michigan,Northern Illinois,ESPN2,Wed,19.0,0,0.0,0.0
+642,2024,11/7/24,East Carolina,FAU,ESPN2,Thu,20.0,0,0.0,0.0
+643,2024,11/7/24,Coastal Carolina,Appalachian St.,ESPN,Thu,20.0,0,0.0,0.0
+644,2024,11/8/24,Memphis,Rice,ESPN2,Fri,21.0,0,0.0,0.0
+645,2024,11/8/24,UCLA,Iowa,FOX,Fri,21.0,0,0.0,1.0
+646,2024,11/9/24,Texas,Florida,ABC,Sat,12.0,0,0.0,0.0
+647,2024,11/9/24,Georgia Tech,Miami,ESPN,Sat,12.0,0,0.0,0.0
+648,2024,11/9/24,South Florida,Navy,ESPN2,Sat,12.0,0,0.0,0.0
+649,2024,11/9/24,Louisiana Monroe,Texas St.,ESPNU,Sat,12.0,0,0.0,0.0
+650,2024,11/9/24,Rutgers,Minnesota,NBC,Sat,12.0,0,0.0,0.0
+651,2024,11/9/24,Ohio St.,Purdue,FOX,Sat,12.0,0,0.0,0.0
+652,2024,11/9/24,Indiana,Michigan,CBS,Sat,15.5,0,0.0,0.0
+653,2024,11/9/24,Virginia Tech,Clemson,ESPN,Sat,15.5,0,0.0,0.0
+654,2024,11/9/24,Mississippi,Georgia,ABC,Sat,15.5,0,0.0,0.0
+655,2024,11/9/24,North Texas,Army,ESPN2,Sat,15.5,0,0.0,0.0
+656,2024,11/9/24,Tulane,Temple,ESPNU,Sat,16.0,0,0.0,0.0
+657,2024,11/9/24,Texas Tech,Colorado,FOX,Sat,16.0,0,0.0,0.0
+658,2024,11/9/24,Arizona St.,UCF,ESPN2,Sat,19.0,0,0.0,0.0
+659,2024,11/9/24,TCU,Oklahoma St.,FS1,Sat,19.0,0,0.0,0.0
+660,2024,11/9/24,Oregon,Maryland,BTN,Sat,19.0,0,0.0,0.0
+661,2024,11/9/24,Tennessee,Mississippi St.,ESPN,Sat,19.0,0,0.0,0.0
+662,2024,11/9/24,LSU,Alabama,ABC,Sat,19.5,0,0.0,0.0
+663,2024,11/9/24,Notre Dame,Florida St.,NBC,Sat,19.5,0,0.0,0.0
+664,2024,11/9/24,Boise St.,Nevada,FOX,Sat,20.0,0,0.0,0.0
+665,2024,11/9/24,Utah,BYU,ESPN,Sat,22.5,0,0.0,0.0
+666,2024,11/9/24,Washington St.,Utah St.,CW,Sat,22.5,0,0.0,0.0
+667,2024,11/12/24,Toledo,Central Michigan,ESPNU,Tue,19.0,0,0.0,0.0
+668,2024,11/12/24,Bowling Green,Western Michigan,ESPN2,Tue,19.0,0,0.0,0.0
+669,2024,11/13/24,Ohio,Eastern Michigan,ESPN2,Wed,19.0,0,0.0,0.0
+670,2024,11/13/24,Miami Ohio,Kent St.,ESPNU,Wed,19.0,0,0.0,0.0
+671,2024,11/14/24,Tulsa,East Carolina,ESPN,Thu,19.5,0,0.0,0.0
+672,2024,11/15/24,UTSA,North Texas,ESPN2,Fri,21.0,0,0.0,0.0
+673,2024,11/15/24,Washington,UCLA,FOX,Fri,21.0,0,0.0,1.0
+674,2024,11/16/24,Pittsburgh,Clemson,ESPN,Sat,12.0,0,0.0,0.0
+675,2024,11/16/24,Northwestern,Ohio St.,BTN,Sat,12.0,0,0.0,0.0
+676,2024,11/16/24,Arkansas,Texas,ABC,Sat,12.0,0,0.0,0.0
+677,2024,11/16/24,Navy,Tulane,ESPN2,Sat,12.0,0,0.0,0.0
+678,2024,11/16/24,Colorado,Utah,FOX,Sat,12.0,0,0.0,0.0
+679,2024,11/16/24,California,Syracuse,CW,Sat,15.0,0,0.0,0.0
+680,2024,11/16/24,SMU,Boston College,ESPN,Sat,15.5,0,0.0,0.0
+681,2024,11/16/24,Notre Dame,Virginia,NBC,Sat,15.5,0,0.0,0.0
+682,2024,11/16/24,Purdue,Penn St.,CBS,Sat,15.5,0,0.0,0.0
+683,2024,11/16/24,Florida,LSU,ABC,Sat,15.5,0,0.0,0.0
+684,2024,11/16/24,West Virginia,Baylor,ESPN2,Sat,16.0,0,0.0,0.0
+685,2024,11/16/24,Old Dominion,James Madison,ESPNU,Sat,16.0,0,0.0,0.0
+686,2024,11/16/24,USC,Nebraska,FOX,Sat,16.0,0,0.0,0.0
+687,2024,11/16/24,Maryland,Rutgers,FS1,Sat,18.0,0,0.0,0.0
+688,2024,11/16/24,Kansas St.,Arizona St.,ESPN,Sat,19.0,0,0.0,0.0
+689,2024,11/16/24,Wisconsin,Oregon,NBC,Sat,19.5,0,0.0,0.0
+690,2024,11/16/24,Georgia,Tennessee,ABC,Sat,19.5,0,0.0,0.0
+691,2024,11/16/24,Iowa St.,Cincinnati,FOX,Sat,20.0,0,0.0,0.0
+692,2024,11/16/24,Memphis,UAB,ESPN2,Sat,20.0,0,0.0,0.0
+693,2024,11/16/24,New Mexico,Washington St.,FS1,Sat,21.5,0,0.0,0.0
+694,2024,11/16/24,BYU,Kansas,ESPN,Sat,22.5,0,0.0,0.0
+695,2024,11/19/24,Central Michigan,Western Michigan,ESPN2,Tue,19.5,0,0.0,0.0
+696,2024,11/19/24,Miami Ohio,Northern Illinois,ESPN,Tue,20.0,0,0.0,0.0
+697,2024,11/20/24,Eastern Michigan,Buffalo,ESPNU,Wed,19.0,0,0.0,0.0
+698,2024,11/20/24,Toledo,Ohio,ESPN2,Wed,19.0,0,0.0,0.0
+699,2024,11/21/24,Georgia Tech,North Carolina St.,ESPN,Thu,19.5,0,0.0,0.0
+700,2024,11/22/24,UTSA,Temple,ESPN2,Fri,19.0,0,0.0,0.0
+701,2024,11/22/24,Michigan St.,Purdue,FOX,Fri,20.0,0,0.0,1.0
+702,2024,11/23/24,Florida,Mississippi,ABC,Sat,12.0,0,0.0,0.0
+703,2024,11/23/24,Maryland,Iowa,BTN,Sat,12.0,0,0.0,0.0
+704,2024,11/23/24,Ohio St.,Indiana,FOX,Sat,12.0,0,0.0,0.0
+705,2024,11/23/24,Virginia,SMU,ESPN2,Sat,12.0,0,0.0,0.0
+706,2024,11/23/24,Miami,Wake Forest,ESPN,Sat,12.0,0,0.0,0.0
+707,2024,11/23/24,Nebraska,Wisconsin,BTN,Sat,15.5,0,0.0,0.0
+708,2024,11/23/24,Michigan,Northwestern,FS1,Sat,15.5,0,0.0,0.0
+709,2024,11/23/24,Texas,Kentucky,ABC,Sat,15.5,0,0.0,0.0
+710,2024,11/23/24,Arizona St.,BYU,ESPN,Sat,15.5,0,0.0,0.0
+711,2024,11/23/24,Kansas,Colorado,FOX,Sat,15.5,0,0.0,0.0
+712,2024,11/23/24,West Virginia,UCF,ESPNU,Sat,15.5,0,0.0,0.0
+713,2024,11/23/24,Louisville,Pittsburgh,ESPN2,Sat,16.0,0,0.0,0.0
+714,2024,11/23/24,Houston,Baylor,FS1,Sat,19.0,0,0.0,0.0
+715,2024,11/23/24,Notre Dame,Army,NBC,Sat,19.0,0,0.0,0.0
+716,2024,11/23/24,Oregon St.,Washington St.,CW,Sat,18.5,0,0.0,0.0
+717,2024,11/23/24,Utah,Iowa St.,FOX,Sat,19.5,0,0.0,0.0
+718,2024,11/23/24,Old Dominion,Marshall,ESPNU,Sat,19.5,0,0.0,0.0
+719,2024,11/23/24,Auburn,Texas A&M,ESPN,Sat,19.5,0,0.0,0.0
+720,2024,11/23/24,Oklahoma,Alabama,ABC,Sat,19.5,0,0.0,0.0
+721,2024,11/23/24,Kansas St.,Cincinnati,ESPN2,Sat,20.0,0,0.0,0.0
+722,2024,11/23/24,UCLA,USC,NBC,Sat,22.5,0,0.0,0.0
+723,2024,11/23/24,Nevada,Air Force,FS1,Sat,22.5,0,0.0,0.0
+724,2024,11/26/24,Akron,Toledo,ESPN2,Tue,19.0,0,0.0,0.0
+725,2024,11/28/24,Tulane,Memphis,ESPN,Thu,19.5,0,0.0,0.0
+726,2024,11/29/24,East Carolina,Navy,ESPN,Fri,12.0,1,0.0,0.0
+727,2024,11/29/24,Boise St.,Oregon St.,FOX,Fri,12.0,1,0.0,0.0
+728,2024,11/29/24,Wisconsin,Minnesota,CBS,Fri,12.0,1,0.0,0.0
+729,2024,11/29/24,Colorado,Oklahoma St.,ABC,Fri,12.0,1,0.0,0.0
+730,2024,11/29/24,Bowling Green,Miami Ohio,ESPNU,Fri,12.0,1,0.0,0.0
+731,2024,11/29/24,Mississippi,Mississippi St.,ABC,Fri,15.5,1,0.0,0.0
+732,2024,11/29/24,Georgia,Georgia Tech,ABC,Fri,19.5,1,0.0,0.0
+733,2024,11/29/24,Iowa,Nebraska,NBC,Fri,19.5,1,0.0,0.0
+734,2024,11/29/24,UCF,Utah,FOX,Fri,20.0,1,0.0,0.0
+735,2024,11/30/24,Texas Tech,West Virginia,FS1,Sat,12.0,0,0.0,0.0
+736,2024,11/30/24,Louisiana Monroe,Louisiana,ESPNU,Sat,12.0,0,0.0,0.0
+737,2024,11/30/24,Ohio St.,Michigan,FOX,Sat,12.0,0,0.0,0.0
+738,2024,11/30/24,Northwestern,Illinois,BTN,Sat,12.0,0,0.0,0.0
+739,2024,11/30/24,Clemson,South Carolina,ESPN,Sat,12.0,0,0.0,0.0
+740,2024,11/30/24,Baylor,Kansas,ESPN2,Sat,12.0,0,0.0,0.0
+741,2024,11/30/24,Vanderbilt,Tennessee,ABC,Sat,12.0,0,0.0,0.0
+742,2024,11/30/24,SMU,California,ESPN2,Sat,15.5,0,0.0,0.0
+743,2024,11/30/24,Michigan St.,Rutgers,FS1,Sat,15.5,0,0.0,0.0
+744,2024,11/30/24,Alabama,Auburn,ABC,Sat,15.5,0,0.0,0.0
+745,2024,11/30/24,Syracuse,Miami,ESPN,Sat,15.5,0,0.0,0.0
+746,2024,11/30/24,Western Kentucky,Jacksonville St.,ESPNU,Sat,16.0,0,0.0,0.0
+747,2024,11/30/24,Washington St.,Wyoming,CW,Sat,18.5,0,0.0,0.0
+748,2024,11/30/24,Florida St.,Florida,ESPN2,Sat,19.0,0,0.0,0.0
+749,2024,11/30/24,LSU,Oklahoma,ESPN,Sat,19.0,0,0.0,0.0
+750,2024,11/30/24,Indiana,Purdue,FS1,Sat,19.0,0,0.0,0.0
+751,2024,11/30/24,Oregon,Washington,NBC,Sat,19.5,0,0.0,0.0
+752,2024,11/30/24,Iowa St.,Kansas St.,FOX,Sat,19.5,0,0.0,0.0
+753,2024,11/30/24,Texas A&M,Texas,ABC,Sat,19.5,0,0.0,0.0
+754,2024,11/30/24,James Madison,Marshall,ESPNU,Sat,20.0,0,0.0,0.0
+755,2024,11/30/24,BYU,Houston,ESPN,Sat,22.5,0,0.0,0.0
+756,2024,11/30/24,San Diego St.,Air Force,FS1,Sat,22.5,0,0.0,0.0
+757,2024,12/6/24,Army,Tulane,ABC,Fri,20.0,0,1.0,0.0
+758,2024,12/6/24,Boise St.,UNLV,FOX,Fri,20.0,0,1.0,0.0
+759,2024,12/7/24,Arizona St.,Iowa St.,ABC,Sat,12.0,0,1.0,0.0
+760,2024,12/7/24,Miami Ohio,Ohio,ESPN,Sat,12.0,0,1.0,0.0
+761,2024,12/7/24,Texas,Georgia,ABC,Sat,16.0,0,1.0,0.0
+762,2024,12/7/24,Louisiana,Marshall,ESPN,Sat,19.5,0,1.0,0.0
+763,2024,12/7/24,SMU,Clemson,ABC,Sat,20.0,0,1.0,0.0
+764,2024,12/7/24,Oregon,Penn St.,CBS,Sat,20.0,0,1.0,0.0
+765,2024,12/14/24,Army,Navy,CBS,Sat,15.0,0,0.0,0.0
+766,2023,9/8/23,Indiana,Indiana State,BTN,Fri,19.0,0,0.0,0.0
+767,2023,9/8/23,Kansas,Illinois,ESPN2,Fri,19.5,0,0.0,0.0
+768,2023,9/9/23,Baylor,Utah,ESPN,Sat,12.0,0,0.0,0.0
+769,2023,9/9/23,North Carolina St.,Notre Dame,ABC,Sat,12.0,0,0.0,0.0
+770,2023,9/9/23,Virginia,James Madison,ESPNU,Sat,12.0,0,0.0,0.0
+771,2023,9/9/23,Colorado,Nebraska,FOX,Sat,12.0,0,0.0,0.0
+772,2023,9/9/23,Ohio St.,Youngstown State,BTN,Sat,12.0,0,0.0,0.0
+773,2023,9/9/23,Virginia Tech,Purdue,ESPN2,Sat,12.0,0,0.0,0.0
+774,2023,9/9/23,Kansas St.,Troy,FS1,Sat,12.0,0,0.0,0.0
+775,2023,9/9/23,Tulane,Mississippi,ESPN2,Sat,15.5,0,0.0,0.0
+776,2023,9/9/23,Iowa St.,Iowa,FOX,Sat,15.5,0,0.0,0.0
+777,2023,9/9/23,Miami,Texas A&M,ABC,Sat,17.5,0,0.0,0.0
+778,2023,9/9/23,Michigan,UNLV,CBS,Sat,15.5,0,0.0,0.0
+779,2023,9/9/23,East Carolina,Marshall,ESPNU,Sat,16.0,0,0.0,0.0
+780,2023,9/9/23,Pittsburgh,Cincinnati,CW,Sat,18.5,0,0.0,0.0
+781,2023,9/9/23,Boise St.,UCF,FS1,Sat,19.0,0,0.0,0.0
+782,2023,9/9/23,Rice,Houston,NFLN,Sat,19.0,0,0.0,0.0
+783,2023,9/9/23,Texas Tech,Oregon,FOX,Sat,19.0,0,0.0,0.0
+784,2023,9/9/23,Alabama,Texas,ESPN,Sat,19.0,0,0.0,0.0
+785,2023,9/9/23,San Diego St.,UCLA,CBS,Sat,19.5,0,0.0,0.0
+786,2023,9/9/23,Washington St.,Wisconsin,ABC,Sat,19.5,0,0.0,0.0
+787,2023,9/9/23,Florida,McNeese,ESPNU,Sat,19.0,0,0.0,0.0
+788,2023,9/9/23,Maryland,Charlotte,NBC,Sat,19.5,0,0.0,0.0
+789,2023,9/9/23,California,Auburn,ESPN,Sat,22.5,0,0.0,0.0
+790,2023,9/9/23,Arizona St.,Oklahoma St.,FS1,Sat,22.5,0,0.0,0.0
+791,2023,9/9/23,USC,Stanford,FOX,Sat,22.5,0,0.0,0.0
+792,2023,9/14/23,Memphis,Navy,ESPN,Thu,19.5,0,0.0,0.0
+793,2023,9/15/23,UTSA,Army,ESPN,Fri,19.0,0,0.0,0.0
+794,2023,9/15/23,Maryland,Virginia,FS1,Fri,19.0,0,0.0,0.0
+795,2023,9/16/23,Old Dominion,Wake Forest,ESPN2,Sat,12.0,0,0.0,0.0
+796,2023,9/16/23,Boise St.,North Dakota,FS1,Sat,12.0,0,0.0,0.0
+797,2023,9/16/23,Boston College,Florida St.,ABC,Sat,12.0,0,0.0,0.0
+798,2023,9/16/23,Mississippi St.,LSU,ESPN,Sat,12.0,0,0.0,0.0
+799,2023,9/16/23,Ohio,Iowa St.,ESPNU,Sat,12.0,0,0.0,0.0
+800,2023,9/16/23,Illinois,Penn St.,FOX,Sat,12.0,0,0.0,0.0
+801,2023,9/16/23,North Carolina St.,VMI,CW,Sat,14.0,0,0.0,0.0
+802,2023,9/16/23,Oregon St.,San Diego St.,FS1,Sat,15.5,0,0.0,0.0
+803,2023,9/16/23,Tulsa,Oklahoma,ESPN2,Sat,15.5,0,0.0,0.0
+804,2023,9/16/23,South Florida,Alabama,ABC,Sat,15.5,0,0.0,0.0
+805,2023,9/16/23,Georgia,South Carolina,CBS,Sat,15.5,0,0.0,0.0
+806,2023,9/16/23,North Carolina,Minnesota,ESPN,Sat,15.5,0,0.0,0.0
+807,2023,9/16/23,Ohio St.,Western Kentucky,FOX,Sat,16.0,0,0.0,0.0
+808,2023,9/16/23,Southern Miss,Tulane,ESPNU,Sat,16.0,0,0.0,0.0
+809,2023,9/16/23,Florida,Tennessee,ESPN,Sat,19.0,0,0.0,0.0
+810,2023,9/16/23,Troy,James Madison,NFLN,Sat,19.0,0,0.0,0.0
+811,2023,9/16/23,Nebraska,Northern Illinois,FS1,Sat,19.0,0,0.0,0.0
+812,2023,9/16/23,West Virginia,Pittsburgh,ABC,Sat,19.5,0,0.0,0.0
+813,2023,9/16/23,Arkansas,BYU,ESPN2,Sat,19.5,0,0.0,0.0
+814,2023,9/16/23,Kentucky,Akron,ESPNU,Sat,19.5,0,0.0,0.0
+815,2023,9/16/23,Purdue,Syracuse,NBC,Sat,19.5,0,0.0,0.0
+816,2023,9/16/23,Michigan,Bowling Green,BTN,Sat,19.5,0,0.0,0.0
+817,2023,9/16/23,Houston,TCU,FOX,Sat,20.0,0,0.0,0.0
+818,2023,9/16/23,Colorado,Colorado St.,ESPN,Sat,22.0,0,0.0,0.0
+819,2023,9/16/23,Arizona St.,Fresno St.,FS1,Sat,21.5,0,0.0,0.0
+820,2023,11/25/23,Ohio St.,Michigan,FOX,Sat,12.0,0,0.0,0.0
+821,2023,9/21/23,Coastal Carolina,Georgia St.,ESPN,Thu,19.5,0,0.0,0.0
+822,2023,9/22/23,Purdue,Wisconsin,FS1,Fri,19.0,0,0.0,0.0
+823,2023,9/22/23,Virginia,North Carolina St.,ESPN,Fri,19.5,0,0.0,0.0
+824,2023,9/22/23,San Jose St.,Air Force,FS1,Fri,22.5,0,0.0,0.0
+825,2023,9/23/23,Troy,Western Kentucky,ESPNU,Sat,12.0,0,0.0,0.0
+826,2023,9/23/23,TCU,SMU,FS1,Sat,12.0,0,0.0,0.0
+827,2023,9/23/23,Michigan,Rutgers,BTN,Sat,12.0,0,0.0,0.0
+828,2023,9/23/23,Clemson,Florida St.,ABC,Sat,12.0,0,0.0,0.0
+829,2023,9/23/23,Marshall,Virginia Tech,ESPN2,Sat,12.0,0,0.0,0.0
+830,2023,9/23/23,Texas A&M,Auburn,ESPN,Sat,12.0,0,0.0,0.0
+831,2023,9/23/23,Cincinnati,Oklahoma,FOX,Sat,12.0,0,0.0,0.0
+832,2023,9/23/23,Michigan St.,Maryland,NBC,Sat,15.5,0,0.0,0.0
+833,2023,9/23/23,Temple,Miami,ESPN2,Sat,15.5,0,0.0,0.0
+834,2023,9/23/23,Kansas,BYU,ESPN,Sat,15.5,0,0.0,0.0
+835,2023,9/23/23,Oregon,Colorado,ABC,Sat,15.5,0,0.0,0.0
+836,2023,9/23/23,Alabama,Mississippi,CBS,Sat,15.5,0,0.0,0.0
+837,2023,9/23/23,Utah,UCLA,FOX,Sat,15.5,0,0.0,0.0
+838,2023,9/23/23,Iowa St.,Oklahoma St.,FS1,Sat,16.0,0,0.0,0.0
+839,2023,9/23/23,South Florida,Rice,ESPNU,Sat,16.0,0,0.0,0.0
+840,2023,9/23/23,Wake Forest,Georgia Tech,CW,Sat,18.5,0,0.0,0.0
+841,2023,9/23/23,LSU,Arkansas,ESPN,Sat,19.0,0,0.0,0.0
+842,2023,9/23/23,Washington St.,Oregon St.,FOX,Sat,19.0,0,0.0,0.0
+843,2023,9/23/23,Baylor,Texas,ABC,Sat,19.5,0,0.0,0.0
+844,2023,9/23/23,Notre Dame,Ohio St.,NBC,Sat,19.5,0,0.0,0.0
+845,2023,9/23/23,Penn St.,Iowa,CBS,Sat,19.5,0,0.0,0.0
+846,2023,9/23/23,Georgia,UAB,ESPN2,Sat,19.5,0,0.0,0.0
+847,2023,9/23/23,Missouri,Memphis,ESPNU,Sat,19.5,0,0.0,0.0
+848,2023,9/23/23,Kansas St.,UCF,FS1,Sat,20.0,0,0.0,0.0
+849,2023,9/23/23,Washington,California,ESPN,Sat,22.5,0,0.0,0.0
+850,2023,9/23/23,Arizona St.,USC,FOX,Sat,22.5,0,0.0,0.0
+851,2023,9/28/23,Tulsa,Temple,ESPN,Thu,19.5,0,0.0,0.0
+852,2023,9/28/23,Sam Houston,Jacksonville St.,ESPNU,Thu,20.0,0,0.0,0.0
+853,2023,9/29/23,North Carolina St.,Louisville,ESPN,Fri,19.0,0,0.0,0.0
+854,2023,9/29/23,Oregon St.,Utah,FS1,Fri,21.0,0,0.0,0.0
+855,2023,9/29/23,BYU,Cincinnati,ESPN,Fri,22.5,0,0.0,0.0
+856,2023,9/30/23,Kentucky,Florida,ESPN,Sat,12.0,0,0.0,0.0
+857,2023,9/30/23,James Madison,South Alabama,ESPNU,Sat,12.0,0,0.0,0.0
+858,2023,9/30/23,Tulane,UAB,ESPN2,Sat,12.0,0,0.0,0.0
+859,2023,9/30/23,Syracuse,Clemson,ABC,Sat,12.0,0,0.0,0.0
+860,2023,9/30/23,Colorado,USC,FOX,Sat,12.0,0,0.0,0.0
+861,2023,9/30/23,Boston College,Virginia,CW,Sat,14.0,0,0.0,0.0
+862,2023,9/30/23,UCF,Baylor,FS1,Sat,15.5,0,0.0,0.0
+863,2023,9/30/23,Texas Tech,Houston,FS2,Sat,15.5,0,0.0,0.0
+864,2023,9/30/23,Auburn,Georgia,CBS,Sat,15.5,0,0.0,0.0
+865,2023,9/30/23,Texas,Kansas,ABC,Sat,15.5,0,0.0,0.0
+866,2023,9/30/23,Nebraska,Michigan,FOX,Sat,15.5,0,0.0,0.0
+867,2023,9/30/23,Toledo,Northern Illinois,ESPNU,Sat,15.5,0,0.0,0.0
+868,2023,9/30/23,Memphis,Boise St.,ESPN2,Sat,16.0,0,0.0,0.0
+869,2023,9/30/23,Mississippi,LSU,ESPN,Sat,18.0,0,0.0,0.0
+870,2023,9/30/23,Oklahoma,Iowa St.,FS1,Sat,19.0,0,0.0,0.0
+871,2023,9/30/23,SMU,Charlotte,ESPNU,Sat,19.5,0,0.0,0.0
+872,2023,9/30/23,Iowa,Michigan St.,NBC,Sat,19.5,0,0.0,0.0
+873,2023,9/30/23,Duke,Notre Dame,ABC,Sat,19.5,0,0.0,0.0
+874,2023,9/30/23,TCU,West Virginia,ESPN2,Sat,20.0,0,0.0,0.0
+875,2023,9/30/23,Mississippi St.,Alabama,ESPN,Sat,21.0,0,0.0,0.0
+876,2023,9/30/23,Fresno St.,Nevada,FS1,Sat,22.5,0,0.0,0.0
+877,2023,10/4/23,Middle Tennessee St.,Jacksonville St.,ESPNU,Wed,20.0,0,0.0,0.0
+878,2023,10/5/23,Louisiana Tech,Western Kentucky,ESPN,Thu,20.0,0,0.0,0.0
+879,2023,10/6/23,Oklahoma St.,Kansas St.,ESPN,Fri,19.5,0,0.0,0.0
+880,2023,10/6/23,Illinois,Nebraska,FS1,Fri,20.0,0,0.0,0.0
+881,2023,10/7/23,Massachusetts,Toledo,ESPNU,Sat,12.0,0,0.0,0.0
+882,2023,10/7/23,Ohio St.,Maryland,FOX,Sat,12.0,0,0.0,0.0
+883,2023,10/7/23,Missouri,LSU,ESPN,Sat,12.0,0,0.0,0.0
+884,2023,10/7/23,Texas,Oklahoma,ABC,Sat,12.0,0,0.0,0.0
+885,2023,10/7/23,North Carolina St.,Marshall,CW,Sat,14.0,0,0.0,0.0
+886,2023,10/7/23,Louisiana,Texas St.,ESPNU,Sat,15.5,0,0.0,0.0
+887,2023,10/7/23,Texas A&M,Alabama,CBS,Sat,15.5,0,0.0,0.0
+888,2023,10/7/23,North Carolina,Syracuse,ESPN,Sat,15.5,0,0.0,0.0
+889,2023,10/7/23,Florida St.,Virginia Tech,ABC,Sat,15.5,0,0.0,0.0
+890,2023,10/7/23,UAB,South Florida,ESPN2,Sat,16.0,0,0.0,0.0
+891,2023,10/7/23,Kansas,UCF,FOX,Sat,16.0,0,0.0,0.0
+892,2023,10/7/23,Georgia,Kentucky,ESPN,Sat,19.0,0,0.0,0.0
+893,2023,10/7/23,Minnesota,Michigan,NBC,Sat,19.5,0,0.0,0.0
+894,2023,10/7/23,Louisville,Notre Dame,ABC,Sat,19.5,0,0.0,0.0
+895,2023,10/7/23,Iowa St.,TCU,FS1,Sat,20.0,0,0.0,0.0
+896,2023,10/7/23,Wyoming,Fresno St.,FOX,Sat,20.0,0,0.0,0.0
+897,2023,10/7/23,Baylor,Texas Tech,ESPN2,Sat,20.0,0,0.0,0.0
+898,2023,10/7/23,USC,Arizona,ESPN,Sat,22.5,0,0.0,0.0
+899,2023,10/10/23,Jacksonville St.,Liberty,ESPNU,Tue,19.5,0,0.0,0.0
+900,2023,10/10/23,Appalachian St.,Coastal Carolina,ESPN2,Tue,19.0,0,0.0,0.0
+901,2023,10/11/23,FIU,UTEP,ESPN2,Wed,19.5,0,0.0,0.0
+902,2023,10/12/23,Houston,West Virginia,FS1,Thu,19.0,0,0.0,0.0
+903,2023,10/12/23,East Carolina,SMU,ESPN,Thu,19.5,0,0.0,0.0
+904,2023,10/13/23,Memphis,Tulane,ESPN,Fri,19.0,0,0.0,0.0
+905,2023,10/13/23,Colorado,Stanford,ESPN,Fri,22.0,0,0.0,0.0
+906,2023,10/14/23,Florida St.,Syracuse,ABC,Sat,12.0,0,0.0,0.0
+907,2023,10/14/23,Michigan,Indiana,FOX,Sat,12.0,0,0.0,0.0
+908,2023,10/14/23,Alabama,Arkansas,ESPN,Sat,12.0,0,0.0,0.0
+909,2023,10/14/23,Cincinnati,Iowa St.,FS1,Sat,12.0,0,0.0,0.0
+910,2023,10/14/23,James Madison,Georgia Southern,ESPN2,Sat,12.0,0,0.0,0.0
+911,2023,10/14/23,Rutgers,Michigan St.,BTN,Sat,12.0,0,0.0,0.0
+912,2023,10/14/23,North Texas,Temple,ESPNU,Sat,12.0,0,0.0,0.0
+913,2023,10/14/23,Vanderbilt,Georgia,CBS,Sat,12.0,0,0.0,0.0
+914,2023,10/14/23,Maryland,Illinois,NBC,Sat,15.5,0,0.0,0.0
+915,2023,10/14/23,TCU,BYU,ESPN,Sat,15.5,0,0.0,0.0
+916,2023,10/14/23,South Florida,FAU,ESPN2,Sat,15.5,0,0.0,0.0
+917,2023,10/14/23,Oklahoma St.,Kansas,FS1,Sat,15.5,0,0.0,0.0
+918,2023,10/14/23,Tennessee,Texas A&M,CBS,Sat,15.5,0,0.0,0.0
+919,2023,10/14/23,Washington,Oregon,ABC,Sat,15.5,0,0.0,0.0
+920,2023,10/14/23,Penn St.,Massachusetts,BTN,Sat,15.5,0,0.0,0.0
+921,2023,10/14/23,Wisconsin,Iowa,FOX,Sat,16.0,0,0.0,0.0
+922,2023,10/14/23,Northern Illinois,Ohio,ESPNU,Sat,16.0,0,0.0,0.0
+923,2023,10/14/23,Pittsburgh,Louisville,CW,Sat,18.5,0,0.0,0.0
+924,2023,10/14/23,Georgia St.,Marshall,ESPN2,Sat,19.0,0,0.0,0.0
+925,2023,10/14/23,LSU,Auburn,ESPN,Sat,19.0,0,0.0,0.0
+926,2023,10/14/23,Texas Tech,Kansas St.,FS1,Sat,19.0,0,0.0,0.0
+927,2023,10/14/23,Notre Dame,USC,NBC,Sat,19.5,0,0.0,0.0
+928,2023,10/14/23,North Carolina,Miami,ABC,Sat,19.5,0,0.0,0.0
+929,2023,10/14/23,Oregon St.,UCLA,FOX,Sat,20.0,0,0.0,0.0
+930,2023,10/14/23,UTSA,UAB,ESPNU,Sat,19.0,0,0.0,0.0
+931,2023,10/14/23,Colorado St.,Boise St.,FS1,Sat,22.0,0,0.0,0.0
+932,2023,10/17/23,Jacksonville St.,Western Kentucky,ESPNU,Tue,19.5,0,0.0,0.0
+933,2023,10/17/23,South Alabama,Southern Miss,ESPN2,Tue,19.5,0,0.0,0.0
+934,2023,10/18/23,UTEP,New Mexico St.,ESPN2,Wed,21.0,0,0.0,0.0
+935,2023,10/19/23,Tulsa,Rice,ESPN2,Thu,19.0,0,0.0,0.0
+936,2023,10/19/23,Marshall,James Madison,ESPN,Thu,19.0,0,0.0,0.0
+937,2023,10/20/23,Temple,SMU,ESPN,Fri,19.0,0,0.0,0.0
+938,2023,10/21/23,Arkansas,Mississippi St.,ESPN,Sat,12.0,0,0.0,0.0
+939,2023,10/21/23,Ohio St.,Penn St.,FOX,Sat,12.0,0,0.0,0.0
+940,2023,10/21/23,Oklahoma,UCF,ABC,Sat,12.0,0,0.0,0.0
+941,2023,10/21/23,UAB,Memphis,ESPN2,Sat,12.0,0,0.0,0.0
+942,2023,10/21/23,Indiana,Rutgers,BTN,Sat,12.0,0,0.0,0.0
+943,2023,10/21/23,Navy,Air Force,CBS,Sat,12.0,0,0.0,0.0
+944,2023,10/21/23,Illinois,Wisconsin,FS1,Sat,15.5,0,0.0,0.0
+945,2023,10/21/23,Oregon,Washington St.,ABC,Sat,15.5,0,0.0,0.0
+946,2023,10/21/23,Tulane,North Texas,ESPN2,Sat,15.5,0,0.0,0.0
+947,2023,10/21/23,Iowa,Minnesota,NBC,Sat,15.5,0,0.0,0.0
+948,2023,10/21/23,Alabama,Tennessee,CBS,Sat,15.5,0,0.0,0.0
+949,2023,10/21/23,Nebraska,Northwestern,BTN,Sat,15.5,0,0.0,0.0
+950,2023,10/21/23,West Virginia,Oklahoma St.,ESPN,Sat,15.5,0,0.0,0.0
+951,2023,10/21/23,Houston,Texas,FOX,Sat,16.0,0,0.0,0.0
+952,2023,10/21/23,Miami Ohio,Toledo,ESPNU,Sat,16.0,0,0.0,0.0
+953,2023,10/21/23,North Carolina,Virginia,CW,Sat,18.5,0,0.0,0.0
+954,2023,10/21/23,Auburn,Mississippi,ESPN,Sat,19.0,0,0.0,0.0
+955,2023,10/21/23,BYU,Texas Tech,FS1,Sat,19.0,0,0.0,0.0
+956,2023,10/21/23,Old Dominion,Appalachian St.,NFLN,Sat,19.0,0,0.0,0.0
+957,2023,10/21/23,Kansas St.,TCU,ESPN2,Sat,19.0,0,0.0,0.0
+958,2023,10/21/23,Florida St.,Duke,ABC,Sat,19.5,0,0.0,0.0
+959,2023,10/21/23,Michigan St.,Michigan,NBC,Sat,19.5,0,0.0,0.0
+960,2023,10/21/23,USC,Utah,FOX,Sat,20.0,0,0.0,0.0
+961,2023,10/21/23,Louisiana,Georgia St.,ESPNU,Sat,20.0,0,0.0,0.0
+962,2023,10/21/23,San Diego St.,Nevada,FS2,Sat,21.0,0,0.0,0.0
+963,2023,10/21/23,Stanford,UCLA,ESPN,Sat,22.5,0,0.0,0.0
+964,2023,10/21/23,Washington,Arizona St.,FS1,Sat,22.5,0,0.0,0.0
+965,2023,10/24/23,Western Kentucky,Liberty,ESPNU,Tue,19.5,0,0.0,0.0
+966,2023,10/25/23,Sam Houston,UTEP,ESPN2,Wed,20.0,0,0.0,0.0
+967,2023,10/26/23,Georgia Southern,Georgia St.,ESPN2,Thu,19.5,0,0.0,0.0
+968,2023,10/26/23,Virginia Tech,Syracuse,ESPN,Thu,19.5,0,0.0,0.0
+969,2023,10/27/23,Charlotte,FAU,ESPN2,Fri,19.5,0,0.0,0.0
+970,2023,10/28/23,Wake Forest,Florida St.,ABC,Sat,12.0,0,0.0,0.0
+971,2023,10/28/23,Kansas,Oklahoma,FOX,Sat,12.0,0,0.0,0.0
+972,2023,10/28/23,Kansas St.,Houston,ESPN2,Sat,12.0,0,0.0,0.0
+973,2023,10/28/23,UCF,West Virginia,FS1,Sat,12.0,0,0.0,0.0
+974,2023,10/28/23,Penn St.,Indiana,CBS,Sat,12.0,0,0.0,0.0
+975,2023,10/28/23,Northwestern,Maryland,BTN,Sat,12.0,0,0.0,0.0
+976,2023,10/28/23,Texas A&M,South Carolina,ESPN,Sat,12.0,0,0.0,0.0
+977,2023,10/28/23,SMU,Tulsa,ESPNU,Sat,12.0,0,0.0,0.0
+978,2023,10/28/23,North Carolina St.,Clemson,CW,Sat,13.0,0,0.0,0.0
+979,2023,10/28/23,Utah,Oregon,FOX,Sat,15.5,0,0.0,0.0
+980,2023,10/28/23,Nebraska,Purdue,FS1,Sat,15.5,0,0.0,0.0
+981,2023,10/28/23,Notre Dame,Pittsburgh,NBC,Sat,15.5,0,0.0,0.0
+982,2023,10/28/23,Louisville,Duke,ESPN,Sat,15.5,0,0.0,0.0
+983,2023,10/28/23,Texas,BYU,ABC,Sat,15.5,0,0.0,0.0
+984,2023,10/28/23,Florida,Georgia,CBS,Sat,15.5,0,0.0,0.0
+985,2023,10/28/23,Minnesota,Michigan St.,BTN,Sat,15.5,0,0.0,0.0
+986,2023,10/28/23,Rice,Tulane,ESPN2,Sat,16.0,0,0.0,0.0
+987,2023,10/28/23,Boise St.,Wyoming,FS2,Sat,17.5,0,0.0,0.0
+988,2023,10/28/23,Coastal Carolina,Marshall,NFLN,Sat,18.0,0,0.0,0.0
+989,2023,10/28/23,Stanford,Washington,FS1,Sat,19.0,0,0.0,0.0
+990,2023,10/28/23,Kentucky,Tennessee,ESPN,Sat,19.0,0,0.0,0.0
+991,2023,10/28/23,Wisconsin,Ohio St.,NBC,Sat,19.5,0,0.0,0.0
+992,2023,10/28/23,UCLA,Colorado,ABC,Sat,19.5,0,0.0,0.0
+993,2023,10/28/23,James Madison,Old Dominion,ESPNU,Sat,20.0,0,0.0,0.0
+994,2023,10/28/23,Oklahoma St.,Cincinnati,ESPN2,Sat,20.0,0,0.0,0.0
+995,2023,10/28/23,Arizona,Oregon St.,ESPN,Sat,22.5,0,0.0,0.0
+996,2023,10/28/23,Fresno St.,UNLV,FS1,Sat,22.5,0,0.0,0.0
+997,2023,10/31/23,Central Michigan,Northern Illinois,ESPNU,Tue,19.0,0,0.0,0.0
+998,2023,10/31/23,Toledo,Buffalo,ESPN2,Tue,19.5,0,0.0,0.0
+999,2023,11/1/23,Bowling Green,Ball St.,ESPN2,Wed,19.0,0,0.0,0.0
+1000,2023,11/1/23,Akron,Kent St.,ESPNU,Wed,19.5,0,0.0,0.0
+1001,2023,11/2/23,Texas Tech,TCU,FS1,Thu,19.0,0,0.0,0.0
+1002,2023,11/2/23,Duke,Wake Forest,ESPN,Thu,19.5,0,0.0,0.0
+1003,2023,11/2/23,Troy,South Alabama,ESPN2,Thu,19.5,0,0.0,0.0
+1004,2023,11/3/23,Syracuse,Boston College,ESPN2,Fri,19.5,0,0.0,0.0
+1005,2023,11/4/23,Texas,Kansas St.,FOX,Sat,12.0,0,0.0,0.0
+1006,2023,11/4/23,South Carolina,Jacksonville St.,ESPNU,Sat,12.0,0,0.0,0.0
+1007,2023,11/4/23,Indiana,Wisconsin,BTN,Sat,12.0,0,0.0,0.0
+1008,2023,11/4/23,Clemson,Notre Dame,ABC,Sat,12.0,0,0.0,0.0
+1009,2023,11/4/23,Michigan St.,Nebraska,FS1,Sat,12.0,0,0.0,0.0
+1010,2023,11/4/23,Rutgers,Ohio St.,CBS,Sat,12.0,0,0.0,0.0
+1011,2023,11/4/23,Florida,Arkansas,ESPN2,Sat,12.0,0,0.0,0.0
+1012,2023,11/4/23,Mississippi,Texas A&M,ESPN,Sat,12.0,0,0.0,0.0
+1013,2023,11/4/23,Virginia,Georgia Tech,CW,Sat,12.0,0,0.0,0.0
+1014,2023,11/4/23,Georgia St.,James Madison,ESPN2,Sat,15.5,0,0.0,0.0
+1015,2023,11/4/23,Oklahoma St.,Oklahoma,ABC,Sat,15.5,0,0.0,0.0
+1016,2023,11/4/23,Maryland,Penn St.,FOX,Sat,15.5,0,0.0,0.0
+1017,2023,11/4/23,Pittsburgh,Florida St.,ESPN,Sat,15.5,0,0.0,0.0
+1018,2023,11/4/23,Cincinnati,UCF,FS1,Sat,15.5,0,0.0,0.0
+1019,2023,11/4/23,Minnesota,Illinois,BTN,Sat,15.5,0,0.0,0.0
+1020,2023,11/4/23,East Carolina,Tulane,ESPNU,Sat,15.5,0,0.0,0.0
+1021,2023,11/4/23,Georgia,Missouri,CBS,Sat,15.5,0,0.0,0.0
+1022,2023,11/4/23,Appalachian St.,Marshall,NFLN,Sat,18.0,0,0.0,0.0
+1023,2023,11/4/23,San Diego St.,Utah St.,FS1,Sat,19.0,0,0.0,0.0
+1024,2023,11/4/23,West Virginia,BYU,FOX,Sat,19.0,0,0.0,0.0
+1025,2023,11/4/23,Iowa St.,Kansas,ESPN,Sat,19.0,0,0.0,0.0
+1026,2023,11/4/23,USC,Washington,ABC,Sat,19.5,0,0.0,0.0
+1027,2023,11/4/23,Rice,SMU,ESPNU,Sat,19.5,0,0.0,0.0
+1028,2023,11/4/23,Michigan,Purdue,NBC,Sat,19.5,0,0.0,0.0
+1029,2023,11/4/23,Alabama,LSU,CBS,Sat,20.0,0,0.0,0.0
+1030,2023,11/4/23,Colorado,Oregon St.,ESPN,Sat,22.0,0,0.0,0.0
+1031,2023,11/4/23,Arizona,UCLA,FS1,Sat,22.5,0,0.0,0.0
+1032,2023,11/7/23,Western Michigan,Central Michigan,ESPNU,Tue,19.0,0,0.0,0.0
+1033,2023,11/7/23,Buffalo,Ohio,ESPN2,Tue,19.5,0,0.0,0.0
+1034,2023,11/8/23,Miami Ohio,Akron,ESPNU,Wed,19.0,0,0.0,0.0
+1035,2023,11/8/23,Toledo,Eastern Michigan,ESPN2,Wed,19.5,0,0.0,0.0
+1036,2023,11/9/23,Louisville,Virginia,ESPN,Thu,19.5,0,0.0,0.0
+1037,2023,11/9/23,Louisiana,Southern Miss,ESPNU,Thu,19.5,0,0.0,0.0
+1038,2023,11/10/23,SMU,North Texas,ESPN2,Fri,21.0,0,0.0,0.0
+1039,2023,11/10/23,UNLV,Wyoming,FS1,Fri,23.0,0,0.0,0.0
+1040,2023,11/11/23,Kansas,Texas Tech,FS1,Sat,12.0,0,0.0,0.0
+1041,2023,11/11/23,Clemson,Georgia Tech,ABC,Sat,12.0,0,0.0,0.0
+1042,2023,11/11/23,Illinois,Indiana,BTN,Sat,12.0,0,0.0,0.0
+1043,2023,11/11/23,Penn St.,Michigan,FOX,Sat,12.0,0,0.0,0.0
+1044,2023,11/11/23,Tulane,Tulsa,ESPN2,Sat,12.0,0,0.0,0.0
+1045,2023,11/11/23,Kentucky,Alabama,ESPN,Sat,12.0,0,0.0,0.0
+1046,2023,11/11/23,Wake Forest,North Carolina St.,CW,Sat,14.0,0,0.0,0.0
+1047,2023,11/11/23,Missouri,Tennessee,CBS,Sat,15.5,0,0.0,0.0
+1048,2023,11/11/23,Washington,Utah,FOX,Sat,15.5,0,0.0,0.0
+1049,2023,11/11/23,UCF,Oklahoma St.,ESPN,Sat,15.5,0,0.0,0.0
+1050,2023,11/11/23,Iowa,Rutgers,BTN,Sat,15.5,0,0.0,0.0
+1051,2023,11/11/23,Florida St.,Miami,ABC,Sat,15.5,0,0.0,0.0
+1052,2023,11/11/23,Wisconsin,Northwestern,FS1,Sat,15.5,0,0.0,0.0
+1053,2023,11/11/23,Purdue,Minnesota,NBC,Sat,15.5,0,0.0,0.0
+1054,2023,11/11/23,California,Washington St.,ESPN2,Sat,16.0,0,0.0,0.0
+1055,2023,11/11/23,Oklahoma,West Virginia,FOX,Sat,19.0,0,0.0,0.0
+1056,2023,11/11/23,Georgia,Mississippi,ESPN,Sat,19.0,0,0.0,0.0
+1057,2023,11/11/23,Marshall,Georgia Southern,NFLN,Sat,19.0,0,0.0,0.0
+1058,2023,11/11/23,Houston,Cincinnati,FS1,Sat,19.0,0,0.0,0.0
+1059,2023,11/11/23,TCU,Texas,ABC,Sat,19.5,0,0.0,0.0
+1060,2023,11/11/23,Ohio St.,Michigan St.,NBC,Sat,19.5,0,0.0,0.0
+1061,2023,11/11/23,UTSA,Rice,ESPNU,Sat,19.5,0,0.0,0.0
+1062,2023,11/11/23,Texas A&M,Mississippi St.,ESPN2,Sat,19.5,0,0.0,0.0
+1063,2023,11/11/23,Boise St.,New Mexico,FS1,Sat,22.0,0,0.0,0.0
+1064,2023,11/11/23,BYU,Iowa St.,ESPN,Sat,22.5,0,0.0,0.0
+1065,2023,11/11/23,Oregon,USC,FOX,Sat,22.5,0,0.0,0.0
+1066,2023,11/14/23,Bowling Green,Toledo,ESPN2,Tue,19.0,0,0.0,0.0
+1067,2023,11/14/23,Northern Illinois,Western Michigan,ESPNU,Tue,19.0,0,0.0,0.0
+1068,2023,11/15/23,Miami Ohio,Buffalo,ESPN2,Wed,19.0,0,0.0,0.0
+1069,2023,11/15/23,Ohio,Central Michigan,ESPNU,Wed,19.0,0,0.0,0.0
+1070,2023,11/16/23,Pittsburgh,Boston College,ESPN,Thu,19.0,0,0.0,0.0
+1071,2023,11/17/23,UTSA,South Florida,ESPN2,Fri,21.0,0,0.0,0.0
+1072,2023,11/17/23,Washington St.,Colorado,FS1,Fri,22.5,0,0.0,0.0
+1073,2023,11/18/23,Maryland,Michigan,FOX,Sat,12.0,0,0.0,0.0
+1074,2023,11/18/23,BYU,Oklahoma,ESPN,Sat,12.0,0,0.0,0.0
+1075,2023,11/18/23,Miami,Louisville,ABC,Sat,12.0,0,0.0,0.0
+1076,2023,11/18/23,Penn St.,Rutgers,FS1,Sat,12.0,0,0.0,0.0
+1077,2023,11/18/23,Memphis,SMU,ESPN2,Sat,12.0,0,0.0,0.0
+1078,2023,11/18/23,Virginia,Duke,CW,Sat,15.0,0,0.0,0.0
+1079,2023,11/18/23,Troy,Louisiana,NFLN,Sat,15.5,0,0.0,0.0
+1080,2023,11/18/23,USC,UCLA,ABC,Sat,15.5,0,0.0,0.0
+1081,2023,11/18/23,Tennessee,Georgia,CBS,Sat,15.5,0,0.0,0.0
+1082,2023,11/18/23,Notre Dame,Wake Forest,NBC,Sat,15.5,0,0.0,0.0
+1083,2023,11/18/23,Iowa,Illinois,FS1,Sat,15.5,0,0.0,0.0
+1084,2023,11/18/23,Clemson,North Carolina,ESPN,Sat,15.5,0,0.0,0.0
+1085,2023,11/18/23,Ohio St.,Minnesota,BTN,Sat,16.0,0,0.0,0.0
+1086,2023,11/18/23,Arizona St.,Oregon,FOX,Sat,16.0,0,0.0,0.0
+1087,2023,11/18/23,Houston,Oklahoma St.,ESPN2,Sat,15.5,0,0.0,0.0
+1088,2023,11/18/23,Texas Tech,UCF,FS2,Sat,17.0,0,0.0,0.0
+1089,2023,11/18/23,Florida St.,North Alabama,CW,Sat,18.5,0,0.0,0.0
+1090,2023,11/18/23,Kansas,Kansas St.,FS1,Sat,19.0,0,0.0,0.0
+1091,2023,11/18/23,Arkansas,FIU,ESPNU,Sat,19.5,0,0.0,0.0
+1092,2023,11/18/23,Oregon St.,Washington,ABC,Sat,19.5,0,0.0,0.0
+1093,2023,11/18/23,Missouri,Florida,ESPN,Sat,19.5,0,0.0,0.0
+1094,2023,11/18/23,Wisconsin,Nebraska,NBC,Sat,19.5,0,0.0,0.0
+1095,2023,11/18/23,Iowa St.,Texas,FOX,Sat,20.0,0,0.0,0.0
+1096,2023,11/18/23,LSU,Georgia St.,ESPN2,Sat,20.0,0,0.0,0.0
+1097,2023,11/18/23,Fresno St.,New Mexico,FS1,Sat,22.5,0,0.0,0.0
+1098,2023,11/21/23,Western Michigan,Bowling Green,ESPNU,Tue,19.0,0,0.0,0.0
+1099,2023,11/21/23,Buffalo,Eastern Michigan,ESPN2,Tue,19.5,0,0.0,0.0
+1100,2023,11/23/23,Mississippi St.,Mississippi,ESPN,Thu,19.5,0,0.0,0.0
+1101,2023,11/24/23,Oklahoma,TCU,FOX,Fri,12.0,1,0.0,0.0
+1102,2023,11/24/23,Nebraska,Iowa,CBS,Fri,12.0,1,0.0,0.0
+1103,2023,11/24/23,Boston College,Miami,ABC,Fri,12.0,1,0.0,0.0
+1104,2023,11/24/23,Central Michigan,Toledo,ESPNU,Fri,12.0,1,0.0,0.0
+1105,2023,11/24/23,Temple,Memphis,ESPN,Fri,12.0,1,0.0,0.0
+1106,2023,11/24/23,Tulane,UTSA,ABC,Fri,15.5,1,0.0,0.0
+1107,2023,11/24/23,Arkansas,Missouri,CBS,Fri,16.0,1,0.0,0.0
+1108,2023,11/24/23,Boise St.,Air Force,FS1,Fri,16.0,1,0.0,0.0
+1109,2023,11/24/23,Michigan St.,Penn St.,NBC,Fri,19.5,1,0.0,0.0
+1110,2023,11/24/23,Texas,Texas Tech,ABC,Fri,19.5,1,0.0,0.0
+1111,2023,11/24/23,Oregon,Oregon St.,FOX,Fri,20.5,1,0.0,0.0
+1112,2023,11/25/23,Purdue,Indiana,BTN,Sat,12.0,0,0.0,0.0
+1113,2023,11/25/23,Louisville,Kentucky,ABC,Sat,12.0,0,0.0,0.0
+1114,2023,11/25/23,LSU,Texas A&M,ESPN,Sat,12.0,0,0.0,0.0
+1115,2023,11/25/23,Southern Miss,Troy,ESPNU,Sat,12.0,0,0.0,0.0
+1116,2023,11/25/23,UCF,Houston,FS1,Sat,12.0,0,0.0,0.0
+1117,2023,11/25/23,SMU,Navy,ESPN2,Sat,12.0,0,0.0,0.0
+1118,2023,11/25/23,Syracuse,Wake Forest,CW,Sat,14.0,0,0.0,0.0
+1119,2023,11/25/23,Arizona St.,Arizona,ESPN,Sat,15.5,0,0.0,0.0
+1120,2023,11/25/23,Auburn,Alabama,CBS,Sat,15.5,0,0.0,0.0
+1121,2023,11/25/23,Minnesota,Wisconsin,FS1,Sat,15.5,0,0.0,0.0
+1122,2023,11/25/23,Appalachian St.,Georgia Southern,ESPNU,Sat,15.5,0,0.0,0.0
+1123,2023,11/25/23,Coastal Carolina,James Madison,ESPN2,Sat,15.5,0,0.0,0.0
+1124,2023,11/25/23,Oklahoma St.,BYU,ABC,Sat,15.5,0,0.0,0.0
+1125,2023,11/25/23,Washington,Washington St.,FOX,Sat,16.0,0,0.0,0.0
+1126,2023,11/25/23,Florida,Florida St.,ESPN,Sat,19.0,0,0.0,0.0
+1127,2023,11/25/23,Baylor,West Virginia,FS1,Sat,19.0,0,0.0,0.0
+1128,2023,11/25/23,Texas St.,South Alabama,NFLN,Sat,19.0,0,0.0,0.0
+1129,2023,11/25/23,Georgia Tech,Georgia,ABC,Sat,19.5,0,0.0,0.0
+1130,2023,11/25/23,Cincinnati,Kansas,ESPN2,Sat,19.5,0,0.0,0.0
+1131,2023,11/26/23,South Florida,Charlotte,ESPNU,Sun,19.5,0,0.0,0.0
+1132,2023,11/25/23,Kansas St.,Iowa St.,FOX,Sat,20.0,0,0.0,0.0
+1133,2023,11/25/23,UCLA,California,ESPN,Sat,22.5,0,0.0,0.0
+1134,2023,11/25/23,San Diego St.,Fresno St.,FS1,Sat,22.5,0,0.0,0.0
+1135,2023,12/1/23,Washington,Oregon,ABC,Fri,20.0,0,1.0,0.0
+1136,2023,12/2/23,Texas,Oklahoma St.,ABC,Sat,12.0,0,1.0,0.0
+1137,2023,12/2/23,Toledo,Miami Ohio,ESPN,Sat,12.0,0,1.0,0.0
+1138,2023,12/2/23,UNLV,Boise St.,FOX,Sat,16.0,0,1.0,0.0
+1139,2023,12/2/23,Alabama,Georgia,CBS,Sat,16.0,0,1.0,0.0
+1140,2023,12/2/23,Troy,Appalachian St.,ESPN,Sat,16.0,0,1.0,0.0
+1141,2023,12/2/23,Tulane,SMU,ABC,Sat,16.0,0,1.0,0.0
+1142,2023,12/2/23,Iowa,Michigan,FOX,Sat,20.0,0,1.0,0.0
+1143,2023,12/2/23,Florida St.,Louisville,ABC,Sat,20.0,0,1.0,0.0
+1144,2023,12/9/23,Army,Navy,CBS,Sat,15.0,0,0.0,0.0
+1145,2022,8/27/22,Northwestern,Nebraska,FOX,Sat,12.5,0,0.0,0.0
+1146,2022,8/27/22,Illinois,Wyoming,BTN,Sat,16.0,0,0.0,0.0
+1147,2022,8/27/22,Utah St.,Connecticut,FS1,Sat,16.0,0,0.0,0.0
+1148,2022,8/27/22,New Mexico St.,Nevada,ESPN2,Sat,22.0,0,0.0,0.0
+1149,2022,9/1/22,Oklahoma St.,Central Michigan,FS1,Thu,19.0,0,0.0,0.0
+1150,2022,9/1/22,Pittsburgh,West Virginia,ESPN,Thu,19.0,0,0.0,0.0
+1151,2022,9/1/22,Missouri,Louisiana Tech,ESPNU,Thu,20.0,0,0.0,0.0
+1152,2022,9/1/22,Purdue,Penn St.,FOX,Thu,20.0,0,0.0,0.0
+1153,2022,9/1/22,Minnesota,New Mexico St.,BTN,Thu,21.0,0,0.0,0.0
+1154,2022,9/1/22,Fresno St.,Cal Poly,FS1,Thu,22.5,0,0.0,0.0
+1155,2022,9/2/22,Michigan St.,Western Michigan,ESPN2,Fri,19.0,0,0.0,0.0
+1156,2022,9/2/22,Old Dominion,Virginia Tech,ESPNU,Fri,19.0,0,0.0,0.0
+1157,2022,9/2/22,Indiana,Illinois,FS1,Fri,20.0,0,0.0,0.0
+1158,2022,9/2/22,Colorado,TCU,ESPN,Fri,22.5,0,0.0,0.0
+1159,2022,9/3/22,Iowa,South Dakota State,FS1,Sat,12.0,0,0.0,0.0
+1160,2022,9/3/22,Appalachian St.,North Carolina,ESPNU,Sat,12.0,0,0.0,0.0
+1161,2022,9/3/22,Maryland,Buffalo,BTN,Sat,12.0,0,0.0,0.0
+1162,2022,9/3/22,Michigan,Colorado St.,ABC,Sat,12.0,0,0.0,0.0
+1163,2022,9/3/22,East Carolina,North Carolina St.,ESPN,Sat,12.0,0,0.0,0.0
+1164,2022,9/3/22,Wyoming,Tulsa,FS1,Sat,15.5,0,0.0,0.0
+1165,2022,9/3/22,Nebraska,North Dakota,BTN,Sat,15.5,0,0.0,0.0
+1166,2022,9/3/22,Arkansas,Cincinnati,ESPN,Sat,15.5,0,0.0,0.0
+1167,2022,9/3/22,San Diego St.,Arizona,CBS,Sat,15.5,0,0.0,0.0
+1168,2022,9/3/22,Georgia,Oregon,ABC,Sat,15.5,0,0.0,0.0
+1169,2022,9/3/22,Oklahoma,UTEP,FOX,Sat,15.5,0,0.0,0.0
+1170,2022,9/3/22,Wisconsin,Illinois State,FS1,Sat,19.5,0,0.0,0.0
+1171,2022,9/3/22,Florida,Utah,ESPN,Sat,19.0,0,0.0,0.0
+1172,2022,9/3/22,Ohio St.,Notre Dame,ABC,Sat,19.5,0,0.0,0.0
+1173,2022,9/3/22,Washington,Kent St.,FS1,Sat,22.5,0,0.0,0.0
+1174,2022,9/3/22,Oregon St.,Boise St.,ESPN,Sat,22.5,0,0.0,0.0
+1175,2022,9/4/22,Florida St.,LSU,ABC,Sun,19.5,0,0.0,0.0
+1176,2022,9/5/22,Georgia Tech,Clemson,ESPN,Mon,19.0,0,0.0,0.0
+1177,2022,9/9/22,UCF,Louisville,ESPN2,Fri,19.5,0,0.0,0.0
+1178,2022,9/10/22,Arkansas,South Carolina,ESPN,Sat,12.0,0,0.0,0.0
+1179,2022,9/10/22,Kansas St.,Missouri,ESPN2,Sat,12.0,0,0.0,0.0
+1180,2022,9/10/22,Northwestern,Duke,FS1,Sat,12.0,0,0.0,0.0
+1181,2022,9/10/22,Texas,Alabama,FOX,Sat,12.0,0,0.0,0.0
+1182,2022,9/10/22,Penn St.,Ohio,ABC,Sat,12.0,0,0.0,0.0
+1183,2022,9/10/22,Notre Dame,Marshall,NBC,Sat,14.5,0,0.0,0.0
+1184,2022,9/10/22,Wisconsin,Washington St.,FOX,Sat,15.5,0,0.0,0.0
+1185,2022,9/10/22,Air Force,Colorado,CBS,Sat,15.5,0,0.0,0.0
+1186,2022,9/10/22,Texas A&M,Appalachian St.,ESPN2,Sat,15.5,0,0.0,0.0
+1187,2022,9/10/22,Pittsburgh,Tennessee,ABC,Sat,15.5,0,0.0,0.0
+1188,2022,9/10/22,Illinois,Virginia,ESPNU,Sat,15.5,0,0.0,0.0
+1189,2022,9/10/22,Texas Tech,Houston,FS1,Sat,15.5,0,0.0,0.0
+1190,2022,9/10/22,Florida,Kentucky,ESPN,Sat,19.0,0,0.0,0.0
+1191,2022,9/10/22,Auburn,San Jose St.,ESPNU,Sat,19.5,0,0.0,0.0
+1192,2022,9/10/22,Oklahoma St.,Arizona St.,ESPN2,Sat,19.5,0,0.0,0.0
+1193,2022,9/10/22,Stanford,USC,ABC,Sat,19.5,0,0.0,0.0
+1194,2022,9/10/22,Nebraska,Georgia Southern,FS1,Sat,19.5,0,0.0,0.0
+1195,2022,9/10/22,BYU,Baylor,ESPN,Sat,22.5,0,0.0,0.0
+1196,2022,9/10/22,Arizona,Mississippi St.,FS1,Sat,23.0,0,0.0,0.0
+1197,2022,9/16/22,Louisville,Florida St.,ESPN,Fri,19.5,0,0.0,0.0
+1198,2022,9/17/22,Nebraska,Oklahoma,FOX,Sat,12.0,0,0.0,0.0
+1199,2022,9/17/22,South Carolina,Georgia,ESPN,Sat,12.0,0,0.0,0.0
+1200,2022,9/17/22,Baylor,Texas St.,FS1,Sat,12.0,0,0.0,0.0
+1201,2022,9/17/22,Miami Ohio,Cincinnati,ESPNU,Sat,12.0,0,0.0,0.0
+1202,2022,9/17/22,Michigan,Connecticut,ABC,Sat,12.0,0,0.0,0.0
+1203,2022,9/17/22,Syracuse,Purdue,ESPN2,Sat,12.0,0,0.0,0.0
+1204,2022,9/17/22,Notre Dame,California,NBC,Sat,14.5,0,0.0,0.0
+1205,2022,9/17/22,Minnesota,Colorado,ESPN2,Sat,15.5,0,0.0,0.0
+1206,2022,9/17/22,Georgia Tech,Mississippi,ABC,Sat,15.5,0,0.0,0.0
+1207,2022,9/17/22,Auburn,Penn St.,CBS,Sat,15.5,0,0.0,0.0
+1208,2022,9/17/22,Wisconsin,New Mexico St.,BTN,Sat,15.5,0,0.0,0.0
+1209,2022,9/17/22,Oregon,BYU,FOX,Sat,15.5,0,0.0,0.0
+1210,2022,9/17/22,Boise St.,UT Martin,FS1,Sat,16.0,0,0.0,0.0
+1211,2022,9/17/22,Houston,Kansas,ESPNU,Sat,16.0,0,0.0,0.0
+1212,2022,9/17/22,Bowling Green,Marshall,NFLN,Sat,17.0,0,0.0,0.0
+1213,2022,9/17/22,LSU,Mississippi St.,ESPN,Sat,19.0,0,0.0,0.0
+1214,2022,9/17/22,North Carolina St.,Texas Tech,ESPN2,Sat,19.0,0,0.0,0.0
+1215,2022,9/17/22,Ohio St.,Toledo,FOX,Sat,19.0,0,0.0,0.0
+1216,2022,9/17/22,Iowa,Nevada,BTN,Sat,19.5,0,0.0,0.0
+1217,2022,9/17/22,Western Michigan,Pittsburgh,ESPNU,Sat,19.5,0,0.0,0.0
+1218,2022,9/17/22,Maryland,SMU,FS1,Sat,19.5,0,0.0,0.0
+1219,2022,9/17/22,Washington,Michigan St.,ABC,Sat,19.5,0,0.0,0.0
+1220,2022,9/17/22,Texas A&M,Miami,ESPN,Sat,21.0,0,0.0,0.0
+1221,2022,9/17/22,Utah,San Diego St.,ESPN2,Sat,22.0,0,0.0,0.0
+1222,2022,9/17/22,USC,Fresno St.,FOX,Sat,22.5,0,0.0,0.0
+1223,2022,9/17/22,Arizona,North Dakota State,FS1,Sat,23.0,0,0.0,0.0
+1224,2022,9/22/22,Georgia St.,Coastal Carolina,ESPN2,Thu,19.5,0,0.0,0.0
+1225,2022,9/22/22,Virginia Tech,West Virginia,ESPN,Thu,19.5,0,0.0,0.0
+1226,2022,9/22/22,Illinois,Chattanooga,BTN,Thu,20.5,0,0.0,0.0
+1227,2022,9/23/22,Syracuse,Virginia,ESPN,Fri,19.0,0,0.0,0.0
+1228,2022,9/23/22,Air Force,Nevada,FS1,Fri,20.0,0,0.0,0.0
+1229,2022,9/24/22,Kansas,Duke,FS1,Sat,12.0,0,0.0,0.0
+1230,2022,9/24/22,Iowa St.,Baylor,ESPN2,Sat,12.0,0,0.0,0.0
+1231,2022,9/24/22,Auburn,Missouri,ESPN,Sat,12.0,0,0.0,0.0
+1232,2022,9/24/22,Penn St.,Central Michigan,BTN,Sat,12.0,0,0.0,0.0
+1233,2022,9/24/22,Wake Forest,Clemson,ABC,Sat,12.0,0,0.0,0.0
+1234,2022,9/24/22,Michigan,Maryland,FOX,Sat,12.0,0,0.0,0.0
+1235,2022,9/24/22,San Diego St.,Toledo,FS1,Sat,15.5,0,0.0,0.0
+1236,2022,9/24/22,Tennessee,Florida,CBS,Sat,15.5,0,0.0,0.0
+1237,2022,9/24/22,Texas Tech,Texas,ESPN,Sat,15.5,0,0.0,0.0
+1238,2022,9/24/22,North Carolina,Notre Dame,ABC,Sat,15.5,0,0.0,0.0
+1239,2022,9/24/22,Michigan St.,Minnesota,BTN,Sat,15.5,0,0.0,0.0
+1240,2022,9/24/22,Cincinnati,Indiana,ESPN2,Sat,15.5,0,0.0,0.0
+1241,2022,9/24/22,Washington St.,Oregon,FOX,Sat,16.0,0,0.0,0.0
+1242,2022,9/24/22,UCF,Georgia Tech,ESPNU,Sat,16.0,0,0.0,0.0
+1243,2022,9/24/22,Texas A&M,Arkansas,ESPN,Sat,19.0,0,0.0,0.0
+1244,2022,9/24/22,Kentucky,Northern Illinois,ESPN2,Sat,19.0,0,0.0,0.0
+1245,2022,9/24/22,Rutgers,Iowa,FS1,Sat,19.0,0,0.0,0.0
+1246,2022,9/24/22,Ohio St.,Wisconsin,ABC,Sat,19.5,0,0.0,0.0
+1247,2022,9/24/22,South Carolina,Charlotte,ESPNU,Sat,19.5,0,0.0,0.0
+1248,2022,9/24/22,Oklahoma,Kansas St.,FOX,Sat,20.0,0,0.0,0.0
+1249,2022,9/24/22,BYU,Wyoming,ESPN2,Sat,22.5,0,0.0,0.0
+1250,2022,9/24/22,Arizona St.,Utah,ESPN,Sat,22.5,0,0.0,0.0
+1251,2022,9/24/22,Washington,Stanford,FS1,Sat,22.5,0,0.0,0.0
+1252,2022,9/29/22,BYU,Utah St.,ESPN,Thu,20.0,0,0.0,0.0
+1253,2022,9/30/22,Houston,Tulane,ESPN,Fri,19.0,0,0.0,0.0
+1254,2022,9/30/22,Boise St.,San Diego St.,FS1,Fri,20.0,0,0.0,0.0
+1255,2022,9/30/22,UCLA,Washington,ESPN,Fri,22.5,0,0.0,0.0
+1256,2022,10/1/22,TCU,Oklahoma,ABC,Sat,12.0,0,0.0,0.0
+1257,2022,10/1/22,Wisconsin,Illinois,BTN,Sat,12.0,0,0.0,0.0
+1258,2022,10/1/22,Minnesota,Purdue,ESPN2,Sat,12.0,0,0.0,0.0
+1259,2022,10/1/22,Iowa,Michigan,FOX,Sat,12.0,0,0.0,0.0
+1260,2022,10/1/22,Air Force,Navy,CBS,Sat,12.0,0,0.0,0.0
+1261,2022,10/1/22,Mississippi,Kentucky,ESPN,Sat,12.0,0,0.0,0.0
+1262,2022,10/1/22,Maryland,Michigan St.,FS1,Sat,15.5,0,0.0,0.0
+1263,2022,10/1/22,Florida St.,Wake Forest,ABC,Sat,15.5,0,0.0,0.0
+1264,2022,10/1/22,Ohio St.,Rutgers,BTN,Sat,15.5,0,0.0,0.0
+1265,2022,10/1/22,Arkansas,Alabama,CBS,Sat,15.5,0,0.0,0.0
+1266,2022,10/1/22,Kansas,Iowa St.,ESPN2,Sat,15.5,0,0.0,0.0
+1267,2022,10/1/22,Penn St.,Northwestern,ESPN,Sat,15.5,0,0.0,0.0
+1268,2022,10/1/22,Baylor,Oklahoma St.,FOX,Sat,15.5,0,0.0,0.0
+1269,2022,10/1/22,Auburn,LSU,ESPN,Sat,19.0,0,0.0,0.0
+1270,2022,10/1/22,Clemson,North Carolina St.,ABC,Sat,19.5,0,0.0,0.0
+1271,2022,10/1/22,Texas,West Virginia,FS1,Sat,19.5,0,0.0,0.0
+1272,2022,10/1/22,Nebraska,Indiana,BTN,Sat,19.5,0,0.0,0.0
+1273,2022,10/1/22,USC,Arizona St.,ESPN,Sat,22.5,0,0.0,0.0
+1274,2022,10/1/22,Oregon,Stanford,FS1,Sat,23.0,0,0.0,0.0
+1275,2022,10/5/22,UCF,SMU,ESPN2,Wed,19.0,0,0.0,0.0
+1276,2022,10/7/22,Rutgers,Nebraska,FS1,Fri,19.0,0,0.0,0.0
+1277,2022,10/7/22,Memphis,Houston,ESPN2,Fri,19.5,0,0.0,0.0
+1278,2022,10/7/22,Nevada,Colorado St.,FS1,Fri,22.5,0,0.0,0.0
+1279,2022,10/8/22,Indiana,Michigan,FOX,Sat,12.0,0,0.0,0.0
+1280,2022,10/8/22,LSU,Tennessee,ESPN,Sat,12.0,0,0.0,0.0
+1281,2022,10/8/22,Kansas,TCU,FS1,Sat,12.0,0,0.0,0.0
+1282,2022,10/8/22,Florida,Missouri,ESPNU,Sat,12.0,0,0.0,0.0
+1283,2022,10/8/22,Maryland,Purdue,BTN,Sat,12.0,0,0.0,0.0
+1284,2022,10/8/22,Oklahoma,Texas,ABC,Sat,12.0,0,0.0,0.0
+1285,2022,10/8/22,UCLA,Utah,FOX,Sat,15.5,0,0.0,0.0
+1286,2022,10/8/22,Oklahoma St.,Texas Tech,FS1,Sat,15.5,0,0.0,0.0
+1287,2022,10/8/22,Georgia,Auburn,CBS,Sat,15.5,0,0.0,0.0
+1288,2022,10/8/22,Northwestern,Wisconsin,BTN,Sat,15.5,0,0.0,0.0
+1289,2022,10/8/22,Miami,North Carolina,ESPN2,Sat,17.0,0,0.0,0.0
+1290,2022,10/8/22,Michigan St.,Ohio St.,ABC,Sat,16.0,0,0.0,0.0
+1291,2022,10/8/22,Utah St.,Air Force,FS1,Sat,19.0,0,0.0,0.0
+1292,2022,10/8/22,Arkansas St.,James Madison,NFLN,Sat,19.0,0,0.0,0.0
+1293,2022,10/8/22,Notre Dame,BYU,NBC,Sat,19.5,0,0.0,0.0
+1294,2022,10/8/22,Boston College,Clemson,ABC,Sat,19.5,0,0.0,0.0
+1295,2022,10/8/22,Iowa St.,Kansas St.,ESPNU,Sat,19.5,0,0.0,0.0
+1296,2022,10/8/22,USC,Washington St.,FOX,Sat,19.5,0,0.0,0.0
+1297,2022,10/8/22,Illinois,Iowa,BTN,Sat,19.5,0,0.0,0.0
+1298,2022,10/8/22,Alabama,Texas A&M,CBS,Sat,20.0,0,0.0,0.0
+1299,2022,10/8/22,Boise St.,Fresno St.,FS1,Sat,22.0,0,0.0,0.0
+1300,2022,10/8/22,Stanford,Oregon St.,ESPN,Sat,23.0,0,0.0,0.0
+1301,2022,10/12/22,Marshall,Louisiana,ESPN2,Wed,19.5,0,0.0,0.0
+1302,2022,10/13/22,UCF,Temple,ESPN,Thu,19.0,0,0.0,0.0
+1303,2022,10/13/22,West Virginia,Baylor,FS1,Thu,19.0,0,0.0,0.0
+1304,2022,10/14/22,SMU,Navy,ESPN,Fri,19.5,0,0.0,0.0
+1305,2022,10/15/22,Oklahoma,Kansas,ESPN2,Sat,12.0,0,0.0,0.0
+1306,2022,10/15/22,Illinois,Minnesota,BTN,Sat,12.0,0,0.0,0.0
+1307,2022,10/15/22,Mississippi,Auburn,ESPN,Sat,12.0,0,0.0,0.0
+1308,2022,10/15/22,Texas,Iowa St.,ABC,Sat,12.0,0,0.0,0.0
+1309,2022,10/15/22,Michigan,Penn St.,FOX,Sat,12.0,0,0.0,0.0
+1310,2022,10/15/22,TCU,Oklahoma St.,ABC,Sat,15.5,0,0.0,0.0
+1311,2022,10/15/22,BYU,Arkansas,ESPN,Sat,15.5,0,0.0,0.0
+1312,2022,10/15/22,Indiana,Maryland,ESPN2,Sat,15.5,0,0.0,0.0
+1313,2022,10/15/22,Tennessee,Alabama,CBS,Sat,15.5,0,0.0,0.0
+1314,2022,10/15/22,Michigan St.,Wisconsin,FOX,Sat,16.0,0,0.0,0.0
+1315,2022,10/15/22,Florida,LSU,ESPN,Sat,19.0,0,0.0,0.0
+1316,2022,10/15/22,Florida St.,Clemson,ABC,Sat,19.5,0,0.0,0.0
+1317,2022,10/15/22,Purdue,Nebraska,BTN,Sat,19.5,0,0.0,0.0
+1318,2022,10/15/22,Notre Dame,Stanford,NBC,Sat,19.5,0,0.0,0.0
+1319,2022,10/15/22,Utah,USC,FOX,Sat,20.0,0,0.0,0.0
+1320,2022,10/19/22,Appalachian St.,Georgia St.,ESPN2,Wed,19.5,0,0.0,0.0
+1321,2022,10/20/22,Georgia Tech,Virginia,ESPN,Thu,19.5,0,0.0,0.0
+1322,2022,10/21/22,Temple,Tulsa,ESPN2,Fri,19.5,0,0.0,0.0
+1323,2022,10/22/22,Baylor,Kansas,ESPN2,Sat,12.0,0,0.0,0.0
+1324,2022,10/22/22,Clemson,Syracuse,ABC,Sat,12.0,0,0.0,0.0
+1325,2022,10/22/22,Ohio St.,Iowa,FOX,Sat,12.0,0,0.0,0.0
+1326,2022,10/22/22,Rutgers,Indiana,BTN,Sat,12.0,0,0.0,0.0
+1327,2022,10/22/22,SMU,Cincinnati,ESPN,Sat,12.0,0,0.0,0.0
+1328,2022,10/22/22,Texas Tech,West Virginia,FS1,Sat,15.0,0,0.0,0.0
+1329,2022,10/22/22,Tulane,Memphis,ESPN2,Sat,15.5,0,0.0,0.0
+1330,2022,10/22/22,Maryland,Northwestern,BTN,Sat,15.5,0,0.0,0.0
+1331,2022,10/22/22,Oregon,UCLA,FOX,Sat,15.5,0,0.0,0.0
+1332,2022,10/22/22,Oklahoma St.,Texas,ABC,Sat,15.5,0,0.0,0.0
+1333,2022,10/22/22,Wisconsin,Purdue,ESPN,Sat,15.5,0,0.0,0.0
+1334,2022,10/22/22,LSU,Mississippi,CBS,Sat,15.5,0,0.0,0.0
+1335,2022,10/22/22,Alabama,Mississippi St.,ESPN,Sat,19.0,0,0.0,0.0
+1336,2022,10/22/22,Penn St.,Minnesota,ABC,Sat,19.5,0,0.0,0.0
+1337,2022,10/22/22,TCU,Kansas St.,FS1,Sat,20.0,0,0.0,0.0
+1338,2022,10/22/22,Wyoming,Utah St.,FS2,Sat,22.0,0,0.0,0.0
+1339,2022,10/22/22,California,Washington,ESPN,Sat,22.5,0,0.0,0.0
+1340,2022,10/27/22,Southern Miss,Louisiana,ESPN2,Thu,19.5,0,0.0,0.0
+1341,2022,10/27/22,North Carolina St.,Virginia Tech,ESPN,Thu,19.5,0,0.0,0.0
+1342,2022,10/27/22,Washington St.,Utah,FS1,Thu,22.0,0,0.0,0.0
+1343,2022,10/28/22,BYU,East Carolina,ESPN2,Fri,20.0,0,0.0,0.0
+1344,2022,10/29/22,Houston,South Florida,ESPN2,Sat,12.0,0,0.0,0.0
+1345,2022,10/29/22,Penn St.,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+1346,2022,10/29/22,Syracuse,Notre Dame,ABC,Sat,12.0,0,0.0,0.0
+1347,2022,10/29/22,Iowa St.,Oklahoma,FS1,Sat,12.0,0,0.0,0.0
+1348,2022,10/29/22,West Virginia,TCU,ESPN,Sat,12.0,0,0.0,0.0
+1349,2022,10/29/22,Minnesota,Rutgers,BTN,Sat,14.5,0,0.0,0.0
+1350,2022,10/29/22,California,Oregon,FS1,Sat,15.5,0,0.0,0.0
+1351,2022,10/29/22,UCF,Cincinnati,ESPN,Sat,15.5,0,0.0,0.0
+1352,2022,10/29/22,Iowa,Northwestern,ESPN2,Sat,15.5,0,0.0,0.0
+1353,2022,10/29/22,Kansas St.,Oklahoma St.,FOX,Sat,15.5,0,0.0,0.0
+1354,2022,10/29/22,Georgia,Florida,CBS,Sat,15.5,0,0.0,0.0
+1355,2022,10/29/22,Nebraska,Illinois,ABC,Sat,15.5,0,0.0,0.0
+1356,2022,10/29/22,Boise St.,Colorado St.,FS1,Sat,19.0,0,0.0,0.0
+1357,2022,10/29/22,Tennessee,Kentucky,ESPN,Sat,19.0,0,0.0,0.0
+1358,2022,10/29/22,Michigan,Michigan St.,ABC,Sat,19.5,0,0.0,0.0
+1359,2022,10/29/22,Texas Tech,Baylor,ESPN2,Sat,19.5,0,0.0,0.0
+1360,2022,10/29/22,Fresno St.,San Diego St.,FS1,Sat,22.5,0,0.0,0.0
+1361,2022,10/29/22,UCLA,Stanford,ESPN,Sat,22.5,0,0.0,0.0
+1362,2022,11/1/22,Ohio,Buffalo,ESPN2,Tue,19.5,0,0.0,0.0
+1363,2022,11/2/22,Bowling Green,Western Michigan,ESPN2,Wed,19.0,0,0.0,0.0
+1364,2022,11/3/22,Coastal Carolina,Appalachian St.,ESPN,Thu,19.5,0,0.0,0.0
+1365,2022,11/4/22,Boston College,Duke,ESPN2,Fri,19.0,0,0.0,0.0
+1366,2022,11/4/22,Washington,Oregon St.,ESPN2,Fri,22.5,0,0.0,0.0
+1367,2022,11/5/22,Army,Air Force,CBS,Sat,11.5,0,0.0,0.0
+1368,2022,11/5/22,Purdue,Iowa,FS1,Sat,12.0,0,0.0,0.0
+1369,2022,11/5/22,Nebraska,Minnesota,ESPN2,Sat,12.0,0,0.0,0.0
+1370,2022,11/5/22,TCU,Texas Tech,FOX,Sat,12.0,0,0.0,0.0
+1371,2022,11/5/22,Wisconsin,Maryland,BTN,Sat,12.0,0,0.0,0.0
+1372,2022,11/5/22,Texas A&M,Florida,ESPN,Sat,12.0,0,0.0,0.0
+1373,2022,11/5/22,Northwestern,Ohio St.,ABC,Sat,12.0,0,0.0,0.0
+1374,2022,11/5/22,Kansas,Oklahoma St.,FS1,Sat,15.5,0,0.0,0.0
+1375,2022,11/5/22,Indiana,Penn St.,ABC,Sat,15.5,0,0.0,0.0
+1376,2022,11/5/22,Illinois,Michigan St.,BTN,Sat,15.5,0,0.0,0.0
+1377,2022,11/5/22,Memphis,UCF,ESPN2,Sat,15.5,0,0.0,0.0
+1378,2022,11/5/22,Colorado,Oregon,ESPN,Sat,15.5,0,0.0,0.0
+1379,2022,11/5/22,Georgia,Tennessee,CBS,Sat,15.5,0,0.0,0.0
+1380,2022,11/5/22,Boise St.,BYU,FS2,Sat,19.0,0,0.0,0.0
+1381,2022,11/5/22,LSU,Alabama,ESPN,Sat,19.0,0,0.0,0.0
+1382,2022,11/5/22,Kansas St.,Texas,FS1,Sat,19.0,0,0.0,0.0
+1383,2022,11/5/22,Miami,Florida St.,ABC,Sat,19.5,0,0.0,0.0
+1384,2022,11/5/22,Mississippi St.,Auburn,ESPN2,Sat,19.5,0,0.0,0.0
+1385,2022,11/5/22,Rutgers,Michigan,BTN,Sat,19.5,0,0.0,0.0
+1386,2022,11/5/22,Notre Dame,Clemson,NBC,Sat,19.5,0,0.0,0.0
+1387,2022,11/5/22,USC,California,ESPN,Sat,22.5,0,0.0,0.0
+1388,2022,11/5/22,Arizona St.,UCLA,FS1,Sat,22.5,0,0.0,0.0
+1389,2022,11/8/22,Miami Ohio,Ohio,ESPN2,Tue,19.5,0,0.0,0.0
+1390,2022,11/8/22,Toledo,Ball St.,ESPN,Tue,20.0,0,0.0,0.0
+1391,2022,11/9/22,Central Michigan,Buffalo,ESPN2,Wed,19.0,0,0.0,0.0
+1392,2022,11/10/22,Memphis,Tulsa,ESPN,Thu,19.5,0,0.0,0.0
+1393,2022,11/10/22,Louisiana,Georgia Southern,ESPN2,Thu,19.5,0,0.0,0.0
+1394,2022,11/11/22,Cincinnati,East Carolina,ESPN2,Fri,20.0,0,0.0,0.0
+1395,2022,11/11/22,USC,Colorado,FS1,Fri,21.5,0,0.0,0.0
+1396,2022,11/12/22,Ohio St.,Indiana,FOX,Sat,12.0,0,0.0,0.0
+1397,2022,11/12/22,Michigan St.,Rutgers,BTN,Sat,12.0,0,0.0,0.0
+1398,2022,11/12/22,Navy,Notre Dame,ABC,Sat,12.0,0,0.0,0.0
+1399,2022,11/12/22,West Virginia,Oklahoma,FS1,Sat,12.0,0,0.0,0.0
+1400,2022,11/12/22,Tennessee,Missouri,CBS,Sat,12.0,0,0.0,0.0
+1401,2022,11/12/22,Illinois,Purdue,ESPN2,Sat,12.0,0,0.0,0.0
+1402,2022,11/12/22,Arkansas,LSU,ESPN,Sat,12.0,0,0.0,0.0
+1403,2022,11/12/22,Iowa,Wisconsin,FS1,Sat,15.5,0,0.0,0.0
+1404,2022,11/12/22,Oklahoma St.,Iowa St.,ESPNU,Sat,15.5,0,0.0,0.0
+1405,2022,11/12/22,Mississippi,Alabama,CBS,Sat,15.5,0,0.0,0.0
+1406,2022,11/12/22,Michigan,Nebraska,ABC,Sat,15.5,0,0.0,0.0
+1407,2022,11/12/22,Penn St.,Maryland,FOX,Sat,15.5,0,0.0,0.0
+1408,2022,11/12/22,Tulane,UCF,ESPN2,Sat,15.5,0,0.0,0.0
+1409,2022,11/12/22,Clemson,Louisville,ESPN,Sat,15.5,0,0.0,0.0
+1410,2022,11/12/22,Minnesota,Northwestern,BTN,Sat,15.5,0,0.0,0.0
+1411,2022,11/12/22,Oregon,Washington,FOX,Sat,19.0,0,0.0,0.0
+1412,2022,11/12/22,Baylor,Kansas St.,FS1,Sat,19.0,0,0.0,0.0
+1413,2022,11/12/22,Mississippi St.,Georgia,ESPN,Sat,19.0,0,0.0,0.0
+1414,2022,11/12/22,Texas,TCU,ABC,Sat,19.5,0,0.0,0.0
+1415,2022,11/12/22,Wake Forest,North Carolina,ESPN2,Sat,19.5,0,0.0,0.0
+1416,2022,11/12/22,Utah,Stanford,ESPN,Sat,22.5,0,0.0,0.0
+1417,2022,11/12/22,San Diego St.,San Jose St.,FS1,Sat,22.5,0,0.0,0.0
+1418,2022,11/12/22,UCLA,Arizona,FOX,Sat,22.5,0,0.0,0.0
+1419,2022,11/15/22,Ball St.,Ohio,ESPN2,Tue,19.0,0,0.0,0.0
+1420,2022,11/16/22,Kent St.,Eastern Michigan,ESPN2,Wed,18.0,0,0.0,0.0
+1421,2022,11/16/22,Central Michigan,Western Michigan,ESPNU,Wed,20.0,0,0.0,0.0
+1422,2022,11/17/22,Tulane,SMU,ESPN,Thu,19.5,0,0.0,0.0
+1423,2022,11/18/22,Tulsa,South Florida,ESPN2,Fri,21.0,0,0.0,0.0
+1424,2022,11/18/22,New Mexico,San Diego St.,FS1,Fri,22.0,0,0.0,0.0
+1425,2022,11/19/22,UCF,Navy,ESPN2,Sat,11.0,0,0.0,0.0
+1426,2022,11/19/22,Michigan St.,Indiana,BTN,Sat,12.0,0,0.0,0.0
+1427,2022,11/19/22,Nebraska,Wisconsin,ESPN,Sat,12.0,0,0.0,0.0
+1428,2022,11/19/22,Baylor,TCU,FOX,Sat,12.0,0,0.0,0.0
+1429,2022,11/19/22,Purdue,Northwestern,FS1,Sat,12.0,0,0.0,0.0
+1430,2022,11/19/22,Michigan,Illinois,ABC,Sat,12.0,0,0.0,0.0
+1431,2022,11/19/22,Arizona St.,Oregon St.,ESPN2,Sat,14.5,0,0.0,0.0
+1432,2022,11/19/22,Notre Dame,Boston College,NBC,Sat,14.5,0,0.0,0.0
+1433,2022,11/19/22,Maryland,Ohio St.,ABC,Sat,15.5,0,0.0,0.0
+1434,2022,11/19/22,Kansas,Texas,FS1,Sat,15.5,0,0.0,0.0
+1435,2022,11/19/22,Rutgers,Penn St.,BTN,Sat,15.5,0,0.0,0.0
+1436,2022,11/19/22,Clemson,Miami,ESPN,Sat,15.5,0,0.0,0.0
+1437,2022,11/19/22,Kentucky,Georgia,CBS,Sat,15.5,0,0.0,0.0
+1438,2022,11/19/22,Minnesota,Iowa,FOX,Sat,16.0,0,0.0,0.0
+1439,2022,11/19/22,North Carolina,Georgia Tech,ESPN2,Sat,17.5,0,0.0,0.0
+1440,2022,11/19/22,Iowa St.,Texas Tech,FS1,Sat,19.0,0,0.0,0.0
+1441,2022,11/19/22,South Carolina,Tennessee,ESPN,Sat,19.0,0,0.0,0.0
+1442,2022,11/19/22,Missouri,New Mexico St.,ESPNU,Sat,19.5,0,0.0,0.0
+1443,2022,11/19/22,Oklahoma,Oklahoma St.,ABC,Sat,19.5,0,0.0,0.0
+1444,2022,11/19/22,UCLA,USC,FOX,Sat,20.0,0,0.0,0.0
+1445,2022,11/19/22,LSU,UAB,ESPN2,Sat,21.0,0,0.0,0.0
+1446,2022,11/19/22,Utah St.,San Jose St.,FS1,Sat,22.0,0,0.0,0.0
+1447,2022,11/19/22,Oregon,Utah,ESPN,Sat,22.5,0,0.0,0.0
+1448,2022,11/22/22,Ohio,Bowling Green,ESPNU,Tue,19.0,0,0.0,0.0
+1449,2022,11/24/22,Mississippi,Mississippi St.,ESPN,Thu,19.0,0,0.0,0.0
+1450,2022,11/25/22,Cincinnati,Tulane,ABC,Fri,12.0,1,0.0,0.0
+1451,2022,11/25/22,Boise St.,Utah St.,CBS,Fri,12.0,1,0.0,0.0
+1452,2022,11/25/22,Texas,Baylor,ESPN,Fri,12.0,1,0.0,0.0
+1453,2022,11/25/22,Arizona,Arizona St.,FS1,Fri,15.0,1,0.0,0.0
+1454,2022,11/25/22,Missouri,Arkansas,CBS,Fri,15.5,1,0.0,0.0
+1455,2022,11/25/22,North Carolina,North Carolina St.,ABC,Fri,15.5,1,0.0,0.0
+1456,2022,11/25/22,Iowa,Nebraska,BTN,Fri,16.0,1,0.0,0.0
+1457,2022,11/25/22,California,UCLA,FOX,Fri,16.5,1,0.0,0.0
+1458,2022,11/25/22,Florida St.,Florida,ABC,Fri,19.5,1,0.0,0.0
+1459,2022,11/25/22,Fresno St.,Wyoming,FS1,Fri,22.0,1,0.0,0.0
+1460,2022,11/26/22,Clemson,South Carolina,ABC,Sat,12.0,0,0.0,0.0
+1461,2022,11/26/22,Ohio St.,Michigan,FOX,Sat,12.0,0,0.0,0.0
+1462,2022,11/26/22,Maryland,Rutgers,BTN,Sat,12.0,0,0.0,0.0
+1463,2022,11/26/22,Georgia,Georgia Tech,ESPN,Sat,12.0,0,0.0,0.0
+1464,2022,11/26/22,Oklahoma St.,West Virginia,ESPN2,Sat,12.0,0,0.0,0.0
+1465,2022,11/26/22,Alabama,Auburn,CBS,Sat,15.5,0,0.0,0.0
+1466,2022,11/26/22,Wisconsin,Minnesota,ESPN,Sat,15.5,0,0.0,0.0
+1467,2022,11/26/22,SMU,Memphis,ESPN2,Sat,15.5,0,0.0,0.0
+1468,2022,11/26/22,Oregon St.,Oregon,ABC,Sat,15.5,0,0.0,0.0
+1469,2022,11/26/22,Penn St.,Michigan St.,FS1,Sat,16.0,0,0.0,0.0
+1470,2022,11/26/22,TCU,Iowa St.,FOX,Sat,16.0,0,0.0,0.0
+1471,2022,11/26/22,Texas A&M,LSU,ESPN,Sat,19.0,0,0.0,0.0
+1472,2022,11/26/22,South Florida,UCF,ESPN2,Sat,19.0,0,0.0,0.0
+1473,2022,11/26/22,Texas Tech,Oklahoma,FS1,Sat,19.5,0,0.0,0.0
+1474,2022,11/26/22,USC,Notre Dame,ABC,Sat,19.5,0,0.0,0.0
+1475,2022,11/26/22,Kansas St.,Kansas,FOX,Sat,20.0,0,0.0,0.0
+1476,2022,11/26/22,Washington St.,Washington,ESPN,Sat,22.5,0,0.0,0.0
+1477,2022,11/26/22,Stanford,BYU,FS1,Sat,23.0,0,0.0,0.0
+1478,2022,12/2/22,USC,Utah,FOX,Fri,20.0,0,1.0,0.0
+1479,2022,12/3/22,TCU,Kansas St.,ABC,Sat,12.0,0,1.0,0.0
+1480,2022,12/3/22,Ohio,Toledo,ESPN,Sat,12.0,0,1.0,0.0
+1481,2022,12/3/22,Troy,Coastal Carolina,ESPN,Sat,15.5,0,1.0,0.0
+1482,2022,12/3/22,Tulane,UCF,ABC,Sat,15.5,0,1.0,0.0
+1483,2022,12/3/22,Boise St.,Fresno St.,FOX,Sat,16.0,0,1.0,0.0
+1484,2022,12/3/22,Georgia,LSU,CBS,Sat,16.0,0,1.0,0.0
+1485,2022,12/3/22,North Carolina,Clemson,ABC,Sat,20.0,0,1.0,0.0
+1486,2022,12/3/22,Michigan,Purdue,FOX,Sat,20.0,0,1.0,0.0
+1487,2022,12/10/22,Army,Navy,CBS,Sat,15.0,0,0.0,0.0
+1488,2021,8/28/21,Illinois,Nebraska,FOX,Sat,13.0,0,0.0,0.0
+1489,2021,8/28/21,UCLA,Hawaii,ESPN,Sat,15.5,0,0.0,0.0
+1490,2021,9/1/21,Jacksonville St.,UAB,ESPN,Wed,19.5,0,0.0,0.0
+1491,2021,9/2/21,UCF,Boise St.,ESPN,Thu,21.5,0,0.0,0.0
+1492,2021,9/2/21,Appalachian St.,East Carolina,ESPNU,Thu,19.5,0,0.0,0.0
+1493,2021,9/2/21,Minnesota,Ohio St.,FOX,Thu,20.0,0,0.0,0.0
+1494,2021,9/3/21,Virginia Tech,North Carolina,ESPN,Fri,18.0,0,0.0,0.0
+1495,2021,9/3/21,Colorado St.,South Dakota State,FS1,Fri,21.0,0,0.0,0.0
+1496,2021,9/3/21,Northwestern,Michigan St.,ESPN,Fri,21.0,0,0.0,0.0
+1497,2021,9/4/21,Oklahoma,Tulane,ABC,Sat,12.0,0,0.0,0.0
+1498,2021,9/4/21,Kansas St.,Stanford,FS1,Sat,12.0,0,0.0,0.0
+1499,2021,9/4/21,Michigan,Western Michigan,ESPN,Sat,12.0,0,0.0,0.0
+1500,2021,9/4/21,Wisconsin,Penn St.,FOX,Sat,12.0,0,0.0,0.0
+1501,2021,9/4/21,Miami,Alabama,ABC,Sat,15.5,0,0.0,0.0
+1502,2021,9/4/21,Maryland,West Virginia,ESPN,Sat,15.5,0,0.0,0.0
+1503,2021,9/4/21,Iowa,Indiana,BTN,Sat,15.5,0,0.0,0.0
+1504,2021,9/4/21,Mississippi St.,Louisiana Tech,ESPNU,Sat,16.0,0,0.0,0.0
+1505,2021,9/4/21,Texas,Louisiana,FOX,Sat,16.0,0,0.0,0.0
+1506,2021,9/4/21,Purdue,Oregon St.,FS1,Sat,19.0,0,0.0,0.0
+1507,2021,9/4/21,Houston,Texas Tech,ESPN,Sat,19.0,0,0.0,0.0
+1508,2021,9/4/21,Illinois,UTSA,BTN,Sat,19.5,0,0.0,0.0
+1509,2021,9/4/21,Clemson,Georgia,ABC,Sat,19.5,0,0.0,0.0
+1510,2021,9/4/21,Texas A&M,Kent St.,ESPNU,Sat,20.0,0,0.0,0.0
+1511,2021,9/5/21,UCLA,LSU,FOX,Sun,20.0,0,0.0,0.0
+1512,2021,9/4/21,California,Nevada,FS1,Sat,22.5,0,0.0,0.0
+1513,2021,9/4/21,Arizona,BYU,ESPN,Sat,22.5,0,0.0,0.0
+1514,2021,9/5/21,Florida St.,Notre Dame,ABC,Sun,19.5,0,0.0,0.0
+1515,2021,9/6/21,Mississippi,Louisville,ESPN,Mon,20.0,0,0.0,0.0
+1516,2021,9/10/21,Coastal Carolina,Kansas,ESPN2,Fri,19.5,0,0.0,0.0
+1517,2021,9/10/21,Boise St.,UTEP,FS1,Fri,21.5,0,0.0,0.0
+1518,2021,9/11/21,East Carolina,South Carolina,ESPN2,Sat,12.0,0,0.0,0.0
+1519,2021,9/11/21,Ohio St.,Oregon,FOX,Sat,12.0,0,0.0,0.0
+1520,2021,9/11/21,Oklahoma St.,Tulsa,FS1,Sat,12.0,0,0.0,0.0
+1521,2021,9/11/21,Tennessee,Pittsburgh,ESPN,Sat,12.0,0,0.0,0.0
+1522,2021,9/11/21,South Florida,Florida,ABC,Sat,13.0,0,0.0,0.0
+1523,2021,9/11/21,Penn St.,Ball St.,FS1,Sat,15.5,0,0.0,0.0
+1524,2021,9/11/21,Colorado,Texas A&M,FOX,Sat,15.5,0,0.0,0.0
+1525,2021,9/11/21,TCU,California,ESPNU,Sat,15.5,0,0.0,0.0
+1526,2021,9/11/21,Nebraska,Buffalo,BTN,Sat,15.5,0,0.0,0.0
+1527,2021,9/11/21,Georgia,UAB,ESPN2,Sat,15.5,0,0.0,0.0
+1528,2021,9/11/21,Navy,Air Force,CBS,Sat,15.5,0,0.0,0.0
+1529,2021,9/11/21,Iowa St.,Iowa,ABC,Sat,16.5,0,0.0,0.0
+1530,2021,9/11/21,Mississippi St.,North Carolina St.,ESPN2,Sat,19.0,0,0.0,0.0
+1531,2021,9/11/21,Arkansas,Texas,ESPN,Sat,19.0,0,0.0,0.0
+1532,2021,9/11/21,Wisconsin,Eastern Michigan,FS1,Sat,19.0,0,0.0,0.0
+1533,2021,9/11/21,Miami,Appalachian St.,ESPNU,Sat,19.0,0,0.0,0.0
+1534,2021,9/11/21,Michigan,Washington,ABC,Sat,20.0,0,0.0,0.0
+1535,2021,9/11/21,BYU,Utah,ESPN,Sat,22.5,0,0.0,0.0
+1536,2021,9/11/21,Arizona St.,UNLV,ESPN2,Sat,22.5,0,0.0,0.0
+1537,2021,9/11/21,USC,Stanford,FOX,Sat,23.5,0,0.0,0.0
+1538,2021,9/11/21,Oregon St.,Hawaii,FS1,Sat,23.5,0,0.0,0.0
+1539,2021,9/16/21,Louisiana,Ohio,ESPN,Thu,20.0,0,0.0,0.0
+1540,2021,9/17/21,Louisville,UCF,ESPN,Fri,19.5,0,0.0,0.0
+1541,2021,9/17/21,Illinois,Maryland,FS1,Fri,21.0,0,0.0,0.0
+1542,2021,9/18/21,Miami,Michigan St.,ABC,Sat,12.0,0,0.0,0.0
+1543,2021,9/18/21,Buffalo,Coastal Carolina,ESPN2,Sat,12.0,0,0.0,0.0
+1544,2021,9/18/21,Michigan,Northern Illinois,BTN,Sat,12.0,0,0.0,0.0
+1545,2021,9/18/21,Oklahoma,Nebraska,FOX,Sat,12.0,0,0.0,0.0
+1546,2021,9/18/21,Indiana,Cincinnati,ESPN,Sat,12.0,0,0.0,0.0
+1547,2021,9/18/21,West Virginia,Virginia Tech,FS1,Sat,12.0,0,0.0,0.0
+1548,2021,9/18/21,Notre Dame,Purdue,NBC,Sat,14.5,0,0.0,0.0
+1549,2021,9/18/21,Washington St.,USC,FOX,Sat,15.5,0,0.0,0.0
+1550,2021,9/18/21,Florida,Alabama,CBS,Sat,15.5,0,0.0,0.0
+1551,2021,9/18/21,Ohio St.,Tulsa,FS1,Sat,15.5,0,0.0,0.0
+1552,2021,9/18/21,Wake Forest,Florida St.,ESPN,Sat,15.5,0,0.0,0.0
+1553,2021,9/18/21,Clemson,Georgia Tech,ABC,Sat,15.5,0,0.0,0.0
+1554,2021,9/18/21,Memphis,Mississippi St.,ESPN2,Sat,16.0,0,0.0,0.0
+1555,2021,9/18/21,Georgia,South Carolina,ESPN,Sat,19.0,0,0.0,0.0
+1556,2021,9/18/21,Penn St.,Auburn,ABC,Sat,19.5,0,0.0,0.0
+1557,2021,9/18/21,Mississippi,Tulane,ESPN2,Sat,20.0,0,0.0,0.0
+1558,2021,9/18/21,Boise St.,Oklahoma St.,FS1,Sat,21.0,0,0.0,0.0
+1559,2021,9/18/21,BYU,Arizona St.,ESPN,Sat,22.5,0,0.0,0.0
+1560,2021,9/18/21,Hawaii,San Jose St.,FS1,Sat,23.5,0,0.0,0.0
+1561,2021,9/23/21,Appalachian St.,Marshall,ESPN,Thu,19.5,0,0.0,0.0
+1562,2021,9/24/21,Virginia,Wake Forest,ESPN2,Fri,19.0,0,0.0,0.0
+1563,2021,9/25/21,Boston College,Missouri,ESPN2,Sat,12.0,0,0.0,0.0
+1564,2021,9/25/21,Mississippi St.,LSU,ESPN,Sat,12.0,0,0.0,0.0
+1565,2021,9/25/21,Texas,Texas Tech,ABC,Sat,12.0,0,0.0,0.0
+1566,2021,9/25/21,TCU,SMU,FS1,Sat,12.0,0,0.0,0.0
+1567,2021,9/25/21,Wisconsin,Notre Dame,FOX,Sat,12.0,0,0.0,0.0
+1568,2021,9/25/21,Utah St.,Boise St.,CBS,Sat,12.0,0,0.0,0.0
+1569,2021,9/25/21,North Carolina St.,Clemson,ESPN,Sat,15.5,0,0.0,0.0
+1570,2021,9/25/21,Baylor,Iowa St.,FOX,Sat,15.5,0,0.0,0.0
+1571,2021,9/25/21,Michigan,Rutgers,ABC,Sat,15.5,0,0.0,0.0
+1572,2021,9/25/21,Iowa,Colorado St.,FS1,Sat,15.5,0,0.0,0.0
+1573,2021,9/25/21,Arkansas,Texas A&M,CBS,Sat,15.5,0,0.0,0.0
+1574,2021,9/25/21,Florida St.,Louisville,ESPN2,Sat,15.5,0,0.0,0.0
+1575,2021,9/25/21,South Carolina,Kentucky,ESPN2,Sat,19.0,0,0.0,0.0
+1576,2021,9/25/21,Florida,Tennessee,ESPN,Sat,19.0,0,0.0,0.0
+1577,2021,9/25/21,Michigan St.,Nebraska,FS1,Sat,19.0,0,0.0,0.0
+1578,2021,9/25/21,Ohio St.,Akron,BTN,Sat,19.5,0,0.0,0.0
+1579,2021,9/25/21,Oklahoma,West Virginia,ABC,Sat,19.0,0,0.0,0.0
+1580,2021,9/25/21,BYU,South Florida,ESPN2,Sat,22.5,0,0.0,0.0
+1581,2021,9/25/21,Oregon,Arizona,ESPN,Sat,22.5,0,0.0,0.0
+1582,2021,9/25/21,USC,Oregon St.,FS1,Sat,22.5,0,0.0,0.0
+1583,2021,9/25/21,Arizona St.,Colorado,ESPNU,Sat,22.5,0,0.0,0.0
+1584,2021,9/30/21,Miami,Virginia,ESPN,Thu,19.5,0,0.0,0.0
+1585,2021,10/1/21,Tulsa,Houston,ESPN,Fri,19.5,0,0.0,0.0
+1586,2021,10/1/21,Maryland,Iowa,FS1,Fri,20.0,0,0.0,0.0
+1587,2021,10/2/21,Wisconsin,Michigan,FOX,Sat,12.0,0,0.0,0.0
+1588,2021,10/2/21,Georgia,Arkansas,ESPN,Sat,12.0,0,0.0,0.0
+1589,2021,10/2/21,TCU,Texas,ABC,Sat,12.0,0,0.0,0.0
+1590,2021,10/2/21,North Carolina,Duke,ESPN2,Sat,12.0,0,0.0,0.0
+1591,2021,10/2/21,Notre Dame,Cincinnati,NBC,Sat,14.5,0,0.0,0.0
+1592,2021,10/2/21,Stanford,Oregon,ABC,Sat,15.5,0,0.0,0.0
+1593,2021,10/2/21,Kansas St.,Oklahoma,FOX,Sat,15.5,0,0.0,0.0
+1594,2021,10/2/21,Alabama,Mississippi,CBS,Sat,15.5,0,0.0,0.0
+1595,2021,10/2/21,Rutgers,Ohio St.,BTN,Sat,15.5,0,0.0,0.0
+1596,2021,10/2/21,West Virginia,Texas Tech,ESPN2,Sat,15.5,0,0.0,0.0
+1597,2021,10/2/21,Boise St.,Nevada,FS1,Sat,15.5,0,0.0,0.0
+1598,2021,10/2/21,Kentucky,Florida,ESPN,Sat,18.0,0,0.0,0.0
+1599,2021,10/2/21,Iowa St.,Kansas,FS1,Sat,19.0,0,0.0,0.0
+1600,2021,10/2/21,Oklahoma St.,Baylor,ESPN2,Sat,19.0,0,0.0,0.0
+1601,2021,10/2/21,Penn St.,Indiana,ABC,Sat,19.5,0,0.0,0.0
+1602,2021,10/2/21,LSU,Auburn,ESPN,Sat,21.0,0,0.0,0.0
+1603,2021,10/2/21,UCLA,Arizona St.,FS1,Sat,22.5,0,0.0,0.0
+1604,2021,10/7/21,Tulane,Houston,ESPN,Thu,19.5,0,0.0,0.0
+1605,2021,10/8/21,Cincinnati,Temple,ESPN,Fri,19.0,0,0.0,0.0
+1606,2021,10/8/21,Arizona St.,Stanford,ESPN,Fri,22.5,0,0.0,0.0
+1607,2021,10/9/21,Tennessee,South Carolina,ESPN2,Sat,12.0,0,0.0,0.0
+1608,2021,10/9/21,Ohio St.,Maryland,FOX,Sat,12.0,0,0.0,0.0
+1609,2021,10/9/21,Rutgers,Michigan St.,BTN,Sat,12.0,0,0.0,0.0
+1610,2021,10/9/21,Texas,Oklahoma,ABC,Sat,12.0,0,0.0,0.0
+1611,2021,10/9/21,Mississippi,Arkansas,ESPN,Sat,12.0,0,0.0,0.0
+1612,2021,10/9/21,Baylor,West Virginia,FS1,Sat,12.0,0,0.0,0.0
+1613,2021,10/9/21,Illinois,Wisconsin,BTN,Sat,15.5,0,0.0,0.0
+1614,2021,10/9/21,Syracuse,Wake Forest,ESPN2,Sat,15.5,0,0.0,0.0
+1615,2021,10/9/21,North Carolina,Florida St.,ESPN,Sat,15.5,0,0.0,0.0
+1616,2021,10/9/21,BYU,Boise St.,ABC,Sat,15.5,0,0.0,0.0
+1617,2021,10/9/21,Auburn,Georgia,CBS,Sat,15.5,0,0.0,0.0
+1618,2021,10/9/21,Iowa,Penn St.,FOX,Sat,16.0,0,0.0,0.0
+1619,2021,10/9/21,Texas Tech,TCU,ESPN,Sat,19.0,0,0.0,0.0
+1620,2021,10/9/21,Nebraska,Michigan,ABC,Sat,19.5,0,0.0,0.0
+1621,2021,10/9/21,Texas A&M,Alabama,CBS,Sat,20.0,0,0.0,0.0
+1622,2021,10/9/21,USC,Utah,FOX,Sat,20.0,0,0.0,0.0
+1623,2021,10/9/21,Nevada,New Mexico St.,ESPN,Sat,22.5,0,0.0,0.0
+1624,2021,10/12/21,Louisiana,Appalachian St.,ESPN2,Tue,19.5,0,0.0,0.0
+1625,2021,10/14/21,Memphis,Navy,ESPN,Thu,19.5,0,0.0,0.0
+1626,2021,10/15/21,Syracuse,Clemson,ESPN,Fri,19.0,0,0.0,0.0
+1627,2021,10/15/21,Oregon,California,ESPN,Fri,22.5,0,0.0,0.0
+1628,2021,10/16/21,Cincinnati,UCF,ABC,Sat,12.0,0,0.0,0.0
+1629,2021,10/16/21,LSU,Florida,ESPN,Sat,12.0,0,0.0,0.0
+1630,2021,10/16/21,Arkansas,Auburn,CBS,Sat,12.0,0,0.0,0.0
+1631,2021,10/16/21,Northwestern,Rutgers,BTN,Sat,12.0,0,0.0,0.0
+1632,2021,10/16/21,Minnesota,Nebraska,ESPN2,Sat,12.0,0,0.0,0.0
+1633,2021,10/16/21,Texas,Oklahoma St.,FOX,Sat,12.0,0,0.0,0.0
+1634,2021,10/16/21,Indiana,Michigan St.,FS1,Sat,12.0,0,0.0,0.0
+1635,2021,10/16/21,Georgia,Kentucky,CBS,Sat,15.5,0,0.0,0.0
+1636,2021,10/16/21,Iowa,Purdue,ABC,Sat,15.5,0,0.0,0.0
+1637,2021,10/16/21,Virginia Tech,Pittsburgh,ESPN2,Sat,15.5,0,0.0,0.0
+1638,2021,10/16/21,Baylor,BYU,ESPN,Sat,15.5,0,0.0,0.0
+1639,2021,10/16/21,Mississippi St.,Alabama,ESPN,Sat,19.0,0,0.0,0.0
+1640,2021,10/16/21,Washington St.,Stanford,ESPNU,Sat,19.5,0,0.0,0.0
+1641,2021,10/16/21,Oklahoma,TCU,ABC,Sat,19.5,0,0.0,0.0
+1642,2021,10/16/21,Kansas St.,Iowa St.,ESPN2,Sat,19.5,0,0.0,0.0
+1643,2021,10/16/21,Wisconsin,Army,BTN,Sat,20.0,0,0.0,0.0
+1644,2021,10/16/21,Washington,UCLA,FOX,Sat,20.5,0,0.0,0.0
+1645,2021,10/16/21,Boise St.,Air Force,FS1,Sat,21.0,0,0.0,0.0
+1646,2021,10/16/21,Utah,Arizona St.,ESPN,Sat,22.0,0,0.0,0.0
+1647,2021,10/20/21,Appalachian St.,Coastal Carolina,ESPN2,Wed,19.5,0,0.0,0.0
+1648,2021,10/21/21,SMU,Tulane,ESPN,Thu,19.5,0,0.0,0.0
+1649,2021,10/22/21,UCF,Memphis,ESPN2,Fri,19.0,0,0.0,0.0
+1650,2021,10/22/21,Arizona,Washington,ESPN2,Fri,22.5,0,0.0,0.0
+1651,2021,10/23/21,Texas Tech,Kansas St.,FS1,Sat,12.0,0,0.0,0.0
+1652,2021,10/23/21,Penn St.,Illinois,ABC,Sat,12.0,0,0.0,0.0
+1653,2021,10/23/21,Michigan,Northwestern,FOX,Sat,12.0,0,0.0,0.0
+1654,2021,10/23/21,Kansas,Oklahoma,ESPN,Sat,12.0,0,0.0,0.0
+1655,2021,10/23/21,Navy,Cincinnati,ESPN2,Sat,12.0,0,0.0,0.0
+1656,2021,10/23/21,Purdue,Wisconsin,BTN,Sat,15.0,0,0.0,0.0
+1657,2021,10/23/21,Minnesota,Maryland,ESPN2,Sat,15.5,0,0.0,0.0
+1658,2021,10/23/21,Mississippi,LSU,CBS,Sat,15.5,0,0.0,0.0
+1659,2021,10/23/21,Washington St.,BYU,FS1,Sat,15.5,0,0.0,0.0
+1660,2021,10/23/21,UCLA,Oregon,ABC,Sat,15.5,0,0.0,0.0
+1661,2021,10/23/21,Iowa St.,Oklahoma St.,FOX,Sat,15.5,0,0.0,0.0
+1662,2021,10/23/21,Pittsburgh,Clemson,ESPN,Sat,15.5,0,0.0,0.0
+1663,2021,10/23/21,Fresno St.,Nevada,FS1,Sat,19.0,0,0.0,0.0
+1664,2021,10/23/21,Alabama,Tennessee,ESPN,Sat,19.0,0,0.0,0.0
+1665,2021,10/23/21,Indiana,Ohio St.,ABC,Sat,19.5,0,0.0,0.0
+1666,2021,10/23/21,Notre Dame,USC,NBC,Sat,19.5,0,0.0,0.0
+1667,2021,10/23/21,TCU,West Virginia,ESPNU,Sat,19.5,0,0.0,0.0
+1668,2021,10/23/21,Miami,North Carolina St.,ESPN2,Sat,19.5,0,0.0,0.0
+1669,2021,10/28/21,Coastal Carolina,Troy,ESPN2,Thu,19.5,0,0.0,0.0
+1670,2021,10/28/21,East Carolina,South Florida,ESPN,Thu,19.5,0,0.0,0.0
+1671,2021,10/29/21,Tulsa,Navy,ESPN2,Fri,19.5,0,0.0,0.0
+1672,2021,10/30/21,Michigan St.,Michigan,FOX,Sat,12.0,0,0.0,0.0
+1673,2021,10/30/21,Wisconsin,Iowa,ESPN,Sat,12.0,0,0.0,0.0
+1674,2021,10/30/21,Baylor,Texas,ABC,Sat,12.0,0,0.0,0.0
+1675,2021,10/30/21,Tulane,Cincinnati,ESPN2,Sat,12.0,0,0.0,0.0
+1676,2021,10/30/21,Arizona St.,Washington St.,FS1,Sat,15.5,0,0.0,0.0
+1677,2021,10/30/21,Clemson,Florida St.,ESPN,Sat,15.5,0,0.0,0.0
+1678,2021,10/30/21,Oregon,Colorado,FOX,Sat,15.5,0,0.0,0.0
+1679,2021,10/30/21,Nebraska,Purdue,ESPN2,Sat,15.5,0,0.0,0.0
+1680,2021,10/30/21,Northwestern,Minnesota,BTN,Sat,15.5,0,0.0,0.0
+1681,2021,10/30/21,Oklahoma,Texas Tech,ABC,Sat,15.5,0,0.0,0.0
+1682,2021,10/30/21,Florida,Georgia,CBS,Sat,15.5,0,0.0,0.0
+1683,2021,10/30/21,Auburn,Mississippi,ESPN,Sat,19.0,0,0.0,0.0
+1684,2021,10/30/21,Oklahoma St.,Kansas,FS1,Sat,19.0,0,0.0,0.0
+1685,2021,10/30/21,Houston,SMU,ESPN2,Sat,19.0,0,0.0,0.0
+1686,2021,10/30/21,Notre Dame,North Carolina,NBC,Sat,19.5,0,0.0,0.0
+1687,2021,10/30/21,Ohio St.,Penn St.,ABC,Sat,19.5,0,0.0,0.0
+1688,2021,10/30/21,Utah,UCLA,ESPN,Sat,22.0,0,0.0,0.0
+1689,2021,10/30/21,BYU,Virginia,ESPN2,Sat,22.5,0,0.0,0.0
+1690,2021,10/30/21,Stanford,Washington,FS1,Sat,22.5,0,0.0,0.0
+1691,2021,11/2/21,Toledo,Eastern Michigan,ESPN2,Tue,19.5,0,0.0,0.0
+1692,2021,11/3/21,Kent St.,Northern Illinois,ESPN2,Wed,19.0,0,0.0,0.0
+1693,2021,11/4/21,Louisiana,Georgia St.,ESPN,Thu,19.5,0,0.0,0.0
+1694,2021,11/5/21,Boston College,Virginia Tech,ESPN2,Fri,19.5,0,0.0,0.0
+1695,2021,11/5/21,Stanford,Utah,FS1,Fri,22.5,0,0.0,0.0
+1696,2021,11/6/21,Air Force,Army,CBS,Sat,11.5,0,0.0,0.0
+1697,2021,11/6/21,North Carolina,Wake Forest,ABC,Sat,12.0,0,0.0,0.0
+1698,2021,11/6/21,Minnesota,Illinois,ESPN2,Sat,12.0,0,0.0,0.0
+1699,2021,11/6/21,Nebraska,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+1700,2021,11/6/21,Georgia,Missouri,ESPN,Sat,12.0,0,0.0,0.0
+1701,2021,11/6/21,Kansas,Kansas St.,FS1,Sat,12.0,0,0.0,0.0
+1702,2021,11/6/21,Maryland,Penn St.,FS1,Sat,15.5,0,0.0,0.0
+1703,2021,11/6/21,West Virginia,Oklahoma St.,ESPN,Sat,15.5,0,0.0,0.0
+1704,2021,11/6/21,Texas A&M,Auburn,CBS,Sat,15.5,0,0.0,0.0
+1705,2021,11/6/21,Notre Dame,Navy,NBC,Sat,15.5,0,0.0,0.0
+1706,2021,11/6/21,TCU,Baylor,FOX,Sat,15.5,0,0.0,0.0
+1707,2021,11/6/21,Cincinnati,Tulsa,ESPN2,Sat,15.5,0,0.0,0.0
+1708,2021,11/6/21,Purdue,Michigan St.,ABC,Sat,15.5,0,0.0,0.0
+1709,2021,11/6/21,Rutgers,Wisconsin,BTN,Sat,15.5,0,0.0,0.0
+1710,2021,11/6/21,Northwestern,Iowa,BTN,Sat,19.0,0,0.0,0.0
+1711,2021,11/6/21,Alabama,LSU,ESPN,Sat,19.0,0,0.0,0.0
+1712,2021,11/6/21,Kentucky,Tennessee,ESPN2,Sat,19.0,0,0.0,0.0
+1713,2021,11/6/21,Iowa St.,Texas,FS1,Sat,19.5,0,0.0,0.0
+1714,2021,11/6/21,Michigan,Indiana,FOX,Sat,19.5,0,0.0,0.0
+1715,2021,11/6/21,Washington,Oregon,ABC,Sat,19.5,0,0.0,0.0
+1716,2021,11/6/21,UTEP,UTSA,ESPN2,Sat,22.5,0,0.0,0.0
+1717,2021,11/6/21,Arizona St.,USC,ESPN,Sat,22.5,0,0.0,0.0
+1718,2021,11/6/21,Hawaii,San Diego St.,FS1,Sat,23.0,0,0.0,0.0
+1719,2021,11/9/21,Eastern Michigan,Ohio,ESPN2,Tue,20.0,0,0.0,0.0
+1720,2021,11/10/21,Northern Illinois,Ball St.,ESPN2,Wed,19.0,0,0.0,0.0
+1721,2021,11/10/21,Central Michigan,Kent St.,ESPNU,Wed,20.0,0,0.0,0.0
+1722,2021,11/11/21,Pittsburgh,North Carolina,ESPN,Thu,19.5,0,0.0,0.0
+1723,2021,11/12/21,South Florida,Cincinnati,ESPN2,Fri,18.0,0,0.0,0.0
+1724,2021,11/12/21,Boise St.,Wyoming,FS1,Fri,21.0,0,0.0,0.0
+1725,2021,11/13/21,Penn St.,Michigan,ABC,Sat,12.0,0,0.0,0.0
+1726,2021,11/13/21,Wisconsin,Northwestern,ESPN2,Sat,12.0,0,0.0,0.0
+1727,2021,11/13/21,Indiana,Rutgers,BTN,Sat,12.0,0,0.0,0.0
+1728,2021,11/13/21,Auburn,Mississippi St.,ESPN,Sat,12.0,0,0.0,0.0
+1729,2021,11/13/21,Baylor,Oklahoma,FOX,Sat,12.0,0,0.0,0.0
+1730,2021,11/13/21,Kansas St.,West Virginia,FS1,Sat,12.0,0,0.0,0.0
+1731,2021,11/13/21,Ohio St.,Purdue,ABC,Sat,15.5,0,0.0,0.0
+1732,2021,11/13/21,Florida St.,Miami,ESPN,Sat,15.5,0,0.0,0.0
+1733,2021,11/13/21,Tennessee,Georgia,CBS,Sat,15.5,0,0.0,0.0
+1734,2021,11/13/21,Iowa,Minnesota,BTN,Sat,15.5,0,0.0,0.0
+1735,2021,11/13/21,Texas Tech,Iowa St.,ESPN2,Sat,15.5,0,0.0,0.0
+1736,2021,11/13/21,Michigan St.,Maryland,FOX,Sat,16.0,0,0.0,0.0
+1737,2021,11/13/21,Mississippi,Texas A&M,ESPN,Sat,19.0,0,0.0,0.0
+1738,2021,11/13/21,Washington,Arizona St.,FS1,Sat,19.0,0,0.0,0.0
+1739,2021,11/13/21,Vanderbilt,Kentucky,ESPN2,Sat,19.0,0,0.0,0.0
+1740,2021,11/13/21,Texas,Kansas,ESPNU,Sat,19.5,0,0.0,0.0
+1741,2021,11/13/21,Virginia,Notre Dame,ABC,Sat,19.5,0,0.0,0.0
+1742,2021,11/13/21,Oklahoma St.,TCU,FOX,Sat,20.0,0,0.0,0.0
+1743,2021,11/13/21,San Jose St.,Utah St.,FS1,Sat,22.5,0,0.0,0.0
+1744,2021,11/13/21,Oregon,Washington St.,ESPN,Sat,22.5,0,0.0,0.0
+1745,2021,11/16/21,Eastern Michigan,Western Michigan,ESPN2,Tue,19.5,0,0.0,0.0
+1746,2021,11/17/21,Buffalo,Northern Illinois,ESPN2,Wed,19.0,0,0.0,0.0
+1747,2021,11/18/21,Duke,Louisville,ESPN,Thu,19.5,0,0.0,0.0
+1748,2021,11/19/21,Nevada,Air Force,FS1,Fri,21.0,0,0.0,0.0
+1749,2021,11/19/21,Houston,Memphis,ESPN2,Fri,21.0,0,0.0,0.0
+1750,2021,11/20/21,Ohio St.,Michigan St.,ABC,Sat,12.0,0,0.0,0.0
+1751,2021,11/20/21,Clemson,Wake Forest,ESPN,Sat,12.0,0,0.0,0.0
+1752,2021,11/20/21,Oklahoma,Iowa St.,FOX,Sat,12.0,0,0.0,0.0
+1753,2021,11/20/21,West Virginia,Texas,ESPN2,Sat,12.0,0,0.0,0.0
+1754,2021,11/20/21,Iowa,Illinois,FS1,Sat,14.0,0,0.0,0.0
+1755,2021,11/20/21,Notre Dame,Georgia Tech,NBC,Sat,14.5,0,0.0,0.0
+1756,2021,11/20/21,Alabama,Arkansas,CBS,Sat,15.5,0,0.0,0.0
+1757,2021,11/20/21,Pittsburgh,Virginia,ESPN2,Sat,15.5,0,0.0,0.0
+1758,2021,11/20/21,Wisconsin,Nebraska,ABC,Sat,15.5,0,0.0,0.0
+1759,2021,11/20/21,Cincinnati,SMU,ESPN,Sat,15.5,0,0.0,0.0
+1760,2021,11/20/21,USC,UCLA,FOX,Sat,16.0,0,0.0,0.0
+1761,2021,11/20/21,Kansas St.,Baylor,FS1,Sat,17.5,0,0.0,0.0
+1762,2021,11/20/21,South Carolina,Auburn,ESPN,Sat,19.0,0,0.0,0.0
+1763,2021,11/20/21,Tennessee,South Alabama,ESPNU,Sat,19.5,0,0.0,0.0
+1764,2021,11/20/21,Utah,Oregon,ABC,Sat,19.5,0,0.0,0.0
+1765,2021,11/20/21,Texas Tech,Oklahoma St.,FOX,Sat,20.0,0,0.0,0.0
+1766,2021,11/20/21,Boise St.,New Mexico,FS1,Sat,21.0,0,0.0,0.0
+1767,2021,11/20/21,LSU,Louisiana Monroe,ESPN2,Sat,21.0,0,0.0,0.0
+1768,2021,11/20/21,Oregon St.,Arizona St.,ESPN,Sat,22.5,0,0.0,0.0
+1769,2021,11/25/21,San Jose St.,Fresno St.,FS1,Thu,15.5,0,0.0,0.0
+1770,2021,11/25/21,Mississippi St.,Mississippi,ESPN,Thu,19.5,0,0.0,0.0
+1771,2021,11/26/21,San Diego St.,Boise St.,CBS,Fri,12.0,1,0.0,0.0
+1772,2021,11/26/21,Texas,Kansas St.,FOX,Fri,12.0,1,0.0,0.0
+1773,2021,11/26/21,New Mexico,Utah St.,FS1,Fri,13.0,1,0.0,0.0
+1774,2021,11/26/21,Nebraska,Iowa,BTN,Fri,13.5,1,0.0,0.0
+1775,2021,11/26/21,East Carolina,Cincinnati,ABC,Fri,15.5,1,0.0,0.0
+1776,2021,11/26/21,Arkansas,Missouri,CBS,Fri,15.5,1,0.0,0.0
+1777,2021,11/26/21,UCF,South Florida,ESPN,Fri,15.5,1,0.0,0.0
+1778,2021,11/26/21,Utah,Colorado,FOX,Fri,16.0,1,0.0,0.0
+1779,2021,11/26/21,Iowa St.,TCU,FS1,Fri,16.5,1,0.0,0.0
+1780,2021,11/26/21,North Carolina St.,North Carolina,ESPN,Fri,19.0,1,0.0,0.0
+1781,2021,11/26/21,Washington,Washington St.,FS1,Fri,20.0,1,0.0,0.0
+1782,2021,11/27/21,Florida,Florida St.,ESPN,Sat,12.0,0,0.0,0.0
+1783,2021,11/27/21,Georgia Tech,Georgia,ABC,Sat,12.0,0,0.0,0.0
+1784,2021,11/27/21,Baylor,Texas Tech,FS1,Sat,12.0,0,0.0,0.0
+1785,2021,11/27/21,Rutgers,Maryland,BTN,Sat,12.0,0,0.0,0.0
+1786,2021,11/27/21,Michigan,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+1787,2021,11/27/21,Boston College,Wake Forest,ESPN2,Sat,12.0,0,0.0,0.0
+1788,2021,11/27/21,Oregon,Oregon St.,ESPN,Sat,15.5,0,0.0,0.0
+1789,2021,11/27/21,Auburn,Alabama,CBS,Sat,15.5,0,0.0,0.0
+1790,2021,11/27/21,Purdue,Indiana,FS1,Sat,15.5,0,0.0,0.0
+1791,2021,11/27/21,Michigan St.,Penn St.,ABC,Sat,15.5,0,0.0,0.0
+1792,2021,11/27/21,Illinois,Northwestern,BTN,Sat,15.5,0,0.0,0.0
+1793,2021,11/27/21,SMU,Tulsa,ESPN2,Sat,16.0,0,0.0,0.0
+1794,2021,11/27/21,Minnesota,Wisconsin,FOX,Sat,16.0,0,0.0,0.0
+1795,2021,11/27/21,Kansas,West Virginia,FS1,Sat,19.0,0,0.0,0.0
+1796,2021,11/27/21,LSU,Texas A&M,ESPN,Sat,19.0,0,0.0,0.0
+1797,2021,11/27/21,Louisville,Kentucky,ESPN2,Sat,19.5,0,0.0,0.0
+1798,2021,11/27/21,Oklahoma St.,Oklahoma,ABC,Sat,19.5,0,0.0,0.0
+1799,2021,11/27/21,Stanford,Notre Dame,FOX,Sat,20.0,0,0.0,0.0
+1800,2021,11/27/21,UCLA,California,FS1,Sat,22.5,0,0.0,0.0
+1801,2021,11/27/21,USC,BYU,ESPN,Sat,22.5,0,0.0,0.0
+1802,2021,12/3/21,Utah,Oregon,ABC,Fri,20.0,0,1.0,0.0
+1803,2021,12/4/21,Oklahoma St.,Baylor,ABC,Sat,12.0,0,1.0,0.0
+1804,2021,12/4/21,Northern Illinois,Kent St.,ESPN,Sat,12.0,0,1.0,0.0
+1805,2021,12/4/21,San Diego St.,Utah St.,FOX,Sat,15.0,0,1.0,0.0
+1806,2021,12/4/21,Louisiana,Appalachian St.,ESPN,Sat,15.5,0,1.0,0.0
+1807,2021,12/4/21,Cincinnati,Houston,ABC,Sat,16.0,0,1.0,0.0
+1808,2021,12/4/21,Alabama,Georgia,CBS,Sat,16.0,0,1.0,0.0
+1809,2021,12/4/21,Iowa,Michigan,FOX,Sat,20.0,0,1.0,0.0
+1810,2021,12/4/21,Wake Forest,Pittsburgh,ABC,Sat,20.0,0,1.0,0.0
+1811,2021,12/4/21,California,USC,FS1,Sat,23.0,0,0.0,0.0
+1812,2021,12/11/21,Army,Navy,CBS,Sat,15.0,0,0.0,0.0
+1813,2025,8/23/25,Kansas St.,Iowa St.,ESPN,Sat,12.0,0,0.0,0.0
+1814,2025,8/28/25,South Florida,Boise St.,ESPN,Thu,17.5,0,0.0,0.0
+1815,2025,8/28/25,Cincinnati,Nebraska,ESPN,Thu,21.0,0,0.0,0.0
+1816,2025,8/29/25,Charlotte,Appalachian St.,ESPNU,Fri,19.0,0,0.0,0.0
+1817,2025,8/29/25,Colorado,Georgia Tech,ESPN,Fri,20.0,0,0.0,0.0
+1818,2025,8/30/25,Ohio St.,Texas,FOX,Sat,12.0,0,0.0,0.0
+1819,2025,8/30/25,Southern Miss,Mississippi St.,ESPN,Sat,12.0,0,0.0,0.0
+1820,2025,8/30/25,Tennessee,Syracuse,ABC,Sat,12.0,0,0.0,0.0
+1821,2025,8/30/25,Tulane,Northwestern,ESPNU,Sat,12.0,0,0.0,0.0
+1822,2025,8/30/25,Florida St.,Alabama,ABC,Sat,16.0,0,0.0,0.0
+1823,2025,8/30/25,Penn St.,Nevada,CBS,Sat,15.5,0,0.0,0.0
+1824,2025,8/30/25,Georgia,Marshall,ESPN,Sat,15.5,0,0.0,0.0
+1825,2025,8/30/25,Texas A&M,UTSA,ESPN,Sat,19.0,0,0.0,0.0
+1826,2025,8/30/25,Clemson,LSU,ABC,Sat,19.5,0,0.0,0.0
+1827,2025,8/30/25,Oregon St.,California,ESPN,Sat,22.5,0,0.0,0.0
+1828,2025,8/31/25,South Carolina,Virginia Tech,ESPN,Sun,15.0,0,0.0,0.0
+1829,2025,8/31/25,Miami,Notre Dame,ABC,Sun,19.5,0,0.0,0.0
+1830,2025,9/1/25,North Carolina,TCU,ESPN,Mon,20.0,0,0.0,0.0
+1831,2025,9/5/25,Louisville,James Madison,ESPN2,Fri,19.0,0,0.0,0.0
+1832,2025,9/6/25,Pittsburgh,Central Michigan,ESPNU,Sat,12.0,0,0.0,0.0
+1833,2025,9/6/25,Duke,Illinois,ESPN,Sat,12.0,0,0.0,0.0
+1834,2025,9/6/25,Texas,San Jose St.,ABC,Sat,12.0,0,0.0,0.0
+1835,2025,9/6/25,SMU,Baylor,CW,Sat,12.0,0,0.0,0.0
+1836,2025,9/6/25,Iowa St.,Iowa,FOX,Sat,12.0,0,0.0,0.0
+1837,2025,9/6/25,North Carolina St.,Virginia,ESPN2,Sat,12.0,0,0.0,0.0
+1838,2025,9/6/25,Oregon,Oklahoma St.,CBS,Sat,15.5,0,0.0,0.0
+1839,2025,9/6/25,Missouri,Kansas,ESPN2,Sat,15.5,0,0.0,0.0
+1840,2025,9/6/25,Kentucky,Mississippi,ABC,Sat,15.5,0,0.0,0.0
+1841,2025,9/6/25,Colorado,Delaware,FOX,Sat,15.5,0,0.0,0.0
+1842,2025,9/6/25,Oregon St.,Fresno St.,CW,Sat,15.5,0,0.0,0.0
+1843,2025,9/6/25,Ohio,West Virginia,ESPNU,Sat,16.0,0,0.0,0.0
+1844,2025,9/6/25,Kansas St.,Army,ESPN,Sat,19.0,0,0.0,0.0
+1845,2025,9/6/25,Oklahoma,Michigan,ABC,Sat,19.5,0,0.0,0.0
+1846,2025,9/6/25,Auburn,Ball St.,ESPNU,Sat,19.5,0,0.0,0.0
+1847,2025,9/6/25,Mississippi St.,Arizona St.,ESPN2,Sat,19.5,0,0.0,0.0
+1848,2025,9/6/25,BYU,Stanford,ESPN,Sat,22.5,0,0.0,0.0
+1849,2025,9/6/25,Washington St.,San Diego St.,CW,Sat,22.5,0,0.0,0.0
+1850,2025,9/11/25,Wake Forest,North Carolina St.,ESPN,Thu,19.5,0,0.0,0.0
+1851,2025,9/12/25,Houston,Colorado,ESPN,Fri,19.5,0,0.0,0.0
+1852,2025,9/13/25,Temple,Oklahoma,ESPN2,Sat,12.0,0,0.0,0.0
+1853,2025,9/13/25,Alabama,Wisconsin,ABC,Sat,12.0,0,0.0,0.0
+1854,2025,9/13/25,Georgia Tech,Clemson,ESPN,Sat,12.0,0,0.0,0.0
+1855,2025,9/13/25,Troy,Memphis,ESPNU,Sat,12.0,0,0.0,0.0
+1856,2025,9/13/25,Tennessee,Georgia,ABC,Sat,15.5,0,0.0,0.0
+1857,2025,9/13/25,West Virginia,Pittsburgh,ESPN,Sat,15.5,0,0.0,0.0
+1858,2025,9/13/25,North Texas,Washington St.,ESPNU,Sat,15.5,0,0.0,0.0
+1859,2025,9/13/25,Arkansas St.,Iowa St.,ESPN2,Sat,16.0,0,0.0,0.0
+1860,2025,9/13/25,Miami,South Florida,CW,Sat,16.5,0,0.0,0.0
+1861,2025,9/13/25,Mississippi,Arkansas,ESPN,Sat,19.0,0,0.0,0.0
+1862,2025,9/13/25,Notre Dame,Texas A&M,NBC,Sat,20.0,0,0.0,0.0
+1863,2025,9/13/25,LSU,Florida,ABC,Sat,19.5,0,0.0,0.0
+1864,2025,9/13/25,Kentucky,Eastern Michigan,ESPNU,Sat,19.5,0,0.0,0.0
+1865,2025,9/13/25,Tulane,Duke,ESPN2,Sat,20.0,0,0.0,0.0
+1866,2025,9/13/25,California,Minnesota,ESPN,Sat,22.5,0,0.0,0.0
+1867,2025,9/18/25,Charlotte,Rice,ESPN,Thu,19.5,0,0.0,0.0
+1868,2025,9/19/25,Oklahoma St.,Tulsa,ESPN,Fri,19.5,0,0.0,0.0
+1869,2025,9/19/25,Rutgers,Iowa,FOX,Fri,20.0,0,0.0,1.0
+1870,2025,9/20/25,Memphis,Arkansas,ABC,Sat,12.0,0,0.0,0.0
+1871,2025,9/20/25,Clemson,Syracuse,ESPN,Sat,12.0,0,0.0,0.0
+1872,2025,9/20/25,Miami Ohio,UNLV,ESPNU,Sat,12.0,0,0.0,0.0
+1873,2025,9/20/25,TCU,SMU,ESPN2,Sat,12.0,0,0.0,0.0
+1874,2025,9/20/25,Wisconsin,Maryland,NBC,Sat,15.5,0,0.0,0.0
+1875,2025,9/20/25,Utah,Texas Tech,FOX,Sat,12.0,0,0.0,0.0
+1876,2025,9/20/25,Oklahoma,Auburn,ABC,Sat,15.5,0,0.0,0.0
+1877,2025,9/20/25,Liberty,James Madison,ESPNU,Sat,15.5,0,0.0,0.0
+1878,2025,9/20/25,Nebraska,Michigan,CBS,Sat,15.5,0,0.0,0.0
+1879,2025,9/20/25,Mississippi,Tulane,ESPN,Sat,15.5,0,0.0,0.0
+1880,2025,9/20/25,Duke,North Carolina St.,ESPN2,Sat,17.5,0,0.0,0.0
+1881,2025,9/20/25,Missouri,South Carolina,ESPN,Sat,19.0,0,0.0,0.0
+1882,2025,9/20/25,Indiana,Illinois,NBC,Sat,19.5,0,0.0,0.0
+1883,2025,9/20/25,Miami,Florida,ABC,Sat,19.5,0,0.0,0.0
+1884,2025,9/20/25,Vanderbilt,Georgia St.,ESPNU,Sat,20.0,0,0.0,0.0
+1885,2025,9/20/25,East Carolina,BYU,ESPN2,Sat,19.5,0,0.0,0.0
+1886,2025,9/20/25,Washington St.,Washington,CBS,Sat,19.5,0,0.0,0.0
+1887,2025,9/20/25,Colorado,Wyoming,ESPN,Sat,22.5,0,0.0,0.0
+1888,2025,9/25/25,East Carolina,Army,ESPN,Thu,19.5,0,0.0,0.0
+1889,2025,9/26/25,Virginia,Florida St.,ESPN,Fri,19.0,0,0.0,0.0
+1890,2025,9/26/25,Oregon St.,Houston,ESPN,Fri,22.5,0,0.0,0.0
+1891,2025,9/27/25,Illinois,USC,FOX,Sat,12.0,0,0.0,0.0
+1892,2025,9/27/25,Wake Forest,Georgia Tech,ESPN,Sat,12.0,0,0.0,0.0
+1893,2025,9/27/25,North Texas,South Alabama,ESPNU,Sat,12.0,0,0.0,0.0
+1894,2025,9/27/25,Arkansas,Notre Dame,ABC,Sat,12.0,0,0.0,0.0
+1895,2025,9/27/25,Pittsburgh,Louisville,ESPN2,Sat,12.0,0,0.0,0.0
+1896,2025,9/27/25,Oklahoma St.,Baylor,ESPN2,Sat,15.5,0,0.0,0.0
+1897,2025,9/27/25,Mississippi,LSU,ABC,Sat,15.5,0,0.0,0.0
+1898,2025,9/27/25,Texas A&M,Auburn,ESPN,Sat,15.5,0,0.0,0.0
+1899,2025,9/27/25,Washington,Ohio St.,CBS,Sat,15.5,0,0.0,0.0
+1900,2025,9/27/25,Tulsa,Tulane,ESPNU,Sat,16.0,0,0.0,0.0
+1901,2025,9/27/25,FAU,Memphis,ESPN2,Sat,19.0,0,0.0,0.0
+1902,2025,9/27/25,Iowa St.,Arizona,ESPN,Sat,19.0,0,0.0,0.0
+1903,2025,9/27/25,Georgia,Alabama,ABC,Sat,19.5,0,0.0,0.0
+1904,2025,9/27/25,Penn St.,Oregon,NBC,Sat,19.5,0,0.0,0.0
+1905,2025,9/27/25,Missouri,Massachusetts,ESPNU,Sat,19.5,0,0.0,0.0
+1906,2025,9/27/25,Colorado,BYU,ESPN,Sat,22.5,0,0.0,0.0
+1907,2025,10/3/25,South Florida,Charlotte,ESPN2,Fri,19.0,0,0.0,0.0
+1908,2025,10/3/25,BYU,West Virginia,ESPN,Fri,22.5,0,0.0,0.0
+1909,2025,10/4/25,Navy,Air Force,CBS,Sat,12.0,0,0.0,0.0
+1910,2025,10/4/25,Georgia,Kentucky,ABC,Sat,12.0,0,0.0,0.0
+1911,2025,10/4/25,North Carolina,Clemson,ESPN,Sat,12.0,0,0.0,0.0
+1912,2025,10/4/25,UAB,Army,ESPNU,Sat,12.0,0,0.0,0.0
+1913,2025,10/4/25,Cincinnati,Iowa St.,ESPN2,Sat,12.0,0,0.0,0.0
+1914,2025,10/4/25,Michigan,Wisconsin,FOX,Sat,12.0,0,0.0,0.0
+1915,2025,10/4/25,Virginia Tech,Wake Forest,CW,Sat,13.0,0,0.0,0.0
+1916,2025,10/4/25,Alabama,Vanderbilt,ABC,Sat,15.5,0,0.0,0.0
+1917,2025,10/4/25,Florida,Texas,ESPN,Sat,15.5,0,0.0,0.0
+1918,2025,10/4/25,Louisville,Virginia,ESPN2,Sat,16.0,0,0.0,0.0
+1919,2025,10/4/25,UCLA,Penn St.,CBS,Sat,15.5,0,0.0,0.0
+1920,2025,10/4/25,Nebraska,Michigan St.,FS1,Sat,16.0,0,0.0,0.0
+1921,2025,10/4/25,Arkansas St.,Texas St.,ESPNU,Sat,16.0,0,0.0,0.0
+1922,2025,10/4/25,Houston,Texas Tech,ESPN,Sat,19.0,0,0.0,0.0
+1923,2025,10/4/25,TCU,Colorado,FOX,Sat,20.0,0,0.0,0.0
+1924,2025,10/4/25,UCF,Kansas,ESPN2,Sat,19.5,0,0.0,0.0
+1925,2025,10/4/25,Ohio St.,Minnesota,NBC,Sat,19.5,0,0.0,0.0
+1926,2025,10/4/25,Florida St.,Miami,ABC,Sat,19.5,0,0.0,0.0
+1927,2025,10/4/25,Memphis,Tulsa,ESPNU,Sat,20.0,0,0.0,0.0
+1928,2025,10/4/25,California,Duke,ESPN,Sat,22.5,0,0.0,0.0
+1929,2025,10/8/25,Middle Tennessee St.,Missouri State,ESPN2,Wed,19.5,0,0.0,0.0
+1930,2025,10/9/25,Kennesaw State,Louisiana Tech,ESPNU,Thu,19.0,0,0.0,0.0
+1931,2025,10/9/25,Tulane,East Carolina,ESPN,Thu,19.5,0,0.0,0.0
+1932,2025,10/9/25,Georgia Southern,Southern Miss,ESPN2,Thu,20.0,0,0.0,0.0
+1933,2025,10/10/25,North Texas,South Florida,ESPN2,Fri,19.5,0,0.0,0.0
+1934,2025,10/11/25,Bowling Green,Toledo,ESPNU,Sat,12.0,0,0.0,0.0
+1935,2025,10/11/25,Missouri,Alabama,ABC,Sat,12.0,0,0.0,0.0
+1936,2025,10/11/25,Florida St.,Pittsburgh,ESPN,Sat,12.0,0,0.0,0.0
+1937,2025,10/11/25,James Madison,Louisiana,ESPN2,Sat,12.0,0,0.0,0.0
+1938,2025,10/11/25,SMU,Stanford,CW,Sat,12.0,0,0.0,0.0
+1939,2025,10/11/25,Illinois,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+1940,2025,10/11/25,Colorado,Iowa St.,ESPN,Sat,15.5,0,0.0,0.0
+1941,2025,10/11/25,Texas,Oklahoma,ABC,Sat,15.5,0,0.0,0.0
+1942,2025,10/11/25,Oregon,Indiana,CBS,Sat,15.5,0,0.0,0.0
+1943,2025,10/11/25,Oregon St.,Wake Forest,CW,Sat,15.5,0,0.0,0.0
+1944,2025,10/11/25,Temple,Navy,ESPN2,Sat,16.0,0,0.0,0.0
+1945,2025,10/11/25,Texas A&M,Florida,ESPN,Sat,19.0,0,0.0,0.0
+1946,2025,10/11/25,Auburn,Georgia,ABC,Sat,19.5,0,0.0,0.0
+1947,2025,10/11/25,UTSA,Rice,ESPNU,Sat,19.5,0,0.0,0.0
+1948,2025,10/11/25,Arizona,BYU,ESPN2,Sat,20.0,0,0.0,0.0
+1949,2025,10/11/25,Utah,Arizona St.,ESPN,Sat,22.5,0,0.0,0.0
+1950,2025,10/14/25,South Alabama,Arkansas St.,ESPN2,Tue,19.5,0,0.0,0.0
+1951,2025,10/14/25,Western Kentucky,FIU,ESPNU,Tue,20.0,0,0.0,0.0
+1952,2025,10/15/25,Jacksonville St.,Delaware,ESPN,Wed,19.0,0,0.0,0.0
+1953,2025,10/16/25,East Carolina,Tulsa,ESPN,Thu,19.5,0,0.0,0.0
+1954,2025,10/17/25,Miami,Louisville,ESPN,Fri,19.0,0,0.0,0.0
+1955,2025,10/17/25,Minnesota,Nebraska,FOX,Fri,20.0,0,0.0,1.0
+1956,2025,10/17/25,California,North Carolina,ESPN,Fri,22.5,0,0.0,0.0
+1957,2025,10/18/25,TCU,Baylor,ESPN2,Sat,12.0,0,0.0,0.0
+1958,2025,10/18/25,Duke,Georgia Tech,ESPN,Sat,12.0,0,0.0,0.0
+1959,2025,10/18/25,Michigan,Washington,FOX,Sat,12.0,0,0.0,0.0
+1960,2025,10/18/25,Vanderbilt,LSU,ABC,Sat,12.0,0,0.0,0.0
+1961,2025,10/18/25,Tulane,Army,ESPNU,Sat,12.0,0,0.0,0.0
+1962,2025,10/18/25,James Madison,Old Dominion,ESPNU,Sat,15.5,0,0.0,0.0
+1963,2025,10/18/25,Arkansas,Texas A&M,ESPN,Sat,17.5,0,0.0,0.0
+1964,2025,10/18/25,Wisconsin,Ohio St.,CBS,Sat,12.0,0,0.0,0.0
+1965,2025,10/18/25,Georgia,Mississippi,ABC,Sat,15.5,0,0.0,0.0
+1966,2025,10/18/25,UAB,Memphis,ESPN2,Sat,16.0,0,0.0,0.0
+1967,2025,10/18/25,Arizona St.,Texas Tech,FOX,Sat,16.0,0,0.0,0.0
+1968,2025,10/18/25,Virginia,Washington St.,CW,Sat,18.5,0,0.0,0.0
+1969,2025,10/18/25,Rutgers,Oregon,BTN,Sat,18.5,0,0.0,0.0
+1970,2025,10/18/25,UCLA,Maryland,FS1,Sat,19.0,0,0.0,0.0
+1971,2025,10/18/25,Kentucky,Texas,ESPN,Sat,19.0,0,0.0,0.0
+1972,2025,10/18/25,Alabama,Tennessee,ABC,Sat,19.5,0,0.0,0.0
+1973,2025,10/18/25,South Florida,FAU,ESPNU,Sat,19.5,0,0.0,0.0
+1974,2025,10/18/25,Notre Dame,USC,NBC,Sat,19.5,0,0.0,0.0
+1975,2025,10/18/25,BYU,Utah,FOX,Sat,20.0,0,0.0,0.0
+1976,2025,10/18/25,Oklahoma St.,Cincinnati,ESPN2,Sat,20.0,0,0.0,0.0
+1977,2025,10/18/25,Oregon St.,Lafayette,CW,Sat,22.0,0,0.0,0.0
+1978,2025,10/18/25,Stanford,Florida St.,ESPN,Sat,23.0,0,0.0,0.0
+1979,2025,10/21/25,FIU,Kennesaw State,ESPN2,Tue,19.0,0,0.0,0.0
+1980,2025,10/22/25,Delaware,Middle Tennessee St.,ESPN2,Wed,19.5,0,0.0,0.0
+1981,2025,10/23/25,Georgia St.,South Alabama,ESPN2,Thu,19.5,0,0.0,0.0
+1982,2025,10/24/25,Charlotte,North Texas,ESPN2,Fri,19.0,0,0.0,0.0
+1983,2025,10/24/25,Virginia Tech,California,ESPN,Fri,19.5,0,0.0,0.0
+1984,2025,10/25/25,Memphis,South Florida,ESPN2,Sat,12.0,0,0.0,0.0
+1985,2025,10/25/25,Old Dominion,Appalachian St.,ESPNU,Sat,12.0,0,0.0,0.0
+1986,2025,10/25/25,Indiana,UCLA,FOX,Sat,12.0,0,0.0,0.0
+1987,2025,10/25/25,Oklahoma,Mississippi,ABC,Sat,12.0,0,0.0,0.0
+1988,2025,10/25/25,Georgia Tech,Syracuse,ESPN,Sat,12.0,0,0.0,0.0
+1989,2025,10/25/25,Wake Forest,SMU,CW,Sat,12.0,0,0.0,0.0
+1990,2025,10/25/25,Washington St.,Toledo,CW,Sat,15.5,0,0.0,0.0
+1991,2025,10/25/25,Iowa St.,BYU,FOX,Sat,15.5,0,0.0,0.0
+1992,2025,10/25/25,South Carolina,Alabama,ABC,Sat,15.5,0,0.0,0.0
+1993,2025,10/25/25,Vanderbilt,Missouri,ESPN,Sat,15.5,0,0.0,0.0
+1994,2025,10/25/25,Iowa,Minnesota,CBS,Sat,15.5,0,0.0,0.0
+1995,2025,10/25/25,Texas Tech,Oklahoma St.,ESPNU,Sat,16.5,0,0.0,0.0
+1996,2025,10/25/25,Cincinnati,Baylor,ESPN2,Sat,16.0,0,0.0,0.0
+1997,2025,10/25/25,Oregon,Wisconsin,FS1,Sat,19.0,0,0.0,0.0
+1998,2025,10/25/25,Miami,Stanford,ESPN,Sat,19.0,0,0.0,0.0
+1999,2025,10/25/25,Michigan St.,Michigan,NBC,Sat,19.5,0,0.0,0.0
+2000,2025,10/25/25,LSU,Texas A&M,ABC,Sat,19.5,0,0.0,0.0
+2001,2025,10/25/25,Arizona St.,Houston,ESPN2,Sat,20.0,0,0.0,0.0
+2002,2025,10/25/25,Utah,Colorado,ESPN,Sat,22.5,0,0.0,0.0
+2003,2025,10/28/25,Texas St.,James Madison,ESPN2,Tue,20.0,0,0.0,0.0
+2004,2025,10/28/25,Kennesaw State,UTEP,ESPNU,Tue,20.0,0,0.0,0.0
+2005,2025,10/29/25,Middle Tennessee St.,Jacksonville St.,ESPN2,Wed,19.5,0,0.0,0.0
+2006,2025,10/30/25,Coastal Carolina,Marshall,ESPN2,Thu,19.5,0,0.0,0.0
+2007,2025,10/30/25,UTSA,Tulane,ESPN,Thu,19.5,0,0.0,0.0
+2008,2025,10/31/25,Rice,Memphis,ESPN2,Fri,19.0,0,0.0,0.0
+2009,2025,10/31/25,Syracuse,North Carolina,ESPN,Fri,19.5,0,0.0,0.0
+2010,2025,11/1/25,Ohio St.,Penn St.,FOX,Sat,12.0,0,0.0,0.0
+2011,2025,11/1/25,Baylor,UCF,ESPNU,Sat,12.0,0,0.0,0.0
+2012,2025,11/1/25,North Texas,Navy,ESPN2,Sat,12.0,0,0.0,0.0
+2013,2025,11/1/25,SMU,Miami,ESPN,Sat,12.0,0,0.0,0.0
+2014,2025,11/1/25,Texas,Vanderbilt,ABC,Sat,12.0,0,0.0,0.0
+2015,2025,11/1/25,Air Force,Army,CBS,Sat,12.0,0,0.0,0.0
+2016,2025,11/1/25,Virginia Tech,Louisville,CW,Sat,15.0,0,0.0,0.0
+2017,2025,11/1/25,Maryland,Indiana,CBS,Sat,15.5,0,0.0,0.0
+2018,2025,11/1/25,Boston College,Notre Dame,ESPN,Sat,15.5,0,0.0,0.0
+2019,2025,11/1/25,Kansas St.,Texas Tech,FOX,Sat,15.5,0,0.0,0.0
+2020,2025,11/1/25,Florida,Georgia,ABC,Sat,15.5,0,0.0,0.0
+2021,2025,11/1/25,California,Virginia,ESPN2,Sat,15.5,0,0.0,0.0
+2022,2025,11/1/25,Western Michigan,Central Michigan,ESPNU,Sat,16.0,0,0.0,0.0
+2023,2025,11/1/25,Colorado,Arizona,FS1,Sat,19.0,0,0.0,0.0
+2024,2025,11/1/25,Mississippi,South Carolina,ESPN,Sat,19.0,0,0.0,0.0
+2025,2025,11/1/25,Michigan,Purdue,BTN,Sat,19.0,0,0.0,0.0
+2026,2025,11/1/25,Oregon St.,Washington St.,CBS,Sat,19.5,0,0.0,0.0
+2027,2025,11/1/25,Nebraska,USC,NBC,Sat,19.5,0,0.0,0.0
+2028,2025,11/1/25,Tennessee,Oklahoma,ABC,Sat,19.5,0,0.0,0.0
+2029,2025,11/1/25,North Carolina St.,Georgia Tech,ESPN2,Sat,19.5,0,0.0,0.0
+2030,2025,11/1/25,Troy,Arkansas St.,ESPNU,Sat,20.0,0,0.0,0.0
+2031,2025,11/1/25,Utah,Cincinnati,ESPN,Sat,22.5,0,0.0,0.0
+2032,2025,11/4/25,Ohio,Miami Ohio,ESPN2,Tue,19.0,0,0.0,0.0
+2033,2025,11/5/25,Toledo,Northern Illinois,ESPN2,Wed,19.0,0,0.0,0.0
+2034,2025,11/5/25,Ball St.,Kent St.,ESPNU,Wed,19.0,0,0.0,0.0
+2035,2025,11/6/25,South Florida,UTSA,ESPN,Thu,19.5,0,0.0,0.0
+2036,2025,11/6/25,Appalachian St.,Georgia Southern,ESPN2,Thu,19.5,0,0.0,0.0
+2037,2025,11/7/25,UCF,Houston,FS1,Fri,20.5,0,0.0,0.0
+2038,2025,11/7/25,Memphis,Tulane,ESPN,Fri,21.0,0,0.0,0.0
+2039,2025,11/7/25,USC,Northwestern,FOX,Fri,21.0,0,0.0,1.0
+2040,2025,11/8/25,Penn St.,Indiana,FOX,Sat,12.0,0,0.0,0.0
+2041,2025,11/8/25,Arkansas St.,Southern Miss,ESPNU,Sat,12.0,0,0.0,0.0
+2042,2025,11/8/25,Mississippi St.,Georgia,ESPN,Sat,12.0,0,0.0,0.0
+2043,2025,11/8/25,Marshall,James Madison,ESPN2,Sat,12.0,0,0.0,0.0
+2044,2025,11/8/25,Texas Tech,BYU,ABC,Sat,12.0,0,0.0,0.0
+2045,2025,11/8/25,Purdue,Ohio St.,BTN,Sat,13.0,0,0.0,0.0
+2046,2025,11/8/25,Rutgers,Maryland,FS1,Sat,14.5,0,0.0,0.0
+2047,2025,11/8/25,TCU,Iowa St.,FOX,Sat,15.5,0,0.0,0.0
+2048,2025,11/8/25,Iowa,Oregon,CBS,Sat,15.5,0,0.0,0.0
+2049,2025,11/8/25,Missouri,Texas A&M,ABC,Sat,15.5,0,0.0,0.0
+2050,2025,11/8/25,Arizona,Kansas,ESPN2,Sat,15.5,0,0.0,0.0
+2051,2025,11/8/25,Miami,Syracuse,ESPN,Sat,15.5,0,0.0,0.0
+2052,2025,11/8/25,North Carolina,Stanford,CW,Sat,16.5,0,0.0,0.0
+2053,2025,11/8/25,Wisconsin,Washington,BTN,Sat,16.5,0,0.0,0.0
+2054,2025,11/8/25,San Jose St.,Air Force,FS1,Sat,18.0,0,0.0,0.0
+2055,2025,11/8/25,Virginia,Wake Forest,ESPN,Sat,19.0,0,0.0,0.0
+2056,2025,11/8/25,Louisville,California,ESPN2,Sat,19.0,0,0.0,0.0
+2057,2025,11/8/25,Notre Dame,Navy,NBC,Sat,19.5,0,0.0,0.0
+2058,2025,11/8/25,Alabama,LSU,ABC,Sat,19.5,0,0.0,0.0
+2059,2025,11/8/25,UCLA,Nebraska,FOX,Sat,21.0,0,0.0,0.0
+2060,2025,11/8/25,Colorado St.,UNLV,FS1,Sat,21.5,0,0.0,0.0
+2061,2025,11/8/25,Oregon St.,Sam Houston,CW,Sat,22.0,0,0.0,0.0
+2062,2025,11/11/25,Akron,Kent St.,ESPNU,Tue,19.5,0,0.0,0.0
+2063,2025,11/11/25,Western Michigan,Ohio,ESPN2,Tue,20.0,0,0.0,0.0
+2064,2025,11/12/25,Miami Ohio,Toledo,ESPN2,Wed,19.0,0,0.0,0.0
+2065,2025,11/12/25,Massachusetts,Northern Illinois,ESPNU,Wed,19.0,0,0.0,0.0
+2066,2025,11/13/25,Old Dominion,Troy,ESPN,Thu,19.5,0,0.0,0.0
+2067,2025,11/14/25,Louisville,Clemson,ESPN,Fri,19.5,0,0.0,0.0
+2068,2025,11/14/25,Oregon,Minnesota,FOX,Fri,21.0,0,0.0,1.0
+2069,2025,11/15/25,Indiana,Wisconsin,BTN,Sat,12.0,0,0.0,0.0
+2070,2025,11/15/25,Texas A&M,South Carolina,ESPN,Sat,12.0,0,0.0,0.0
+2071,2025,11/15/25,Pittsburgh,Notre Dame,ABC,Sat,12.0,0,0.0,0.0
+2072,2025,11/15/25,Navy,South Florida,ESPN2,Sat,12.0,0,0.0,0.0
+2073,2025,11/15/25,Oklahoma St.,Kansas St.,ESPNU,Sat,12.0,0,0.0,0.0
+2074,2025,11/15/25,Cincinnati,Arizona,FS1,Sat,12.0,0,0.0,0.0
+2075,2025,11/15/25,Northwestern,Michigan,FOX,Sat,12.0,0,0.0,0.0
+2076,2025,11/15/25,Texas Tech,UCF,FOX,Sat,15.5,0,0.0,0.0
+2077,2025,11/15/25,Alabama,Oklahoma,ABC,Sat,15.5,0,0.0,0.0
+2078,2025,11/15/25,USC,Iowa,BTN,Sat,15.5,0,0.0,0.0
+2079,2025,11/15/25,Illinois,Maryland,FS1,Sat,15.5,0,0.0,0.0
+2080,2025,11/15/25,Miami,North Carolina St.,ESPN,Sat,15.5,0,0.0,0.0
+2081,2025,11/15/25,Duke,Virginia,ESPN2,Sat,15.5,0,0.0,0.0
+2082,2025,11/15/25,Michigan St.,Penn St.,CBS,Sat,15.5,0,0.0,0.0
+2083,2025,11/15/25,East Carolina,Memphis,ESPNU,Sat,16.0,0,0.0,0.0
+2084,2025,11/15/25,Wake Forest,North Carolina,CW,Sat,16.5,0,0.0,0.0
+2085,2025,11/15/25,Mississippi,Florida,ESPN,Sat,19.0,0,0.0,0.0
+2086,2025,11/15/25,Baylor,Utah,ESPN2,Sat,19.0,0,0.0,0.0
+2087,2025,11/15/25,Washington,Purdue,FS1,Sat,19.0,0,0.0,0.0
+2088,2025,11/15/25,Georgia,Texas,ABC,Sat,19.5,0,0.0,0.0
+2089,2025,11/15/25,Ohio St.,UCLA,NBC,Sat,19.5,0,0.0,0.0
+2090,2025,11/15/25,Jacksonville St.,Kennesaw State,ESPNU,Sat,20.0,0,0.0,0.0
+2091,2025,11/15/25,Washington St.,Louisiana Tech,CW,Sat,22.0,0,0.0,0.0
+2092,2025,11/15/25,BYU,TCU,ESPN,Sat,22.5,0,0.0,0.0
+2093,2025,11/15/25,Fresno St.,Wyoming,FS1,Sat,22.5,0,0.0,0.0
+2094,2025,11/21/25,North Carolina St.,Florida St.,ESPN,Fri,20.0,0,0.0,0.0
+2095,2025,11/21/25,UNLV,Hawaii,FS1,Fri,22.5,0,0.0,0.0
+2096,2025,11/22/25,Maryland,Michigan,BTN,Sat,16.0,0,0.0,0.0
+2097,2025,11/22/25,Oregon,USC,CBS,Sat,15.5,0,0.0,0.0
+2098,2025,11/22/25,Iowa,Michigan St.,FS1,Sat,15.5,0,0.0,0.0
+2099,2025,11/22/25,Ohio St.,Rutgers,FOX,Sat,12.0,0,0.0,0.0
+2100,2025,11/22/25,SMU,Louisville,ESPN2,Sat,12.0,0,0.0,0.0
+2101,2025,11/22/25,Iowa St.,Kansas,FS1,Sat,12.0,0,0.0,0.0
+2102,2025,11/22/25,UCLA,Washington,NBC,Sat,22.5,0,0.0,0.0
+2103,2025,11/22/25,Vanderbilt,Kentucky,ESPN,Sat,15.5,0,0.0,0.0
+2104,2025,11/22/25,San Diego St.,San Jose St.,FS1,Sat,22.5,0,0.0,0.0
+2105,2025,11/22/25,Utah,Kansas St.,ESPN2,Sat,16.0,0,0.0,0.0
+2106,2025,11/22/25,Colorado,Arizona St.,ESPN2,Sat,20.0,0,0.0,0.0
+2107,2025,11/22/25,Temple,Tulane,ESPNU,Sat,16.0,0,0.0,0.0
+2108,2025,11/22/25,Northwestern,Minnesota,BTN,Sat,12.0,0,0.0,0.0
+2109,2025,11/22/25,Wisconsin,Illinois,BTN,Sat,19.5,0,0.0,0.0
+2110,2025,11/22/25,Florida,Tennessee,ABC,Sat,19.5,0,0.0,0.0
+2111,2025,11/22/25,Georgia Tech,Pittsburgh,ESPN,Sat,19.0,0,0.0,0.0
+2112,2025,11/22/25,Texas,Arkansas,ABC,Sat,15.5,0,0.0,0.0
+2113,2025,11/22/25,Penn St.,Nebraska,NBC,Sat,19.0,0,0.0,0.0
+2114,2025,11/22/25,Virginia Tech,Miami,ESPN,Sat,12.0,0,0.0,0.0
+2115,2025,11/22/25,Boise St.,Colorado St.,FS1,Sat,19.0,0,0.0,0.0
+2116,2025,11/22/25,Cincinnati,BYU,FOX,Sat,20.0,0,0.0,0.0
+2117,2025,11/22/25,Houston,TCU,FOX,Sat,16.0,0,0.0,0.0
+2118,2025,11/22/25,Oklahoma,Missouri,ABC,Sat,12.0,0,0.0,0.0
+2119,2025,11/22/25,Notre Dame,Syracuse,NBC,Sat,15.5,0,0.0,0.0
+2120,2025,11/25/25,Eastern Michigan,Western Michigan,ESPN2,Tue,19.5,0,0.0,0.0
+2121,2025,11/25/25,Massachusetts,Bowling Green,ESPNU,Tue,16.5,0,0.0,0.0
+2122,2025,11/27/25,Memphis,Navy,ESPN,Thu,19.5,0,0.0,0.0
+2123,2025,11/28/25,Nebraska,Iowa,CBS,Fri,12.0,1,0.0,0.0
+2124,2025,11/28/25,Mississippi St.,Mississippi,ABC,Fri,12.0,1,0.0,0.0
+2125,2025,11/28/25,Kansas,Utah,ESPN,Fri,12.0,1,0.0,0.0
+2126,2025,11/28/25,Buffalo,Ohio,ESPNU,Fri,12.0,1,0.0,0.0
+2127,2025,11/28/25,Colorado St.,Air Force,FS1,Fri,15.0,1,0.0,0.0
+2128,2025,11/28/25,Georgia Tech,Georgia,ABC,Fri,15.5,1,0.0,0.0
+2129,2025,11/28/25,North Texas,Temple,ESPN,Fri,15.5,1,0.0,0.0
+2130,2025,11/28/25,Utah St.,Boise St.,CBS,Fri,16.0,1,0.0,0.0
+2131,2025,11/28/25,Texas,Texas A&M,ABC,Fri,19.5,1,0.0,0.0
+2132,2025,11/28/25,Purdue,Indiana,NBC,Fri,19.5,1,0.0,0.0
+2133,2025,11/28/25,Arizona St.,Arizona,FOX,Fri,21.0,1,0.0,0.0
+2134,2025,11/29/25,San Jose St.,Fresno St.,FS1,Sat,22.5,0,0.0,0.0
+2135,2025,11/29/25,Illinois,Northwestern,FOX,Sat,19.5,0,0.0,0.0
+2136,2025,11/29/25,Virginia,Virginia Tech,ESPN,Sat,19.0,0,0.0,0.0
+2137,2025,11/29/25,Tulane,Charlotte,ESPNU,Sat,19.5,0,0.0,0.0
+2138,2025,11/29/25,Pittsburgh,Miami,ABC,Sat,12.0,0,0.0,0.0
+2139,2025,11/29/25,California,SMU,ESPN2,Sat,20.0,0,0.0,0.0
+2140,2025,11/29/25,Washington,Oregon,CBS,Sat,15.5,0,0.0,0.0
+2141,2025,11/29/25,Oklahoma,LSU,ABC,Sat,15.5,0,0.0,0.0
+2142,2025,11/29/25,Rutgers,Penn St.,BTN,Sat,15.5,0,0.0,0.0
+2143,2025,11/29/25,Kansas St.,Colorado,FS1,Sat,12.0,0,0.0,0.0
+2144,2025,11/29/25,Florida,Florida St.,ESPN2,Sat,16.5,0,0.0,0.0
+2145,2025,11/29/25,Oklahoma St.,Iowa St.,ESPNU,Sat,12.0,0,0.0,0.0
+2146,2025,11/29/25,Coastal Carolina,James Madison,ESPNU,Sat,15.5,0,0.0,0.0
+2147,2025,11/29/25,Tennessee,Vanderbilt,ESPN,Sat,15.5,0,0.0,0.0
+2148,2025,11/29/25,Minnesota,Wisconsin,FS1,Sat,15.5,0,0.0,0.0
+2149,2025,11/29/25,Auburn,Alabama,ABC,Sat,19.5,0,0.0,0.0
+2150,2025,11/29/25,BYU,UCF,ESPN2,Sat,13.0,0,0.0,0.0
+2151,2025,11/29/25,Syracuse,Boston College,CW,Sat,15.0,0,0.0,0.0
+2152,2025,11/29/25,TCU,Cincinnati,FOX,Sat,15.5,0,0.0,0.0
+2153,2025,11/29/25,Stanford,Notre Dame,ESPN,Sat,22.5,0,0.0,0.0
+2154,2025,11/29/25,USC,UCLA,NBC,Sat,19.5,0,0.0,0.0
+2155,2025,11/29/25,Michigan St.,Maryland,FS1,Sat,19.0,0,0.0,0.0
+2156,2025,11/29/25,West Virginia,Texas Tech,ESPN,Sat,12.0,0,0.0,0.0
+2157,2025,11/29/25,Michigan,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+2158,2025,11/29/25,Washington St.,Oregon St.,CW,Sat,18.5,0,0.0,0.0
+2159,2025,12/6/25,Indiana,Ohio St.,FOX,Sat,20.0,0,1.0,0.0
+2160,2025,12/6/25,Alabama,Georgia,ABC,Sat,16.0,0,1.0,0.0
+2161,2025,12/6/25,BYU,Texas Tech,ABC,Sat,12.0,0,1.0,0.0
+2162,2025,12/6/25,Duke,Virginia,ABC,Sat,20.0,0,1.0,0.0
+2163,2025,12/5/25,North Texas,Tulane,ABC,Fri,20.0,0,1.0,0.0
+2164,2025,12/5/25,UNLV,Boise St.,FOX,Fri,20.0,0,1.0,0.0
+2165,2025,12/5/25,Troy,James Madison,ESPN,Fri,19.0,0,1.0,0.0
+2166,2025,12/6/25,Miami Ohio,Western Michigan,ESPN,Sat,12.0,0,1.0,0.0
+2167,2025,8/30/25,Utah,UCLA,FOX,Sat,23.0,0,0.0,0.0
+1043779,2019,8/31/19,FAU,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+1043780,2019,8/31/19,Fresno St.,USC,ESPN,Sat,23.0,0,0.0,0.0
+1043781,2019,8/30/19,Colorado St.,Colorado,ESPN,Fri,23.0,0,0.0,0.0
+1043782,2019,8/31/19,Boise St.,Florida St.,ESPNEWS,Sat,12.0,0,0.0,0.0
+1043783,2019,8/31/19,Middle Tennessee St.,Michigan,BTN,Sat,19.5,0,0.0,0.0
+1043784,2019,8/30/19,Tulsa,Michigan St.,FS1,Fri,19.0,0,0.0,0.0
+1043785,2019,8/30/19,Oklahoma St.,Oregon St.,FS1,Fri,22.5,0,0.0,0.0
+1043786,2019,8/31/19,Georgia St.,Tennessee,ESPNU,Sat,15.5,0,0.0,0.0
+1043787,2019,8/31/19,Idaho,Penn St.,BTN,Sat,15.5,0,0.0,0.0
+1043788,2019,8/31/19,Northern Iowa,Iowa St.,FS1,Sat,12.0,0,0.0,0.0
+1043789,2019,8/29/19,South Dakota St.,Minnesota,FS1,Thu,21.0,0,0.0,0.0
+1043790,2019,8/31/19,Mississippi St.,Louisiana,ESPNU,Sat,12.0,0,0.0,0.0
+1043791,2019,9/7/19,Cincinnati,Ohio St.,ABC,Sat,12.0,0,0.0,0.0
+1043792,2019,9/7/19,Buffalo,Penn St.,FOX,Sat,20.0,0,0.0,0.0
+1043793,2019,9/6/19,Marshall,Boise St.,ESPN2,Fri,21.0,0,0.0,0.0
+1043794,2019,9/7/19,Murray St.,Georgia,ESPN2,Sat,16.0,0,0.0,0.0
+1043795,2019,9/7/19,Southern Miss,Mississippi St.,ESPNU,Sat,15.5,0,0.0,0.0
+1043796,2019,9/14/19,Pittsburgh,Penn St.,ABC,Sat,12.5,0,0.0,0.0
+1043797,2019,9/14/19,Ohio St.,Indiana,FOX,Sat,12.0,0,0.0,0.0
+1043798,2019,9/14/19,Arizona St.,Michigan St.,FOX,Sat,16.0,0,0.0,0.0
+1043799,2019,9/13/19,Washington St.,Houston,ESPN,Fri,21.5,0,0.0,0.0
+1043800,2019,9/14/19,Kansas St.,Mississippi St.,ESPN,Sat,12.0,0,0.0,0.0
+1043801,2019,9/14/19,Iowa,Iowa St.,FS1,Sat,16.0,0,0.0,0.0
+1043802,2019,9/14/19,Arkansas St.,Georgia,ESPN2,Sat,12.0,0,0.0,0.0
+1043803,2019,9/14/19,Kent St.,Auburn,ESPN2,Sat,19.0,0,0.0,0.0
+1043804,2019,9/14/19,North Carolina St.,West Virginia,FS1,Sat,12.0,0,0.0,0.0
+1043805,2019,9/14/19,Oklahoma St.,Tulsa,ESPN2,Sat,15.5,0,0.0,0.0
+1043806,2019,9/14/19,Portland St.,Boise St.,ESPN2,Sat,22.5,0,0.0,0.0
+1043807,2019,9/21/19,Oklahoma St.,Texas,ABC,Sat,20.0,0,0.0,0.0
+1043808,2019,9/21/19,Louisville,Florida St.,ESPN,Sat,15.5,0,0.0,0.0
+1043809,2019,9/21/19,Michigan St.,Northwestern,ABC,Sat,12.0,0,0.0,0.0
+1043810,2019,9/21/19,UCLA,Washington St.,ESPN,Sat,22.5,0,0.0,0.0
+1043811,2019,9/20/19,Air Force,Boise St.,ESPN2,Fri,21.0,0,0.0,0.0
+1043812,2019,9/21/19,Toledo,Colorado St.,ESPN2,Sat,22.5,0,0.0,0.0
+1043813,2019,9/21/19,Louisiana Monroe,Iowa St.,FS1,Sat,12.0,0,0.0,0.0
+1043814,2019,9/28/19,Ohio St.,Nebraska,ABC,Sat,19.5,0,0.0,0.0
+1043815,2019,9/28/19,Mississippi St.,Auburn,ESPN,Sat,19.0,0,0.0,0.0
+1043816,2019,9/27/19,Arizona St.,California,ESPN,Fri,22.5,0,0.0,0.0
+1043817,2019,9/28/19,Iowa St.,Baylor,ESPN,Sat,15.5,0,0.0,0.0
+1043818,2019,9/27/19,Penn St.,Maryland,FS1,Fri,20.0,0,0.0,0.0
+1043819,2019,9/28/19,Washington St.,Utah,FS1,Sat,22.0,0,0.0,0.0
+1043820,2019,9/28/19,Middle Tennessee St.,Iowa,ESPN2,Sat,12.0,0,0.0,0.0
+1043821,2019,10/5/19,Michigan St.,Ohio St.,ABC,Sat,19.5,0,0.0,0.0
+1043822,2019,10/5/19,Purdue,Penn St.,ESPN,Sat,12.0,0,0.0,0.0
+1043823,2019,10/5/19,Oklahoma St.,Texas Tech,FS1,Sat,12.0,0,0.0,0.0
+1043824,2019,10/5/19,Baylor,Kansas St.,ESPN2,Sat,15.5,0,0.0,0.0
+1043825,2019,10/5/19,TCU,Iowa St.,ESPN2,Sat,14.0,0,0.0,0.0
+1043826,2019,10/5/19,Kent St.,Wisconsin,ESPNU,Sat,12.0,0,0.0,0.0
+1043827,2019,10/5/19,San Diego St.,Colorado St.,ESPN2,Sat,22.0,0,0.0,0.0
+1043828,2019,10/12/19,Penn St.,Iowa,ABC,Sat,19.5,0,0.0,0.0
+1043829,2019,10/12/19,Florida St.,Clemson,ABC,Sat,15.5,0,0.0,0.0
+1043830,2019,10/12/19,Iowa St.,West Virginia,ESPN,Sat,16.0,0,0.0,0.0
+1043831,2019,10/10/19,Syracuse,North Carolina St.,ESPN,Thu,20.0,0,0.0,0.0
+1043832,2019,10/12/19,Hawaii,Boise St.,ESPN2,Sat,22.5,0,0.0,0.0
+1043833,2019,10/9/19,Appalachian St.,Louisiana,ESPN2,Wed,20.0,0,0.0,0.0
+1043834,2019,10/19/19,Michigan,Penn St.,ABC,Sat,19.5,0,0.0,0.0
+1043835,2019,10/19/19,LSU,Mississippi St.,CBS,Sat,15.5,0,0.0,0.0
+1043836,2019,10/19/19,Baylor,Oklahoma St.,FOX,Sat,16.0,0,0.0,0.0
+1043837,2019,10/18/19,Ohio St.,Northwestern,BTN,Fri,20.5,0,0.0,0.0
+1043838,2019,10/19/19,Boise St.,BYU,ESPN2,Sat,22.5,0,0.0,0.0
+1043839,2019,10/19/19,Iowa St.,Texas Tech,FS1,Sat,12.0,0,0.0,0.0
+1043840,2019,10/19/19,Colorado,Washington St.,ESPNU,Sat,19.0,0,0.0,0.0
+1043841,2019,10/26/19,Wisconsin,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+1043842,2019,10/26/19,Oklahoma,Kansas St.,ABC,Sat,12.0,0,0.0,0.0
+1043843,2019,10/26/19,Penn St.,Michigan St.,ABC,Sat,15.5,0,0.0,0.0
+1043844,2019,10/26/19,Washington St.,Oregon,ESPN,Sat,22.5,0,0.0,0.0
+1043845,2019,10/26/19,Oklahoma St.,Iowa St.,FS1,Sat,15.5,0,0.0,0.0
+1043846,2019,10/26/19,Syracuse,Florida St.,ESPN2,Sat,15.5,0,0.0,0.0
+1043847,2019,10/26/19,FIU,Middle Tennessee St.,NFLN,Sat,15.5,0,0.0,0.0
+1043848,2019,11/2/19,Miami,Florida St.,ABC,Sat,15.5,0,0.0,0.0
+1043849,2019,11/2/19,North Carolina St.,Wake Forest,ESPN,Sat,12.0,0,0.0,0.0
+1043850,2019,11/2/19,TCU,Oklahoma St.,ESPN,Sat,15.5,0,0.0,0.0
+1043851,2019,11/2/19,BYU,Utah St.,ESPN2,Sat,22.0,0,0.0,0.0
+1043852,2019,11/2/19,Kansas St.,Kansas,FS1,Sat,15.5,0,0.0,0.0
+1043853,2019,10/31/19,Georgia Southern,Appalachian St.,ESPNU,Thu,20.0,0,0.0,0.0
+1043854,2019,11/9/19,Penn St.,Minnesota,ABC,Sat,12.0,0,0.0,0.0
+1043855,2019,11/9/19,Iowa St.,Oklahoma,FOX,Sat,20.0,0,0.0,0.0
+1043856,2019,11/9/19,Clemson,North Carolina St.,ABC,Sat,19.5,0,0.0,0.0
+1043857,2019,11/9/19,Maryland,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+1043858,2019,11/9/19,USC,Arizona St.,ABC,Sat,15.5,0,0.0,0.0
+1043859,2019,11/9/19,Wyoming,Boise St.,ESPN,Sat,22.5,0,0.0,0.0
+1043860,2019,11/9/19,Kansas St.,Texas,ESPN,Sat,15.5,0,0.0,0.0
+1043861,2019,11/9/19,Appalachian St.,South Carolina,ESPN2,Sat,19.0,0,0.0,0.0
+1043862,2019,11/8/19,Washington,Oregon St.,FS1,Fri,22.5,0,0.0,0.0
+1043863,2019,11/9/19,Illinois,Michigan St.,FS1,Sat,15.5,0,0.0,0.0
+1043864,2019,11/9/19,Nevada,San Diego St.,ESPN2,Sat,22.5,0,0.0,0.0
+1043865,2019,11/5/19,Ball St.,Western Michigan,ESPN2,Tue,19.0,0,0.0,0.0
+1043866,2019,11/16/19,Michigan St.,Michigan,FOX,Sat,12.0,0,0.0,0.0
+1043867,2019,11/16/19,Indiana,Penn St.,ABC,Sat,12.0,0,0.0,0.0
+1043868,2019,11/16/19,Alabama,Mississippi St.,ESPN,Sat,12.0,0,0.0,0.0
+1043869,2019,11/16/19,Texas,Iowa St.,FS1,Sat,15.5,0,0.0,0.0
+1043870,2019,11/16/19,West Virginia,Kansas St.,ESPN,Sat,15.5,0,0.0,0.0
+1043871,2019,11/15/19,Fresno St.,San Diego St.,ESPN2,Fri,21.5,0,0.0,0.0
+1043872,2019,11/16/19,Arizona St.,Oregon St.,FS1,Sat,19.5,0,0.0,0.0
+1043873,2019,11/16/19,Kansas,Oklahoma St.,FS1,Sat,12.0,0,0.0,0.0
+1043874,2019,11/16/19,Air Force,Colorado St.,ESPN2,Sat,19.0,0,0.0,0.0
+1043875,2019,11/16/19,New Mexico,Boise St.,ESPN2,Sat,22.5,0,0.0,0.0
+1043876,2019,11/23/19,Penn St.,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+1043877,2019,11/23/19,Oregon,Arizona St.,ABC,Sat,19.5,0,0.0,0.0
+1043878,2019,11/23/19,Oklahoma St.,West Virginia,ESPN2,Sat,12.0,0,0.0,0.0
+1043879,2019,11/22/19,Colorado St.,Wyoming,ESPN2,Fri,21.5,0,0.0,0.0
+1043880,2019,11/23/19,Kansas St.,Texas Tech,FS1,Sat,19.0,0,0.0,0.0
+1043881,2019,11/21/19,North Carolina St.,Georgia Tech,ESPN,Thu,20.0,0,0.0,0.0
+1043882,2019,11/23/19,Nevada,Fresno St.,ESPN2,Sat,22.5,0,0.0,0.0
+1043883,2019,11/30/19,Ohio St.,Michigan,FOX,Sat,12.0,0,0.0,0.0
+1043884,2019,11/30/19,Oklahoma,Oklahoma St.,FOX,Sat,20.0,0,0.0,0.0
+1043885,2019,11/29/19,Washington St.,Washington,FOX,Fri,16.0,1,0.0,0.0
+1043886,2019,11/30/19,Arizona,Arizona St.,ESPN,Sat,22.0,0,0.0,0.0
+1043887,2019,11/28/19,Mississippi,Mississippi St.,ESPN,Thu,19.5,0,0.0,0.0
+1043888,2019,11/30/19,Iowa St.,Kansas St.,FS1,Sat,19.0,0,0.0,0.0
+1043889,2019,11/30/19,Rutgers,Penn St.,BTN,Sat,15.5,0,0.0,0.0
+1043890,2019,11/30/19,Maryland,Michigan St.,FS1,Sat,15.5,0,0.0,0.0
+1043891,2019,11/30/19,Fresno St.,San Jose St.,ESPN2,Sat,22.5,0,0.0,0.0
+1043892,2018,9/3/18,Virginia Tech,Florida St.,ESPN,Mon,20.0,0,0.0,0.0
+1043893,2018,9/1/18,Oregon St.,Ohio St.,ABC,Sat,12.0,0,0.0,0.0
+1043894,2018,8/31/18,San Diego St.,Stanford,FS1,Fri,21.0,0,0.0,0.0
+1043895,2018,8/30/18,Missouri St.,Oklahoma St.,FS1,Thu,20.0,0,0.0,0.0
+1043896,2018,9/1/18,Boise St.,Troy,ESPNEWS,Sat,18.0,0,0.0,0.0
+1043897,2018,9/1/18,James Madison,North Carolina St.,ESPNU,Sat,12.0,0,0.0,0.0
+1043898,2018,9/1/18,UTSA,Arizona St.,FS1,Sat,22.5,0,0.0,0.0
+1043899,2018,9/1/18,Stephen F Austin,Mississippi St.,ESPNU,Sat,19.5,0,0.0,0.0
+1043900,2018,9/8/18,Penn St.,Pittsburgh,ABC,Sat,20.0,0,0.0,0.0
+1043901,2018,9/8/18,Ball St.,Notre Dame,NBC,Sat,15.5,0,0.0,0.0
+1043902,2018,9/8/18,Michigan St.,Arizona St.,ESPN,Sat,23.0,0,0.0,0.0
+1043903,2018,9/8/18,Iowa St.,Iowa,FOX,Sat,17.0,0,0.0,0.0
+1043904,2018,9/8/18,Mississippi St.,Kansas St.,ESPN,Sat,12.0,0,0.0,0.0
+1043905,2018,9/8/18,Arkansas St.,Alabama,ESPN2,Sat,15.5,0,0.0,0.0
+1043906,2018,9/8/18,Fresno St.,Minnesota,FS1,Sat,19.5,0,0.0,0.0
+1043907,2018,9/8/18,Connecticut,Boise St.,ESPNU,Sat,22.5,0,0.0,0.0
+1043908,2018,9/15/18,Ohio St.,TCU,ABC,Sat,20.0,0,0.0,0.0
+1043909,2018,9/15/18,Oklahoma,Iowa St.,ABC,Sat,12.0,0,0.0,0.0
+1043910,2018,9/15/18,Florida St.,Syracuse,ESPN,Sat,12.0,0,0.0,0.0
+1043911,2018,9/15/18,Boise St.,Oklahoma St.,ESPN,Sat,15.5,0,0.0,0.0
+1043912,2018,9/15/18,Kent St.,Penn St.,FS1,Sat,12.0,0,0.0,0.0
+1043913,2018,9/14/18,Georgia St.,Memphis,ESPN,Fri,19.0,0,0.0,0.0
+1043914,2018,9/15/18,Middle Tennessee St.,Georgia,ESPNEWS,Sat,12.0,0,0.0,0.0
+1043915,2018,9/15/18,Fresno St.,UCLA,FS1,Sat,22.5,0,0.0,0.0
+1043916,2018,9/22/18,Arizona St.,Washington,ESPN,Sat,22.5,0,0.0,0.0
+1043917,2018,9/21/18,Washington St.,USC,ESPN,Fri,22.5,0,0.0,0.0
+1043918,2018,9/22/18,Kansas St.,West Virginia,ESPN,Sat,15.5,0,0.0,0.0
+1043919,2018,9/22/18,Mississippi St.,Kentucky,ESPN2,Sat,19.0,0,0.0,0.0
+1043920,2018,9/21/18,Penn St.,Illinois,FS1,Fri,21.0,0,0.0,0.0
+1043921,2018,9/22/18,Texas Tech,Oklahoma St.,FS1,Sat,19.0,0,0.0,0.0
+1043922,2018,9/22/18,Northern Illinois,Florida St.,ESPNU,Sat,15.5,0,0.0,0.0
+1043923,2018,9/22/18,Air Force,Utah St.,ESPN2,Sat,22.5,0,0.0,0.0
+1043924,2018,9/29/18,Ohio St.,Penn St.,ABC,Sat,20.0,0,0.0,0.0
+1043925,2018,9/29/18,Florida,Mississippi St.,ESPN,Sat,18.0,0,0.0,0.0
+1043926,2018,9/29/18,Florida St.,Louisville,ESPN2,Sat,15.5,0,0.0,0.0
+1043927,2018,9/29/18,Texas,Kansas St.,FS1,Sat,15.5,0,0.0,0.0
+1043928,2018,9/29/18,Central Michigan,Michigan St.,FS1,Sat,12.0,0,0.0,0.0
+1043929,2018,9/29/18,Iowa St.,TCU,ESPNU,Sat,19.0,0,0.0,0.0
+1043930,2018,10/6/18,Indiana,Ohio St.,FOX,Sat,16.0,0,0.0,0.0
+1043931,2018,10/6/18,Florida St.,Miami,ABC,Sat,16.5,0,0.0,0.0
+1043932,2018,10/6/18,Auburn,Mississippi St.,ESPN2,Sat,19.5,0,0.0,0.0
+1043933,2018,10/6/18,Iowa St.,Oklahoma St.,ESPN2,Sat,15.5,0,0.0,0.0
+1043934,2018,10/6/18,Northwestern,Michigan St.,FS1,Sat,12.0,0,0.0,0.0
+1043935,2018,10/5/18,Utah St.,BYU,ESPN2,Fri,21.0,0,0.0,0.0
+1043936,2018,10/6/18,Kansas St.,Baylor,FS1,Sat,15.5,0,0.0,0.0
+1043937,2018,10/6/18,San Diego St.,Boise St.,ESPNU,Sat,15.5,0,0.0,0.0
+1043938,2018,10/13/18,Minnesota,Ohio St.,FS1,Sat,12.0,0,0.0,0.0
+1043939,2018,10/13/18,West Virginia,Iowa St.,FS1,Sat,19.0,0,0.0,0.0
+1043940,2018,10/13/18,Oklahoma St.,Kansas St.,ESPNU,Sat,12.0,0,0.0,0.0
+1043941,2018,10/13/18,Wyoming,Fresno St.,ESPNU,Sat,22.5,0,0.0,0.0
+1043942,2018,10/20/18,Ohio St.,Purdue,ABC,Sat,19.5,0,0.0,0.0
+1043943,2018,10/20/18,Michigan,Michigan St.,FOX,Sat,12.0,0,0.0,0.0
+1043944,2018,10/20/18,Penn St.,Indiana,ABC,Sat,15.5,0,0.0,0.0
+1043945,2018,10/20/18,Mississippi St.,LSU,ESPN,Sat,19.0,0,0.0,0.0
+1043946,2018,10/20/18,Oregon,Washington St.,FOX,Sat,19.5,0,0.0,0.0
+1043947,2018,10/20/18,North Carolina St.,Clemson,ESPN,Sat,15.5,0,0.0,0.0
+1043948,2018,10/18/18,Stanford,Arizona St.,ESPN,Thu,21.0,0,0.0,0.0
+1043949,2018,10/20/18,Wake Forest,Florida St.,ESPN2,Sat,15.5,0,0.0,0.0
+1043950,2018,10/19/18,Colorado St.,Boise St.,ESPN2,Fri,21.0,0,0.0,0.0
+1043951,2018,10/27/18,Texas,Oklahoma St.,ABC,Sat,20.0,0,0.0,0.0
+1043952,2018,10/27/18,Iowa,Penn St.,ESPN,Sat,15.5,0,0.0,0.0
+1043953,2018,10/27/18,Clemson,Florida St.,ABC,Sat,12.0,0,0.0,0.0
+1043954,2018,10/27/18,Purdue,Michigan St.,ESPN,Sat,12.0,0,0.0,0.0
+1043955,2018,10/27/18,Texas A&M,Mississippi St.,ESPN,Sat,19.5,0,0.0,0.0
+1043956,2018,10/27/18,Arizona St.,USC,ABC,Sat,15.5,0,0.0,0.0
+1043957,2018,10/27/18,Kansas St.,Oklahoma,FOX,Sat,15.5,0,0.0,0.0
+1043958,2018,10/27/18,Texas Tech,Iowa St.,ESPN2,Sat,12.0,0,0.0,0.0
+1043959,2018,10/27/18,North Carolina St.,Syracuse,ESPN2,Sat,19.0,0,0.0,0.0
+1043960,2018,10/27/18,Hawaii,Fresno St.,ESPN2,Sat,23.0,0,0.0,0.0
+1043961,2018,10/25/18,Appalachian St.,Georgia Southern,ESPNU,Thu,19.5,0,0.0,0.0
+1043962,2018,11/3/18,Nebraska,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+1043963,2018,11/3/18,Penn St.,Michigan,ESPN,Sat,16.0,0,0.0,0.0
+1043964,2018,11/3/18,California,Washington St.,ESPN,Sat,23.0,0,0.0,0.0
+1043965,2018,11/3/18,Florida St.,North Carolina St.,ABC,Sat,15.5,0,0.0,0.0
+1043966,2018,11/3/18,Michigan St.,Maryland,ESPN2,Sat,12.0,0,0.0,0.0
+1043967,2018,11/3/18,Oklahoma St.,Baylor,FS1,Sat,12.0,0,0.0,0.0
+1043968,2018,11/3/18,Kansas St.,TCU,FS1,Sat,15.5,0,0.0,0.0
+1043969,2018,11/3/18,BYU,Boise St.,ESPN2,Sat,22.5,0,0.0,0.0
+1043970,2018,11/3/18,USC,Oregon St.,FS1,Sat,22.0,0,0.0,0.0
+1043971,2018,11/10/18,Mississippi St.,Alabama,CBS,Sat,15.5,0,0.0,0.0
+1043972,2018,11/10/18,Ohio St.,Michigan St.,FOX,Sat,12.0,0,0.0,0.0
+1043973,2018,11/10/18,Oklahoma St.,Oklahoma,ABC,Sat,15.5,0,0.0,0.0
+1043974,2018,11/10/18,Florida St.,Notre Dame,NBC,Sat,19.5,0,0.0,0.0
+1043975,2018,11/10/18,Wisconsin,Penn St.,ABC,Sat,12.0,0,0.0,0.0
+1043976,2018,11/10/18,Washington St.,Colorado,ESPN,Sat,15.5,0,0.0,0.0
+1043977,2018,11/9/18,Fresno St.,Boise St.,ESPN2,Fri,22.5,0,0.0,0.0
+1043978,2018,11/8/18,Wake Forest,North Carolina St.,ESPN,Thu,19.5,0,0.0,0.0
+1043979,2018,11/10/18,UNLV,San Diego St.,ESPN2,Sat,22.5,0,0.0,0.0
+1043980,2018,11/10/18,Baylor,Iowa St.,FS1,Sat,15.5,0,0.0,0.0
+1043981,2018,11/17/18,Ohio St.,Maryland,ABC,Sat,12.0,0,0.0,0.0
+1043982,2018,11/17/18,West Virginia,Oklahoma St.,ABC,Sat,16.0,0,0.0,0.0
+1043983,2018,11/17/18,Michigan St.,Nebraska,FOX,Sat,12.0,0,0.0,0.0
+1043984,2018,11/17/18,Arizona,Washington St.,ESPN,Sat,22.5,0,0.0,0.0
+1043985,2018,11/17/18,Arkansas,Mississippi St.,ESPN,Sat,12.0,0,0.0,0.0
+1043986,2018,11/17/18,Boston College,Florida St.,ESPN2,Sat,16.0,0,0.0,0.0
+1043987,2018,11/13/18,Western Michigan,Ball St.,ESPN2,Tue,18.0,0,0.0,0.0
+1043988,2018,11/17/18,New Mexico St.,BYU,ESPN2,Sat,22.5,0,0.0,0.0
+1043989,2018,11/24/18,Michigan,Ohio St.,FOX,Sat,12.0,0,0.0,0.0
+1043990,2018,11/23/18,Washington,Washington St.,FOX,Fri,20.0,1,0.0,0.0
+1043991,2018,11/24/18,Rutgers,Michigan St.,FOX,Sat,16.0,0,0.0,0.0
+1043992,2018,11/24/18,Florida,Florida St.,ABC,Sat,12.0,0,0.0,0.0
+1043993,2018,11/24/18,Maryland,Penn St.,ABC,Sat,15.5,0,0.0,0.0
+1043994,2018,11/24/18,Oklahoma St.,TCU,FOX,Sat,20.0,0,0.0,0.0
+1043995,2018,11/22/18,Mississippi St.,Mississippi,ESPN,Thu,19.5,0,0.0,0.0
+1043996,2018,11/24/18,Utah St.,Boise St.,ESPN,Sat,23.0,0,0.0,0.0
+1043997,2018,11/23/18,Oregon,Oregon St.,FS1,Fri,16.0,1,0.0,0.0
+1043998,2018,11/24/18,Kansas St.,Iowa St.,FS1,Sat,19.5,0,0.0,0.0
+1043999,2018,11/24/18,Arizona St.,Arizona,FS1,Sat,15.5,0,0.0,0.0

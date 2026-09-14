@@ -1,0 +1,69 @@
+source_index,Team 1,Team 2,Station,actual,pred,variant
+2000000,Richmond,North Carolina St.,ESPNU,,181.08638169620303,current
+2000001,Rutgers,Boston College,ESPN2,,974.291065838253,current
+2000002,Missouri,Kansas,FOX,,2997.6360006297223,current
+2000003,Howard,Indiana,BTN,,382.9230823663239,current
+2000004,Old Dominion,Virginia Tech,CW,,404.57760185370705,current
+2000005,Appalachian St.,East Carolina,ESPNU,,113.29318665438102,current
+2000006,Arizona St.,Texas A&M,ABC,,2815.7525534484344,current
+2000007,Oregon,Oklahoma St.,ESPN,,2091.0051471931974,current
+2000008,Wake Forest,Purdue,FS1,,345.21451089414995,current
+2000009,Oklahoma,Michigan,FOX,,5285.728105909926,current
+2000010,Penn St.,Temple,ESPN2,,610.5367526867649,current
+2000011,UTSA,Texas St.,CW,,198.53007401551574,current
+2000012,Rice,Notre Dame,NBC,,1476.0255456082182,current
+2000013,Utah St.,Washington,BTN,,594.4050575482734,current
+2000014,Eastern Michigan,Michigan St.,BTN,,462.3500744746893,current
+2000015,Duke,Illinois,FS1,,501.3090902643121,current
+2000016,Alabama,Kentucky,ABC,,5643.0338496460645,current
+2000017,Arizona,BYU,FOX,,1776.1007206952197,current
+2000018,UCF,Pittsburgh,ESPN2,,560.0530889776962,current
+2000019,Mississippi St.,Minnesota,CBS,,1587.821597777272,current
+2000020,UNLV,North Texas,ESPNU,,65.36417047563384,current
+2000021,Bowling Green,Nebraska,FS1,,456.1938901871938,current
+2000022,Tennessee,Georgia Tech,ESPN,,1700.2012694337423,current
+2000023,San Diego St.,UCLA,BTN,,305.7518730570007,current
+2000024,Western Illinois,Wisconsin,BTN,,307.58125154494223,current
+2000025,Ohio St.,Texas,ABC,,11972.15876582328,current
+2000026,Navy,FAU,ESPNU,,52.87096547806353,current
+2000027,Iowa St.,Iowa,NBC,,1852.8560022868837,current
+2000028,Texas Tech,Oregon St.,CBS,,1261.485153743717,current
+2000029,Charlotte,Mississippi,ESPN2,,345.1697661166661,current
+2000030,North Dakota State,Air Force,FS1,,176.9655986714987,current
+2000031,Arkansas,Utah,ESPN,,1654.3615274235226,current
+2000032,Montana State,Nevada,CW,,276.3274823926223,current
+2000033,Louisiana,USC,BTN,,539.721118801856,current
+2000000,Richmond,North Carolina St.,ESPNU,,181.10777997851045,fox_friday_night
+2000001,Rutgers,Boston College,ESPN2,,1014.6918721453923,fox_friday_night
+2000002,Missouri,Kansas,FOX,,2592.421303651486,fox_friday_night
+2000003,Howard,Indiana,BTN,,380.57228401858754,fox_friday_night
+2000004,Old Dominion,Virginia Tech,CW,,405.69980671919166,fox_friday_night
+2000005,Appalachian St.,East Carolina,ESPNU,,113.54388794371859,fox_friday_night
+2000006,Arizona St.,Texas A&M,ABC,,2814.9939194444187,fox_friday_night
+2000007,Oregon,Oklahoma St.,ESPN,,2096.972492758264,fox_friday_night
+2000008,Wake Forest,Purdue,FS1,,346.77366462497736,fox_friday_night
+2000009,Oklahoma,Michigan,FOX,,5298.506780961041,fox_friday_night
+2000010,Penn St.,Temple,ESPN2,,609.5397652362512,fox_friday_night
+2000011,UTSA,Texas St.,CW,,199.6533036745986,fox_friday_night
+2000012,Rice,Notre Dame,NBC,,1478.5727220505632,fox_friday_night
+2000013,Utah St.,Washington,BTN,,598.0699318878776,fox_friday_night
+2000014,Eastern Michigan,Michigan St.,BTN,,463.5141697873655,fox_friday_night
+2000015,Duke,Illinois,FS1,,500.15118717154724,fox_friday_night
+2000016,Alabama,Kentucky,ABC,,5664.555151503671,fox_friday_night
+2000017,Arizona,BYU,FOX,,1786.8924026845884,fox_friday_night
+2000018,UCF,Pittsburgh,ESPN2,,559.7779988279324,fox_friday_night
+2000019,Mississippi St.,Minnesota,CBS,,1596.4855601042548,fox_friday_night
+2000020,UNLV,North Texas,ESPNU,,65.08128728384065,fox_friday_night
+2000021,Bowling Green,Nebraska,FS1,,457.5211387471897,fox_friday_night
+2000022,Tennessee,Georgia Tech,ESPN,,1700.890510606694,fox_friday_night
+2000023,San Diego St.,UCLA,BTN,,305.66364636041544,fox_friday_night
+2000024,Western Illinois,Wisconsin,BTN,,306.80569618207664,fox_friday_night
+2000025,Ohio St.,Texas,ABC,,11901.746775121888,fox_friday_night
+2000026,Navy,FAU,ESPNU,,52.95520443435349,fox_friday_night
+2000027,Iowa St.,Iowa,NBC,,1848.731542341568,fox_friday_night
+2000028,Texas Tech,Oregon St.,CBS,,1260.4103010182957,fox_friday_night
+2000029,Charlotte,Mississippi,ESPN2,,345.55361715507354,fox_friday_night
+2000030,North Dakota State,Air Force,FS1,,177.75030733714374,fox_friday_night
+2000031,Arkansas,Utah,ESPN,,1648.4565557816852,fox_friday_night
+2000032,Montana State,Nevada,CW,,278.1572187235457,fox_friday_night
+2000033,Louisiana,USC,BTN,,542.1759237213854,fox_friday_night

@@ -94,6 +94,8 @@ class ServingTests(unittest.TestCase):
         f=x.copy();extra=exact_feature_frame([row],index=x.index)
         for c in extra:f[c]=extra[c]
         for c,v in row_features(a,row).items():f[c]=v
+        from fox_friday import FEATURE, fox_friday_night
+        if FEATURE in a.get('additional_features', []):f[FEATURE]=fox_friday_night(row)
         cfg=a['pregame'];scope=rank_scope(row['rank1'],row['rank2'])
         raw=sum(.5*max(float(np.exp(f[c['columns']].to_numpy()@c['coefficients'])[0])*c['smearing_factor']-1,0) for c in cfg['components']['regular'])
         expected=max(raw-cfg['corrections']['regular']['linear'].get(scope,0),0)

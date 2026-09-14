@@ -1,0 +1,9 @@
+{
+  "training_rows": 2423,
+  "training_through_date": "2026-09-07",
+  "slot_training_matches": 14,
+  "historical_matches": 13,
+  "opening_2026_matches": 1,
+  "artifact_sha256": "a28057713fb1906fb441f7bc986a40f8002fc12e13e191bcecdb89f2439be342",
+  "postgame_note": "Preserve existing pre-2026 postgame calibration; paired feature refit, not separately validated for accuracy"
+}

@@ -6695,5 +6695,6 @@ def model_status():
             "prediction_year": artifact.get("prediction_year", artifact["training_max_year"] + 1),
             "artifact_sha256": artifact["artifact_sha256"],
             "postgame_aligned": True,
+            "additional_features": artifact.get("additional_features", []),
         },
     }
