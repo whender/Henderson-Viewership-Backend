@@ -1,0 +1,23 @@
+{
+  "training_max_year": 2026,
+  "prediction_year": 2026,
+  "training_through_date": "2026-09-07",
+  "training_rows": 2423,
+  "refit_policy": "fixed_validated_architecture; frozen pre-2026 OOS calibrations and intrinsic serving scale",
+  "added_games": 34,
+  "added_week0": 5,
+  "added_week1": 29,
+  "actual_viewers_000s": 83268.0,
+  "historical_rows_preserved": 2389,
+  "attention_training_coverage": 2423,
+  "primary_features": 203,
+  "new_data_evaluation": "Training data: not an out-of-sample accuracy claim",
+  "artifact_sha256": {
+    "aligned_postgame.joblib": "717046367245473df7da8989be6c721a112f4711172407ac3efdf114f94bc8d7",
+    "viewership_model_log.joblib": "79ce6e97a0b1303304b94630967d882515b240c328e4ca30a168e42a910913a4",
+    "nonlinear_pregame.joblib": "a9740772873f4ba9451517cfba1e9f86062562a5020d0a92c13b134550a13291",
+    "audience_interest.joblib": "b9334cd5985368b8db8e7b75a0c1779386e1c6d5c2e5605336ea987a8e1d4662",
+    "viewership_postgame_model.joblib": "3e83e3f8308919a697d8fe326cb8e8c4d2af363066875d266c3ce57543494594",
+    "week1_major_days.joblib": "e188819c258eff3c64d44d096b276b21e4813655ce7e83f2c9706dd38385c9c3"
+  }
+}

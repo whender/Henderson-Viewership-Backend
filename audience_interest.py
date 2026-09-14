@@ -59,7 +59,7 @@ def row_features(artifact, row):
     from pregame_ensemble import _coerce_date
     from predict import normalize_team
     d = _coerce_date(row.get('date'))
-    if d is None or d.year != artifact['training_max_year'] + 1:
+    if d is None or d.year != artifact.get('prediction_year', artifact['training_max_year'] + 1):
         return None
     try:
         as_of = datetime.fromisoformat(row['feature_as_of'].replace('Z', '+00:00')) if row.get('feature_as_of') else datetime.now(timezone.utc)

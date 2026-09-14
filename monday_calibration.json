@@ -5,7 +5,7 @@
   "training_max_year": 2025,
   "prediction_year": 2026,
   "sample_count": 7,
-  "model_sha256": "4fa7ac6542bed7a3cb992bbf65711d1b9884b84ec54e00a0b36d5ff2346512cf",
+  "model_sha256": "79ce6e97a0b1303304b94630967d882515b240c328e4ca30a168e42a910913a4",
   "validation": {
     "holdout_games": 5,
     "improved_games": 4,
@@ -13,5 +13,6 @@
     "revised_mae_000s": 749.2254248016874,
     "other_games_unchanged": true
   },
-  "description": "75% model plus 25% historical early-September Monday-night audience mean; 19:00 or later, September 1-14. Exploratory five-game rolling-origin validation; no 2026 actuals used."
+  "description": "75% model plus 25% historical early-September Monday-night audience mean; 19:00 or later, September 1-14. Exploratory five-game rolling-origin validation; no 2026 actuals used.",
+  "refit_note": "Historical OOS-validated calibration held fixed during September 2026 coefficient refit."
 }

@@ -27,6 +27,17 @@ class WindowTests(unittest.TestCase):
             d=date(2026,9,8)+timedelta(days=i)
             self.assertLessEqual(interest_cutoff(d),d-timedelta(days=2))
 
+    def test_inseason_refit_keeps_current_prediction_year(self):
+        daily={team:{f'2026-09-{i:02}':10 for i in range(1,7)}|{'2026-08-31':10}
+               for team in ['Alabama','Auburn']}
+        artifact={'training_max_year':2026,'prediction_year':2026,'daily':daily}
+        row={'date':'09/12/26','team1':'Alabama','team2':'Auburn',
+             'feature_as_of':'2026-09-08T00:00:00+00:00'}
+        self.assertIsNotNone(row_features(artifact,row))
+        self.assertIsNone(row_features(artifact,dict(row,date='09/12/27')))
+        legacy=dict(artifact,training_max_year=2025);legacy.pop('prediction_year')
+        self.assertEqual(row_features(artifact,row),row_features(legacy,row))
+
 
 class ServingTests(unittest.TestCase):
     @classmethod
