@@ -6615,6 +6615,7 @@ def model_status():
     return {
         "revision": os.environ.get("RENDER_GIT_COMMIT"),
         "nielsen_measurement": measurement_status(),
+        "marquee_calibration": getattr(pregame_model, "marquee_calibration", None),
         "audience_interest": None if artifact is None else {
             "version": artifact["version"],
             "policy": artifact["policy"],

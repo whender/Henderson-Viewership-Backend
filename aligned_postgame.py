@@ -58,4 +58,10 @@ def predict_postgame_points_000s(model,artifact,matrix,contexts):
     from audience_interest import apply_audience_interest
     points=apply_audience_interest(model,matrix,contexts,original,points,scopes,postgame=True)
     points=apply_opening_week_calibration(proxy,matrix,contexts,points)
-    return apply_monday_calibration(proxy,matrix,contexts,points)
+    points=apply_monday_calibration(proxy,matrix,contexts,points)
+    if getattr(model,"marquee_calibration",None) is not None:
+        from pregame_ensemble import predict_pregame_points_000s
+        from marquee_calibration import production_factors
+        pre=predict_pregame_points_000s(model,matrix,contexts,apply_marquee=False)
+        points=points*production_factors(model,contexts,pre)
+    return points

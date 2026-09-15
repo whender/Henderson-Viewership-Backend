@@ -241,6 +241,7 @@ def predict_pregame_points_000s(
     primary_model: Any,
     primary_matrix: pd.DataFrame,
     contexts: Iterable[Mapping[str, Any]] | None = None,
+    *, apply_marquee: bool = True,
 ) -> np.ndarray:
     """Predict primary or its optional level blend plus scoped calibration."""
 
@@ -303,7 +304,11 @@ def predict_pregame_points_000s(
     from audience_interest import apply_audience_interest
     points = apply_audience_interest(primary_model, primary_matrix, context_rows, baseline, points, scopes)
     points = apply_opening_week_calibration(primary_model, primary_matrix, context_rows, points)
-    return apply_monday_calibration(primary_model, primary_matrix, context_rows, points)
+    points = apply_monday_calibration(primary_model, primary_matrix, context_rows, points)
+    if apply_marquee:
+        from marquee_calibration import production_factors
+        points = points * production_factors(primary_model, context_rows, points)
+    return points
 
 
 def apply_monday_calibration(model, matrix, contexts, points):

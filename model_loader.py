@@ -87,6 +87,8 @@ def load_viewership_model():
             model.nonlinear_pregame = nonlinear
         from audience_interest import load_audience_interest
         model.audience_interest = load_audience_interest(BASE_DIR)
+        from marquee_calibration import load_production
+        model.marquee_calibration = load_production(BASE_DIR)
         return model
 
     # fallback if saved as plain model
