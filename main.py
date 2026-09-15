@@ -524,6 +524,9 @@ df_all = pd.read_csv(
     low_memory=False,
 )
 
+# Preserve audited model inputs before legacy display-bucket reconstruction.
+expected_prediction_inputs = df_all.copy()
+
 parsed_game_dates = pd.to_datetime(df_all.get("ParsedDate"), errors="coerce")
 df_all["Black Friday"] = parsed_game_dates.map(
     lambda value: int(pd.notna(value) and value.date() == black_friday_date(value.year))
@@ -654,91 +657,13 @@ df_all["scenario_competing_bucket"] = df_all.apply(detect_competing_tier, axis=1
 df_all["scenario_conf_champ"] = df_all["Conf Champ"].fillna(0).astype(int)
 
 
-def _compute_average_team_effect(df):
-    team_columns = [column for column in pregame_model.params.index if column in MODEL_TEAM_NAMES]
-    team_effects = pd.to_numeric(pregame_model.params.reindex(team_columns), errors="coerce").dropna()
+from expected_viewership import compute_expectations
 
-    team_dummies_1 = pd.get_dummies(df["Team 1"])
-    team_dummies_2 = pd.get_dummies(df["Team 2"])
-    team_dummies = team_dummies_1.add(team_dummies_2, fill_value=0)
-    team_counts = team_dummies.sum()
-    valid_teams = set(team_counts[team_counts >= 5].index)
-    modeled_teams = set(team_columns)
-    omitted_baseline_teams = valid_teams - modeled_teams
+# Use the same complete serving pipeline as the published pregame forecasts.
+expectations = compute_expectations(pregame_model, expected_prediction_inputs, MODEL_TEAM_NAMES, teams_list.values())
+for column in expectations:
+    df_all[column] = expectations[column]
 
-    total_effect = float(team_effects.sum())
-    total_count = len(team_effects) + len(omitted_baseline_teams)
-
-    if total_count == 0:
-        return 0.0
-
-    return total_effect / total_count
-
-
-AVERAGE_TEAM_EFFECT = _compute_average_team_effect(df_all)
-MODELED_TEAM_COLUMNS = {column for column in pregame_model.params.index if column in MODEL_TEAM_NAMES}
-
-
-def _build_pregame_design_matrix(df):
-    model_columns = list(pregame_model.params.index)
-    X = pd.DataFrame(index=df.index)
-
-    for column in model_columns:
-        if column == "const":
-            X[column] = 1.0
-        elif column in df.columns:
-            X[column] = pd.to_numeric(df[column], errors="coerce").fillna(0).astype(float)
-        else:
-            X[column] = 0.0
-
-    team_dummies = pd.get_dummies(df["Team 1"]).add(pd.get_dummies(df["Team 2"]), fill_value=0)
-    team_dummies = team_dummies.reindex(columns=[c for c in model_columns if c in MODELED_TEAM_COLUMNS], fill_value=0)
-
-    for column in team_dummies.columns:
-        X[column] = team_dummies[column].astype(float)
-
-    return X[model_columns]
-
-
-def _predict_viewers_from_design_matrix(X, team_effect_adjustment):
-    ln_pred = pregame_model.predict(X) + team_effect_adjustment
-    smearing = getattr(pregame_model, "smearing_factor", 1.0)
-    expected = (np.exp(ln_pred) - 1) * smearing
-    return pd.to_numeric(expected, errors="coerce")
-
-
-def _compute_expected_viewers(df):
-    X = _build_pregame_design_matrix(df)
-
-    # Neutral matchup baseline: replace both teams with an average-FBS-team effect.
-    for column in MODELED_TEAM_COLUMNS:
-        if column in X.columns:
-            X[column] = 0.0
-    for column in ["DeionEra", "DeionEra25"]:
-        if column in X.columns:
-            X[column] = 0.0
-
-    return _predict_viewers_from_design_matrix(X, 2 * AVERAGE_TEAM_EFFECT)
-
-
-def _compute_team_specific_expected_viewers(df, focal_team_column):
-    X = _build_pregame_design_matrix(df)
-    focal_teams = df[focal_team_column].fillna("")
-
-    for team_name in focal_teams[focal_teams.isin(MODELED_TEAM_COLUMNS)].unique():
-        X.loc[focal_teams == team_name, team_name] = 0.0
-    colorado_mask = focal_teams == "Colorado"
-    for column in ["DeionEra", "DeionEra25"]:
-        if column in X.columns:
-            X.loc[colorado_mask, column] = 0.0
-
-    # Replace only the focal team's brand effect with an average-FBS-team baseline.
-    return _predict_viewers_from_design_matrix(X, AVERAGE_TEAM_EFFECT)
-
-
-df_all["expected_viewers"] = _compute_expected_viewers(df_all)
-df_all["expected_viewers_team1"] = _compute_team_specific_expected_viewers(df_all, "Team 1")
-df_all["expected_viewers_team2"] = _compute_team_specific_expected_viewers(df_all, "Team 2")
 df_all["actual_minus_expected"] = (
     pd.to_numeric(df_all["Persons 2+"], errors="coerce") - df_all["expected_viewers"]
 )
