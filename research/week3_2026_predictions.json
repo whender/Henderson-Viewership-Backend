@@ -954,7 +954,7 @@
       "line_provider_count": 2,
       "spread_source": "CFBD pregame /lines; latest returned spread, not a live in-game line",
       "matchup": "Colorado vs Northwestern",
-      "predicted": "1.28M (0.90-1.80M)",
+      "predicted": "1.69M (1.13-2.48M)",
       "audience_interest_features": {
         "InterestLogTotal7": 9.363919459904483,
         "InterestLogMax7": 8.860215358901183,
@@ -962,7 +962,20 @@
       },
       "audience_interest_artifact_sha256": "a28057713fb1906fb441f7bc986a40f8002fc12e13e191bcecdb89f2439be342",
       "percent_error": null,
-      "accuracy": ""
+      "accuracy": "",
+      "prediction_history": [
+        {
+          "predicted": "1.28M (0.90-1.80M)",
+          "saved_at": "2026-09-15T15:37:35.072573+00:00",
+          "reason": "Before user-requested DeionEra25 override"
+        }
+      ],
+      "prediction_feature_override": {
+        "DeionEra25": 1
+      },
+      "forecast_updated_at": "2026-09-15T15:37:35.072573+00:00",
+      "revision_reason": "User requested the 2025 Deion effect for Colorado.",
+      "prediction_revision": "week3_deion25_override"
     },
     {
       "cfbd_game_id": 401858453,
@@ -2832,7 +2845,7 @@
       "line_provider_count": 2,
       "spread_source": "CFBD pregame /lines; latest returned spread, not a live in-game line",
       "matchup": "Colorado vs Northwestern",
-      "predicted": "1.28M (0.90-1.80M)",
+      "predicted": "1.69M (1.13-2.48M)",
       "audience_interest_features": {
         "InterestLogTotal7": 9.363919459904483,
         "InterestLogMax7": 8.860215358901183,
@@ -2840,7 +2853,20 @@
       },
       "audience_interest_artifact_sha256": "a28057713fb1906fb441f7bc986a40f8002fc12e13e191bcecdb89f2439be342",
       "percent_error": null,
-      "accuracy": ""
+      "accuracy": "",
+      "prediction_history": [
+        {
+          "predicted": "1.28M (0.90-1.80M)",
+          "saved_at": "2026-09-15T15:37:35.072573+00:00",
+          "reason": "Before user-requested DeionEra25 override"
+        }
+      ],
+      "prediction_feature_override": {
+        "DeionEra25": 1
+      },
+      "forecast_updated_at": "2026-09-15T15:37:35.072573+00:00",
+      "revision_reason": "User requested the 2025 Deion effect for Colorado.",
+      "prediction_revision": "week3_deion25_override"
     },
     {
       "cfbd_game_id": 401856688,
