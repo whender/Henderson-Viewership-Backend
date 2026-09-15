@@ -1,0 +1,34 @@
+[
+  {
+    "feature": "BigNoonKickoffOnsite",
+    "date": "2026-09-12",
+    "team1": "Oklahoma",
+    "team2": "Michigan",
+    "announcement_date": "2026-05-27",
+    "verification_source": "https://www.foxsports.com/stories/presspass/fox-sports-unveils-powerhouse-2026-college-football-schedule"
+  },
+  {
+    "feature": "BigNoonKickoffOnsite",
+    "date": "2026-09-05",
+    "team1": "North Texas",
+    "team2": "Indiana",
+    "announcement_date": "2026-05-27",
+    "verification_source": "https://www.foxsports.com/stories/presspass/fox-sports-unveils-powerhouse-2026-college-football-schedule"
+  },
+  {
+    "feature": "CollegeGameDayOnsite",
+    "date": "2023-09-16",
+    "team1": "Colorado State",
+    "team2": "Colorado",
+    "announcement_date": "2023-09-15",
+    "verification_source": "https://espnpressroom.com/press-release/espns-college-gameday-built-by-the-home-depot-travels-to-colorado-for-the-rocky-mountain-showdown-celebrates-corsos-400th-headgear-pick/"
+  },
+  {
+    "feature": "BigNoonKickoffOnsite",
+    "date": "2023-09-16",
+    "team1": "Colorado State",
+    "team2": "Colorado",
+    "announcement_date": "2023-09-15",
+    "verification_source": "https://www.foxsports.com/stories/the-joel-klatt-show/2023-college-football-odds-will-colorado-win-big-over-colorado-state"
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "audience_interest.joblib": "a28057713fb1906fb441f7bc986a40f8002fc12e13e191bcecdb89f2439be342",
+  "viewership_model_log.joblib": "79ce6e97a0b1303304b94630967d882515b240c328e4ca30a168e42a910913a4",
+  "research/pregame_show_locations.json": "c9293b99b4b225a9db21f49a3ef96b857ca5e84a38c345936a61d3f65f2a8075",
+  "research/fox_friday_results/predictions.csv": "73350a78ee18a4f08e07a083e944bbb6f1707326328793d787459fe1be4d005a",
+  "../tmp/week01_retrain/historical.joblib": "19c00155f29a8e12ffdbfea62428ec91b77fc6b0f524bdcc10f794e6c1d17b63",
+  "../RatingsAndRegression/cfbd_pregame_context.csv": "a4d4d943ea7a4b1828c2f02fe1641a0ea3352dac1e7a3807c762fe47103b1599",
+  "../week2_2026/full_slate_predictions.json": "09379914694f39582112f59e54c15286d1d27ee99a3ad20d038cc50ca10847d7"
+}
