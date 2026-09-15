@@ -1,0 +1,227 @@
+[
+  {
+    "variant": "marquee_mean",
+    "definition": "audience",
+    "year": 2021,
+    "n": 0,
+    "raw_ratio": 1.0,
+    "factor": 1.0,
+    "training_max_year": null
+  },
+  {
+    "variant": "marquee_median",
+    "definition": "audience",
+    "year": 2021,
+    "n": 0,
+    "raw_ratio": 1.0,
+    "factor": 1.0,
+    "training_max_year": null
+  },
+  {
+    "variant": "broad_to_marquee",
+    "definition": "audience",
+    "year": 2021,
+    "n": 0,
+    "raw_ratio": 1.0,
+    "factor": 1.0,
+    "training_max_year": null
+  },
+  {
+    "variant": "ranked_mean",
+    "definition": "ranked",
+    "year": 2021,
+    "n": 0,
+    "raw_ratio": 1.0,
+    "factor": 1.0,
+    "training_max_year": null
+  },
+  {
+    "variant": "hybrid_mean",
+    "definition": "hybrid",
+    "year": 2021,
+    "n": 0,
+    "raw_ratio": 1.0,
+    "factor": 1.0,
+    "training_max_year": null
+  },
+  {
+    "variant": "marquee_mean",
+    "definition": "audience",
+    "year": 2022,
+    "n": 24,
+    "raw_ratio": 1.0480952760509363,
+    "factor": 1.0213756782448606,
+    "training_max_year": 2021
+  },
+  {
+    "variant": "marquee_median",
+    "definition": "audience",
+    "year": 2022,
+    "n": 24,
+    "raw_ratio": 0.9728585130332253,
+    "factor": 0.9879371169036557,
+    "training_max_year": 2021
+  },
+  {
+    "variant": "broad_to_marquee",
+    "definition": "audience",
+    "year": 2022,
+    "n": 186,
+    "raw_ratio": 1.088537036227064,
+    "factor": 1.076240225639972,
+    "training_max_year": 2021
+  },
+  {
+    "variant": "ranked_mean",
+    "definition": "ranked",
+    "year": 2022,
+    "n": 38,
+    "raw_ratio": 1.075159435670629,
+    "factor": 1.0420008611100575,
+    "training_max_year": 2021
+  },
+  {
+    "variant": "hybrid_mean",
+    "definition": "hybrid",
+    "year": 2022,
+    "n": 38,
+    "raw_ratio": 1.072334225575989,
+    "factor": 1.0404220672336408,
+    "training_max_year": 2021
+  },
+  {
+    "variant": "marquee_mean",
+    "definition": "audience",
+    "year": 2023,
+    "n": 53,
+    "raw_ratio": 1.0277044133735402,
+    "factor": 1.0176907699855136,
+    "training_max_year": 2022
+  },
+  {
+    "variant": "marquee_median",
+    "definition": "audience",
+    "year": 2023,
+    "n": 53,
+    "raw_ratio": 0.9985988025083509,
+    "factor": 0.9991052594330433,
+    "training_max_year": 2022
+  },
+  {
+    "variant": "broad_to_marquee",
+    "definition": "audience",
+    "year": 2023,
+    "n": 366,
+    "raw_ratio": 1.073339122877838,
+    "factor": 1.067783128720426,
+    "training_max_year": 2022
+  },
+  {
+    "variant": "ranked_mean",
+    "definition": "ranked",
+    "year": 2023,
+    "n": 84,
+    "raw_ratio": 1.0486618536295098,
+    "factor": 1.0358561026743756,
+    "training_max_year": 2022
+  },
+  {
+    "variant": "hybrid_mean",
+    "definition": "hybrid",
+    "year": 2023,
+    "n": 87,
+    "raw_ratio": 1.0421503866778021,
+    "factor": 1.0313425952219555,
+    "training_max_year": 2022
+  },
+  {
+    "variant": "marquee_mean",
+    "definition": "audience",
+    "year": 2024,
+    "n": 52,
+    "raw_ratio": 1.027161694825095,
+    "factor": 1.0172244894012799,
+    "training_max_year": 2023
+  },
+  {
+    "variant": "marquee_median",
+    "definition": "audience",
+    "year": 2024,
+    "n": 52,
+    "raw_ratio": 1.0422179743166053,
+    "factor": 1.0267723739568717,
+    "training_max_year": 2023
+  },
+  {
+    "variant": "broad_to_marquee",
+    "definition": "audience",
+    "year": 2024,
+    "n": 382,
+    "raw_ratio": 1.0886842324594685,
+    "factor": 1.0822266427172742,
+    "training_max_year": 2023
+  },
+  {
+    "variant": "ranked_mean",
+    "definition": "ranked",
+    "year": 2024,
+    "n": 88,
+    "raw_ratio": 1.057288783326388,
+    "factor": 1.0427238384128996,
+    "training_max_year": 2023
+  },
+  {
+    "variant": "hybrid_mean",
+    "definition": "hybrid",
+    "year": 2024,
+    "n": 91,
+    "raw_ratio": 1.0513217214134716,
+    "factor": 1.0385973276745943,
+    "training_max_year": 2023
+  },
+  {
+    "variant": "marquee_mean",
+    "definition": "audience",
+    "year": 2025,
+    "n": 59,
+    "raw_ratio": 1.0561551802062465,
+    "factor": 1.0372264677771748,
+    "training_max_year": 2024
+  },
+  {
+    "variant": "marquee_median",
+    "definition": "audience",
+    "year": 2025,
+    "n": 59,
+    "raw_ratio": 1.0539057767548847,
+    "factor": 1.0357352902082944,
+    "training_max_year": 2024
+  },
+  {
+    "variant": "broad_to_marquee",
+    "definition": "audience",
+    "year": 2025,
+    "n": 418,
+    "raw_ratio": 1.065480655520279,
+    "factor": 1.0610957901952602,
+    "training_max_year": 2024
+  },
+  {
+    "variant": "ranked_mean",
+    "definition": "ranked",
+    "year": 2025,
+    "n": 80,
+    "raw_ratio": 1.0889405328970962,
+    "factor": 1.064684023925161,
+    "training_max_year": 2024
+  },
+  {
+    "variant": "hybrid_mean",
+    "definition": "hybrid",
+    "year": 2025,
+    "n": 90,
+    "raw_ratio": 1.0684742755209602,
+    "factor": 1.0513557066407202,
+    "training_max_year": 2024
+  }
+]

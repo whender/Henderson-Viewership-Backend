@@ -1,0 +1,47 @@
+[
+  {
+    "variant": "marquee_mean",
+    "definition": "audience",
+    "year": 2026,
+    "n": 78,
+    "raw_ratio": 1.0699486721967244,
+    "factor": 1.0505184854754122,
+    "training_max_year": 2025
+  },
+  {
+    "variant": "marquee_median",
+    "definition": "audience",
+    "year": 2026,
+    "n": 78,
+    "raw_ratio": 1.0589200139810062,
+    "factor": 1.0425533434307268,
+    "training_max_year": 2025
+  },
+  {
+    "variant": "broad_to_marquee",
+    "definition": "audience",
+    "year": 2026,
+    "n": 419,
+    "raw_ratio": 1.0630308436812066,
+    "factor": 1.0588194287359145,
+    "training_max_year": 2025
+  },
+  {
+    "variant": "ranked_mean",
+    "definition": "ranked",
+    "year": 2026,
+    "n": 85,
+    "raw_ratio": 1.10135195318416,
+    "factor": 1.074912313223075,
+    "training_max_year": 2025
+  },
+  {
+    "variant": "hybrid_mean",
+    "definition": "hybrid",
+    "year": 2026,
+    "n": 101,
+    "raw_ratio": 1.0789640116496122,
+    "factor": 1.060880650203136,
+    "training_max_year": 2025
+  }
+]

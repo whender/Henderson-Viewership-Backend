@@ -1,0 +1,22 @@
+[
+  {
+    "year": 2021,
+    "choice": "current"
+  },
+  {
+    "year": 2022,
+    "choice": "current"
+  },
+  {
+    "year": 2023,
+    "choice": "broad_to_marquee"
+  },
+  {
+    "year": 2024,
+    "choice": "ranked_mean"
+  },
+  {
+    "year": 2025,
+    "choice": "ranked_mean"
+  }
+]
