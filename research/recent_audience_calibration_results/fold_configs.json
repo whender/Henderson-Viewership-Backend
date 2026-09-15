@@ -1,0 +1,413 @@
+[
+  {
+    "year": 2021,
+    "method": "global_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": null,
+    "training_max_year": null,
+    "records": []
+  },
+  {
+    "year": 2021,
+    "method": "band_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": null,
+    "training_max_year": null,
+    "records": []
+  },
+  {
+    "year": 2021,
+    "method": "band_median",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": null,
+    "training_max_year": null,
+    "records": []
+  },
+  {
+    "year": 2022,
+    "method": "global_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2021,
+    "training_max_year": 2021,
+    "records": [
+      {
+        "band": 0,
+        "n": 186,
+        "raw_ratio": 1.088537036227064,
+        "factor": 1.076240225639972
+      }
+    ]
+  },
+  {
+    "year": 2022,
+    "method": "band_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2021,
+    "training_max_year": 2021,
+    "records": [
+      {
+        "band": 0,
+        "n": 16,
+        "raw_ratio": 1.041700266209572,
+        "factor": 1.0145044404207206
+      },
+      {
+        "band": 1,
+        "n": 107,
+        "raw_ratio": 1.1115766210824094,
+        "factor": 1.087143784349035
+      },
+      {
+        "band": 2,
+        "n": 39,
+        "raw_ratio": 1.1068814181759732,
+        "factor": 1.0604112363603326
+      },
+      {
+        "band": 3,
+        "n": 19,
+        "raw_ratio": 1.0822442516069561,
+        "factor": 1.0318906281741258
+      },
+      {
+        "band": 4,
+        "n": 5,
+        "raw_ratio": 0.9640182965300802,
+        "factor": 0.9948597566471543
+      }
+    ]
+  },
+  {
+    "year": 2022,
+    "method": "band_median",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2021,
+    "training_max_year": 2021,
+    "records": [
+      {
+        "band": 0,
+        "n": 16,
+        "raw_ratio": 0.9965048037329364,
+        "factor": 0.9987842795592822
+      },
+      {
+        "band": 1,
+        "n": 107,
+        "raw_ratio": 1.0525829357319834,
+        "factor": 1.0410684242578263
+      },
+      {
+        "band": 2,
+        "n": 39,
+        "raw_ratio": 1.0553335876492491,
+        "factor": 1.031275506062619
+      },
+      {
+        "band": 3,
+        "n": 19,
+        "raw_ratio": 0.9985988025083509,
+        "factor": 0.9994566785236463
+      },
+      {
+        "band": 4,
+        "n": 5,
+        "raw_ratio": 0.9410379413693716,
+        "factor": 0.9915768487670531
+      }
+    ]
+  },
+  {
+    "year": 2023,
+    "method": "global_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2021,
+    "training_max_year": 2022,
+    "records": [
+      {
+        "band": 0,
+        "n": 366,
+        "raw_ratio": 1.073339122877838,
+        "factor": 1.067783128720426
+      }
+    ]
+  },
+  {
+    "year": 2023,
+    "method": "band_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2021,
+    "training_max_year": 2022,
+    "records": [
+      {
+        "band": 0,
+        "n": 32,
+        "raw_ratio": 1.1361189495915516,
+        "factor": 1.0702549417246718
+      },
+      {
+        "band": 1,
+        "n": 197,
+        "raw_ratio": 1.1098039837259788,
+        "factor": 1.0952924440265102
+      },
+      {
+        "band": 2,
+        "n": 84,
+        "raw_ratio": 1.0796962067895113,
+        "factor": 1.0587235207922714
+      },
+      {
+        "band": 3,
+        "n": 39,
+        "raw_ratio": 1.0637265293663634,
+        "factor": 1.036019342685336
+      },
+      {
+        "band": 4,
+        "n": 14,
+        "raw_ratio": 0.9667365565578868,
+        "factor": 0.9894161770866003
+      }
+    ]
+  },
+  {
+    "year": 2023,
+    "method": "band_median",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2021,
+    "training_max_year": 2022,
+    "records": [
+      {
+        "band": 0,
+        "n": 32,
+        "raw_ratio": 1.0697799684704798,
+        "factor": 1.036015467597667
+      },
+      {
+        "band": 1,
+        "n": 197,
+        "raw_ratio": 1.0492606435233323,
+        "factor": 1.0427504263176055
+      },
+      {
+        "band": 2,
+        "n": 84,
+        "raw_ratio": 1.0252685782358517,
+        "factor": 1.0186189523843119
+      },
+      {
+        "band": 3,
+        "n": 39,
+        "raw_ratio": 1.0088473614143951,
+        "factor": 1.005000682538571
+      },
+      {
+        "band": 4,
+        "n": 14,
+        "raw_ratio": 0.9190403230870352,
+        "factor": 0.9742401028004203
+      }
+    ]
+  },
+  {
+    "year": 2024,
+    "method": "global_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2022,
+    "training_max_year": 2023,
+    "records": [
+      {
+        "band": 0,
+        "n": 382,
+        "raw_ratio": 1.0886842324594685,
+        "factor": 1.0822266427172742
+      }
+    ]
+  },
+  {
+    "year": 2024,
+    "method": "band_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2022,
+    "training_max_year": 2023,
+    "records": [
+      {
+        "band": 0,
+        "n": 35,
+        "raw_ratio": 1.2421666668279248,
+        "factor": 1.1303974359842672
+      },
+      {
+        "band": 1,
+        "n": 194,
+        "raw_ratio": 1.1352535765678744,
+        "factor": 1.1171392582775341
+      },
+      {
+        "band": 2,
+        "n": 101,
+        "raw_ratio": 1.0957569519607198,
+        "factor": 1.0738278789926161
+      },
+      {
+        "band": 3,
+        "n": 34,
+        "raw_ratio": 1.058950970725557,
+        "factor": 1.0313177031979521
+      },
+      {
+        "band": 4,
+        "n": 18,
+        "raw_ratio": 0.9937240720309948,
+        "factor": 0.997646527011623
+      }
+    ]
+  },
+  {
+    "year": 2024,
+    "method": "band_median",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2022,
+    "training_max_year": 2023,
+    "records": [
+      {
+        "band": 0,
+        "n": 35,
+        "raw_ratio": 1.1258044100796751,
+        "factor": 1.0677408361967482
+      },
+      {
+        "band": 1,
+        "n": 194,
+        "raw_ratio": 1.0657228852794443,
+        "factor": 1.0569207131438043
+      },
+      {
+        "band": 2,
+        "n": 101,
+        "raw_ratio": 0.9984611469414618,
+        "factor": 0.9988135560388369
+      },
+      {
+        "band": 3,
+        "n": 34,
+        "raw_ratio": 1.0586762227848423,
+        "factor": 1.0311717433544474
+      },
+      {
+        "band": 4,
+        "n": 18,
+        "raw_ratio": 0.9928184343784454,
+        "factor": 0.997306912891917
+      }
+    ]
+  },
+  {
+    "year": 2025,
+    "method": "global_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2023,
+    "training_max_year": 2024,
+    "records": [
+      {
+        "band": 0,
+        "n": 418,
+        "raw_ratio": 1.065480655520279,
+        "factor": 1.0610957901952602
+      }
+    ]
+  },
+  {
+    "year": 2025,
+    "method": "band_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2023,
+    "training_max_year": 2024,
+    "records": [
+      {
+        "band": 0,
+        "n": 44,
+        "raw_ratio": 1.214120644275706,
+        "factor": 1.1273149776774467
+      },
+      {
+        "band": 1,
+        "n": 206,
+        "raw_ratio": 1.0671101867913346,
+        "factor": 1.0585792308432835
+      },
+      {
+        "band": 2,
+        "n": 109,
+        "raw_ratio": 1.0625499893202337,
+        "factor": 1.0490499916252192
+      },
+      {
+        "band": 3,
+        "n": 37,
+        "raw_ratio": 1.0643130265487326,
+        "factor": 1.0355161489895985
+      },
+      {
+        "band": 4,
+        "n": 22,
+        "raw_ratio": 1.0481801599690648,
+        "factor": 1.020383913833066
+      }
+    ]
+  },
+  {
+    "year": 2025,
+    "method": "band_median",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2023,
+    "training_max_year": 2024,
+    "records": [
+      {
+        "band": 0,
+        "n": 44,
+        "raw_ratio": 1.1308897621712046,
+        "factor": 1.0778263450747703
+      },
+      {
+        "band": 1,
+        "n": 206,
+        "raw_ratio": 1.0032172969657362,
+        "factor": 1.0028083185378884
+      },
+      {
+        "band": 2,
+        "n": 109,
+        "raw_ratio": 0.9543016331358192,
+        "factor": 0.9641645900129805
+      },
+      {
+        "band": 3,
+        "n": 37,
+        "raw_ratio": 1.0450123450542206,
+        "factor": 1.024857563686659
+      },
+      {
+        "band": 4,
+        "n": 22,
+        "raw_ratio": 1.0572274300408262,
+        "factor": 1.0242116050172727
+      }
+    ]
+  }
+]

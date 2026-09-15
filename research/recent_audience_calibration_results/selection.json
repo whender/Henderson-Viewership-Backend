@@ -1,0 +1,22 @@
+[
+  {
+    "year": 2021,
+    "choice": "current"
+  },
+  {
+    "year": 2022,
+    "choice": "current"
+  },
+  {
+    "year": 2023,
+    "choice": "current"
+  },
+  {
+    "year": 2024,
+    "choice": "band_median"
+  },
+  {
+    "year": 2025,
+    "choice": "current"
+  }
+]

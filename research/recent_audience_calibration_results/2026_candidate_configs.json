@@ -1,0 +1,98 @@
+[
+  {
+    "year": 2026,
+    "method": "global_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2024,
+    "training_max_year": 2025,
+    "records": [
+      {
+        "band": 0,
+        "n": 419,
+        "raw_ratio": 1.0630308436812066,
+        "factor": 1.0588194287359145
+      }
+    ]
+  },
+  {
+    "year": 2026,
+    "method": "band_mean",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2024,
+    "training_max_year": 2025,
+    "records": [
+      {
+        "band": 0,
+        "n": 47,
+        "raw_ratio": 1.2239958231220018,
+        "factor": 1.1367247232043387
+      },
+      {
+        "band": 1,
+        "n": 202,
+        "raw_ratio": 1.0508734332661296,
+        "factor": 1.044294972067923
+      },
+      {
+        "band": 2,
+        "n": 92,
+        "raw_ratio": 1.048964548819437,
+        "factor": 1.0369240859949853
+      },
+      {
+        "band": 3,
+        "n": 48,
+        "raw_ratio": 1.0501524823379562,
+        "factor": 1.030863066054127
+      },
+      {
+        "band": 4,
+        "n": 30,
+        "raw_ratio": 1.088349267003244,
+        "factor": 1.044174633501622
+      }
+    ]
+  },
+  {
+    "year": 2026,
+    "method": "band_median",
+    "window": 2,
+    "shrink": 30,
+    "training_min_year": 2024,
+    "training_max_year": 2025,
+    "records": [
+      {
+        "band": 0,
+        "n": 47,
+        "raw_ratio": 1.182451881542174,
+        "factor": 1.111366732889379
+      },
+      {
+        "band": 1,
+        "n": 202,
+        "raw_ratio": 1.014181883122789,
+        "factor": 1.0123480189258764
+      },
+      {
+        "band": 2,
+        "n": 92,
+        "raw_ratio": 1.0204788126995088,
+        "factor": 1.0154430390848754
+      },
+      {
+        "band": 3,
+        "n": 48,
+        "raw_ratio": 1.0604590771894107,
+        "factor": 1.0372055859627143
+      },
+      {
+        "band": 4,
+        "n": 30,
+        "raw_ratio": 1.0485416809058445,
+        "factor": 1.0242708404529224
+      }
+    ]
+  }
+]
