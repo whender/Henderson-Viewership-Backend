@@ -15,10 +15,11 @@
   "postgame_policy": "Same multiplier and pregame eligibility; paired consistency, not separately validated postgame accuracy",
   "interval_policy": "Retain existing shifted primary intervals; calibration uncertainty not separately estimated",
   "base_sha256": {
-    "viewership_model_log.joblib": "79ce6e97a0b1303304b94630967d882515b240c328e4ca30a168e42a910913a4",
-    "audience_interest.joblib": "a28057713fb1906fb441f7bc986a40f8002fc12e13e191bcecdb89f2439be342",
-    "nonlinear_pregame.joblib": "a9740772873f4ba9451517cfba1e9f86062562a5020d0a92c13b134550a13291",
-    "week1_major_days.joblib": "e188819c258eff3c64d44d096b276b21e4813655ce7e83f2c9706dd38385c9c3",
-    "aligned_postgame.joblib": "717046367245473df7da8989be6c721a112f4711172407ac3efdf114f94bc8d7"
-  }
+    "viewership_model_log.joblib": "7c3cbb0e0e9f9eec2c578d4f9e7068d217f4081803fb782a66f677b7dc922b01",
+    "audience_interest.joblib": "976ca805210a0a1c6bd0956df3fdc6d1aa2c71cd0227b32f978958c68879d2b7",
+    "nonlinear_pregame.joblib": "abb16242c43a164a04905ae75804c3d32fbd5cd875f14a165a4fb294d281a118",
+    "week1_major_days.joblib": "51901bfdff929df194de1e45f94e4df760f35cffc289b56520e8ea22dc82944d",
+    "aligned_postgame.joblib": "851f145f7579fbec1849980ac6d40f8ff2906b905aa1eb2a230c26dcae6b4f07"
+  },
+  "refit_note": "Frozen 2024\u201325 held-out calibration retained during coefficient refit; no fit to the new actuals."
 }

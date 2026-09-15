@@ -9,7 +9,7 @@
     "ESPN",
     "FOX"
   ],
-  "model_sha256": "79ce6e97a0b1303304b94630967d882515b240c328e4ca30a168e42a910913a4",
+  "model_sha256": "7c3cbb0e0e9f9eec2c578d4f9e7068d217f4081803fb782a66f677b7dc922b01",
   "validation": {
     "holdout_games": 4,
     "improved_games": 4,
