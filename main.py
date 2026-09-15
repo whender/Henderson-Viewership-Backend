@@ -6534,6 +6534,8 @@ def weekly_predictions():
                 updated = True
 
             response_game = dict(g)
+            from nielsen_measurement import measurement_era_flags
+            response_game["measurement_era_flags"] = measurement_era_flags(g.get("date"))
             if prediction_warnings:
                 existing_warnings = response_game.get("warnings", [])
                 if isinstance(existing_warnings, str):
@@ -6607,10 +6609,12 @@ def weekly_predictions():
 
 @app.get("/model-status")
 def model_status():
+    from nielsen_measurement import measurement_status
     from weekly_predictions_fs import pregame_model
     artifact = getattr(pregame_model, 'audience_interest', None)
     return {
         "revision": os.environ.get("RENDER_GIT_COMMIT"),
+        "nielsen_measurement": measurement_status(),
         "audience_interest": None if artifact is None else {
             "version": artifact["version"],
             "policy": artifact["policy"],

@@ -12,7 +12,9 @@ class InseasonDataTests(unittest.TestCase):
         self.assertEqual(len(data),2423);self.assertEqual(len(new),34)
         self.assertTrue(data.source_index.is_unique)
         self.assertFalse(new.duplicated(['Date','Team 1','Team 2']).any())
-        self.assertAlmostEqual(new['Persons 2+'].sum(),83268)
+        # USC–SJSU actual corrected from 1,862K to 2,000K by the user.
+        self.assertAlmostEqual(new['Persons 2+'].sum(),83406)
+        self.assertEqual(new.loc[new.source_index.eq(1044001), 'Persons 2+'].iloc[0],2000)
         from main import team_profile
         for _,game in new.iterrows():
             for team,other in [('Team 1','Team 2'),('Team 2','Team 1')]:
