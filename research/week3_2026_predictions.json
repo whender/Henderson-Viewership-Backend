@@ -1083,71 +1083,6 @@
       "audience_interest_artifact_sha256": "a28057713fb1906fb441f7bc986a40f8002fc12e13e191bcecdb89f2439be342",
       "percent_error": null,
       "accuracy": ""
-    },
-    {
-      "cfbd_game_id": 401864507,
-      "date": "09/19/26",
-      "day": "Sat",
-      "time_slot": "10:30p",
-      "kickoff_utc": "2026-09-20T02:30:00.000Z",
-      "week": 3,
-      "season_week": 3,
-      "network": "ESPN",
-      "broadcast_outlets": [
-        "ESPN"
-      ],
-      "ranking_source": "ap",
-      "comp_tier1": 0,
-      "conf_champ": false,
-      "actual": "",
-      "generated_at": "2026-09-15T15:30:55.166678+00:00",
-      "forecast_timing": "pregame",
-      "source": "CFBD /games, /games/media, /rankings, /lines fetched 2026-09-15",
-      "warnings": [
-        "No fitted team-specific effect for North Dakota State; using available shared features.",
-        "No fitted team-specific effect for Sacramento State; using available shared features."
-      ],
-      "neutral_site": false,
-      "competing_games_score": 1.1904537766877394,
-      "prediction_status": "ready",
-      "feature_as_of": "2026-09-15T15:30:55.166678+00:00",
-      "team1": "North Dakota State",
-      "rank1": 0,
-      "team1_pregame_elo": 1567,
-      "team1_games_before": 3,
-      "team1_wins_before": 3,
-      "team1_win_pct_to_date": 1.0,
-      "team1_prior_game_ids": [
-        401864577,
-        401864499,
-        401864502
-      ],
-      "team2": "Sacramento State",
-      "rank2": 0,
-      "team2_pregame_elo": 1324,
-      "team2_games_before": 3,
-      "team2_wins_before": 1,
-      "team2_win_pct_to_date": 0.3333333333333333,
-      "team2_prior_game_ids": [
-        401866408,
-        401866411,
-        401860883
-      ],
-      "spread": "North Dakota State -27.5",
-      "spread_home": 27.5,
-      "spread_provider": "DraftKings",
-      "line_provider_count": 2,
-      "spread_source": "CFBD pregame /lines; latest returned spread, not a live in-game line",
-      "matchup": "North Dakota State vs Sacramento State",
-      "predicted": "0.46M (0.34-0.62M)",
-      "audience_interest_features": {
-        "InterestLogTotal7": 9.562967133068346,
-        "InterestLogMax7": 9.314430080500564,
-        "InterestMissing": 0.0
-      },
-      "audience_interest_artifact_sha256": "a28057713fb1906fb441f7bc986a40f8002fc12e13e191bcecdb89f2439be342",
-      "percent_error": null,
-      "accuracy": ""
     }
   ],
   "full_slate_games": [
@@ -3284,8 +3219,11 @@
     "aligned_postgame.joblib": "717046367245473df7da8989be6c721a112f4711172407ac3efdf114f94bc8d7",
     "audience_interest.joblib": "a28057713fb1906fb441f7bc986a40f8002fc12e13e191bcecdb89f2439be342"
   },
-  "display_scope": "All games on NBC, CBS, ABC, FOX, ESPN or ESPN2; no team/conference restriction",
+  "display_scope": "ABC, CBS, NBC, FOX, ESPN and ESPN2; NDSU\u2013Sacramento State excluded at user request.",
   "notes": "Latest available CFBD Week 3 AP ranks, pregame Elo, betting spreads, neutral-site status, and strictly prior completed-game records. Competition includes all supported-network games within the existing 90-minute kickoff window. Week 1 interaction is inactive. Target-game scores are excluded from pregame prediction; completed games have separate postgame estimates. No actual viewership is yet recorded.",
   "audience_interest_source_sha256": "5eb2c7fc15d1621c91db27fa2a1e47c93d59a3ff8c28bb794d018b191fec7f15",
-  "audience_interest_cutoff": "2026-09-14T00:00:00Z (exclusive)"
+  "audience_interest_cutoff": "2026-09-14T00:00:00Z (exclusive)",
+  "display_excluded_game_ids": [
+    401864507
+  ]
 }

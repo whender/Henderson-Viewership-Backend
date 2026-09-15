@@ -15,8 +15,8 @@ assert (payload['year'], payload['week'], payload['season_week']) == (2026, 3, 3
 display_networks = {'ABC', 'CBS', 'NBC', 'FOX', 'ESPN', 'ESPN2'}
 full = payload['full_slate_games']
 assert len(full) == 35 and len({g['cfbd_game_id'] for g in full}) == 35
-assert len(payload['games']) == 19
-assert {g['cfbd_game_id'] for g in payload['games']} == {g['cfbd_game_id'] for g in full if g['network'] in display_networks}
+assert len(payload['games']) == 18
+assert {g['cfbd_game_id'] for g in payload['games']} == {g['cfbd_game_id'] for g in full if g['network'] in display_networks and g['cfbd_game_id'] not in payload.get('display_excluded_game_ids', [])}
 assert sum(g['network'] == 'ESPN2' for g in payload['games']) == 3
 assert all(next(r for r in full if r['cfbd_game_id'] == g['cfbd_game_id']) == g for g in payload['games'])
 for name, expected in payload['model_artifact_hashes'].items():
@@ -33,6 +33,6 @@ if '--publish' in sys.argv:
     ref = db.collection('weekly-predictions').document('3_2026')
     ref.create(payload, timeout=30)
     assert ref.get(timeout=30).to_dict() == payload
-    print('Published and verified Week 3: 19 displayed games, 35 full-slate forecasts.')
+    print('Published and verified Week 3: 18 displayed games, 35 full-slate forecasts.')
 else:
     print('Validated Week 3: scope, uniqueness, cutoffs, model hashes, and serving parity.')
