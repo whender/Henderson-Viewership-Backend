@@ -1,0 +1,282 @@
+[
+  {
+    "game_id": 401858225,
+    "matchup": "Syracuse vs Pittsburgh",
+    "before": "1.35M (0.90-1.98M)",
+    "after": "1.37M (0.92-2.00M)",
+    "competition_before": 0.0,
+    "competition_after": 0.0
+  },
+  {
+    "game_id": 401858226,
+    "matchup": "#5 Miami vs Wake Forest",
+    "before": "2.39M (1.78-3.24M)",
+    "after": "2.42M (1.82-3.27M)",
+    "competition_before": 3.3787044115440827,
+    "competition_after": 3.3339215798171735
+  },
+  {
+    "game_id": 401856811,
+    "matchup": "#22 Houston vs #13 Texas Tech",
+    "before": "2.83M (1.89-4.15M)",
+    "after": "2.84M (1.90-4.16M)",
+    "competition_before": 2.118641145072085,
+    "competition_after": 2.0707335597750234
+  },
+  {
+    "game_id": 401858455,
+    "matchup": "Portland State vs #21 Oregon",
+    "before": "0.75M (0.51-1.08M)",
+    "after": "0.75M (0.51-1.08M)",
+    "competition_before": 0.0,
+    "competition_after": 0.0
+  },
+  {
+    "game_id": 401858456,
+    "matchup": "Buffalo vs #14 Penn St.",
+    "before": "0.67M (0.47-0.95M)",
+    "after": "0.68M (0.48-0.96M)",
+    "competition_before": 11.78852621388999,
+    "competition_after": 11.694982861243977
+  },
+  {
+    "game_id": 401858454,
+    "matchup": "Kent St. vs #6 Ohio St.",
+    "before": "3.47M (2.58-4.74M)",
+    "after": "3.54M (2.64-4.82M)",
+    "competition_before": 9.148795303733133,
+    "competition_after": 9.045538724059195
+  },
+  {
+    "game_id": 401858451,
+    "matchup": "Akron vs Minnesota",
+    "before": "0.30M (0.21-0.44M)",
+    "after": "0.30M (0.21-0.44M)",
+    "competition_before": 12.163748234557497,
+    "competition_after": 12.073515406778943
+  },
+  {
+    "game_id": 401856792,
+    "matchup": "Tulane vs Kansas St.",
+    "before": "0.41M (0.29-0.58M)",
+    "after": "0.41M (0.29-0.59M)",
+    "competition_before": 12.049928053495202,
+    "competition_after": 11.9541661042214
+  },
+  {
+    "game_id": 401856798,
+    "matchup": "Bowling Green vs Iowa St.",
+    "before": "0.17M (0.12-0.23M)",
+    "after": "0.18M (0.13-0.24M)",
+    "competition_before": 12.326735077254545,
+    "competition_after": 12.231190764127561
+  },
+  {
+    "game_id": 401858229,
+    "matchup": "North Carolina vs Clemson",
+    "before": "1.85M (1.34-2.57M)",
+    "after": "1.86M (1.34-2.59M)",
+    "competition_before": 10.63102635272666,
+    "competition_after": 10.537865054983746
+  },
+  {
+    "game_id": 401856686,
+    "matchup": "#2 Georgia vs Arkansas",
+    "before": "4.63M (3.09-6.79M)",
+    "after": "4.63M (3.10-6.78M)",
+    "competition_before": 7.266835487711318,
+    "competition_after": 7.25049378263587
+  },
+  {
+    "game_id": 401856812,
+    "matchup": "Arizona St. vs Kansas",
+    "before": "0.52M (0.37-0.73M)",
+    "after": "0.53M (0.38-0.74M)",
+    "competition_before": 11.954358376093023,
+    "competition_after": 11.865191528593456
+  },
+  {
+    "game_id": 401856685,
+    "matchup": "Florida St. vs #10 Alabama",
+    "before": "7.93M (5.40-11.49M)",
+    "after": "8.04M (5.49-11.64M)",
+    "competition_before": 9.135150470516077,
+    "competition_after": 9.097009494949816
+  },
+  {
+    "game_id": 401858230,
+    "matchup": "#16 SMU vs #23 Louisville",
+    "before": "1.01M (0.84-1.26M)",
+    "after": "1.02M (0.84-1.27M)",
+    "competition_before": 16.8637290215903,
+    "competition_after": 16.840589351672797
+  },
+  {
+    "game_id": 401858450,
+    "matchup": "UTEP vs #19 Michigan",
+    "before": "0.74M (0.53-1.05M)",
+    "after": "0.75M (0.54-1.06M)",
+    "competition_before": 16.686407736982883,
+    "competition_after": 16.6703769007126
+  },
+  {
+    "game_id": 401856801,
+    "matchup": "Utah St. vs #17 Utah",
+    "before": "1.30M (0.98-1.75M)",
+    "after": "1.34M (1.02-1.79M)",
+    "competition_before": 16.278080290221126,
+    "competition_after": 16.266326501373115
+  },
+  {
+    "game_id": 401858457,
+    "matchup": "#12 USC vs Rutgers",
+    "before": "2.03M (1.45-2.84M)",
+    "after": "2.03M (1.46-2.84M)",
+    "competition_before": 15.370146949245079,
+    "competition_after": 15.379619733021352
+  },
+  {
+    "game_id": 401856694,
+    "matchup": "Kentucky vs #9 Texas A&M",
+    "before": "2.30M (1.53-3.39M)",
+    "after": "2.33M (1.56-3.42M)",
+    "competition_before": 14.491817079909806,
+    "competition_after": 14.473736868365357
+  },
+  {
+    "game_id": 401867804,
+    "matchup": "Louisiana Tech vs Baylor",
+    "before": "0.10M (0.07-0.14M)",
+    "after": "0.10M (0.07-0.14M)",
+    "competition_before": 17.427578505056484,
+    "competition_after": 17.40614722213632
+  },
+  {
+    "game_id": 401858231,
+    "matchup": "Stanford vs Duke",
+    "before": "0.49M (0.34-0.71M)",
+    "after": "0.51M (0.35-0.73M)",
+    "competition_before": 16.988523100182636,
+    "competition_after": 16.95713500488046
+  },
+  {
+    "game_id": 401858471,
+    "matchup": "Northern Iowa vs #18 Iowa",
+    "before": "0.48M (0.35-0.66M)",
+    "after": "0.48M (0.36-0.66M)",
+    "competition_before": 17.0287949486514,
+    "competition_after": 17.007731538118374
+  },
+  {
+    "game_id": 401856687,
+    "matchup": "Florida vs Auburn",
+    "before": "2.47M (1.68-3.59M)",
+    "after": "2.45M (1.66-3.56M)",
+    "competition_before": 16.512201531883633,
+    "competition_after": 16.999777978263037
+  },
+  {
+    "game_id": 401858452,
+    "matchup": "North Dakota vs Nebraska",
+    "before": "0.43M (0.31-0.60M)",
+    "after": "0.43M (0.31-0.59M)",
+    "competition_before": 19.240957955694945,
+    "competition_after": 19.733509250502912
+  },
+  {
+    "game_id": 401858459,
+    "matchup": "Eastern Washington vs Washington",
+    "before": "0.31M (0.23-0.43M)",
+    "after": "0.31M (0.23-0.42M)",
+    "competition_before": 19.40860506485928,
+    "competition_after": 19.897010507168865
+  },
+  {
+    "game_id": 401856795,
+    "matchup": "#11 BYU vs Colorado St.",
+    "before": "1.19M (0.86-1.66M)",
+    "after": "1.22M (0.90-1.68M)",
+    "competition_before": 18.33136769677184,
+    "competition_after": 18.831163744804897
+  },
+  {
+    "game_id": 401858232,
+    "matchup": "Virginia Tech vs Maryland",
+    "before": "0.48M (0.35-0.67M)",
+    "after": "0.48M (0.35-0.66M)",
+    "competition_before": 19.215494451522325,
+    "competition_after": 19.70661520094236
+  },
+  {
+    "game_id": 401858453,
+    "matchup": "Michigan St. vs #3 Notre Dame",
+    "before": "4.10M (2.86-5.84M)",
+    "after": "4.04M (2.82-5.75M)",
+    "competition_before": 15.163867928821196,
+    "competition_after": 15.680732290372216
+  },
+  {
+    "game_id": 401856690,
+    "matchup": "New Mexico vs #24 Oklahoma",
+    "before": "0.54M (0.39-0.76M)",
+    "after": "0.54M (0.39-0.76M)",
+    "competition_before": 19.086663442108936,
+    "competition_after": 19.57175903329953
+  },
+  {
+    "game_id": 401856796,
+    "matchup": "Colorado vs Northwestern",
+    "before": "1.69M (1.13-2.48M)",
+    "after": "1.70M (1.13-2.49M)",
+    "competition_before": 18.161256300852372,
+    "competition_after": 17.941828444144832
+  },
+  {
+    "game_id": 401856688,
+    "matchup": "#7 LSU vs #8 Mississippi",
+    "before": "7.32M (5.61-9.72M)",
+    "after": "7.28M (5.62-9.61M)",
+    "competition_before": 13.04387644609353,
+    "competition_after": 13.678837019374727
+  },
+  {
+    "game_id": 401856799,
+    "matchup": "Arkansas St. vs TCU",
+    "before": "0.08M (0.06-0.12M)",
+    "after": "0.08M (0.06-0.12M)",
+    "competition_before": 19.660579700944396,
+    "competition_after": 20.14648198038693
+  },
+  {
+    "game_id": 401860887,
+    "matchup": "James Madison vs San Diego St.",
+    "before": "0.34M (0.24-0.47M)",
+    "after": "0.34M (0.24-0.48M)",
+    "competition_before": 1.2906554250389406,
+    "competition_after": 1.271849784350437
+  },
+  {
+    "game_id": 401864507,
+    "matchup": "North Dakota State vs Sacramento State",
+    "before": "0.46M (0.34-0.62M)",
+    "after": "0.46M (0.34-0.62M)",
+    "competition_before": 1.1904537766877394,
+    "competition_after": 1.1782439300714476
+  },
+  {
+    "game_id": 401860888,
+    "matchup": "Fresno St. vs San Jose St.",
+    "before": "0.27M (0.19-0.39M)",
+    "after": "0.27M (0.19-0.39M)",
+    "competition_before": 1.294139435984074,
+    "competition_after": 1.2790586643990047
+  },
+  {
+    "game_id": 401858458,
+    "matchup": "Purdue vs UCLA",
+    "before": "0.68M (0.48-0.96M)",
+    "after": "0.64M (0.45-0.92M)",
+    "competition_before": 0.9671486366538735,
+    "competition_after": 0.9653579342716279
+  }
+]
